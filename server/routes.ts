@@ -37,19 +37,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = (req.session as any).user.id;
       const qrCodeData = await whatsappService.getQRCode(userId);
       
-      // 🔒 SEGURANÇA: Gerar QR como data URL no servidor (não expor para terceiros)
-      const QRCode = require('qrcode');
-      const qrDataURL = await QRCode.toDataURL(qrCodeData, {
-        width: 256,
-        margin: 2,
-        color: {
-          dark: '#000000',
-          light: '#FFFFFF'
-        }
-      });
-      
-      // 🖼️ Usar QR Image segura gerada pelo Baileys
-      const qrImageURL = whatsappService.qrCodeImage || qrDataURL;
+      // 🔒 SEGURANÇA: QR gerado pelo Baileys no servidor, frontend renderiza
+      const qrImageURL = whatsappService.qrCodeImage;
       
       res.json({ qrCode: qrCodeData, qrImage: qrImageURL });
     } catch (error) {
