@@ -1,18 +1,25 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import type { DashboardAnalytics } from "@shared/api-types";
+
+type WhatsAppStatus = {
+  connected: boolean;
+  phoneNumber?: string;
+};
 import Sidebar from "@/components/sidebar";
+import WhatsAppConnectionModal from "@/components/whatsapp-connection-modal";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { BarChart3, MessageSquare, Users, Zap, TrendingUp, Clock } from "lucide-react";
+import { BarChart3, MessageSquare, Users, Zap, TrendingUp, Clock, Wifi, WifiOff } from "lucide-react";
 
 export default function Dashboard() {
   const { toast } = useToast();
   const { isAuthenticated, isLoading } = useAuth();
+  const [showWhatsAppModal, setShowWhatsAppModal] = useState(false);
 
   // Redirect to home if not authenticated
   useEffect(() => {
@@ -34,6 +41,29 @@ export default function Dashboard() {
     retry: false,
   });
 
+  // 🚀 VERIFICAR STATUS DO WHATSAPP AUTOMATICAMENTE
+  const { data: whatsappStatus } = useQuery<WhatsAppStatus>({
+    queryKey: ["/api/whatsapp/status"],
+    refetchInterval: 5000, // Verificar a cada 5 segundos
+    retry: false,
+  });
+
+  // 💥 ABRIR MODAL AUTOMATICAMENTE SE NÃO CONECTADO
+  useEffect(() => {
+    if (isAuthenticated && whatsappStatus && !whatsappStatus.connected && !showWhatsAppModal) {
+      // Aguardar 2 segundos para dar tempo do dashboard carregar
+      const timer = setTimeout(() => {
+        setShowWhatsAppModal(true);
+        toast({
+          title: "🚀 ZapRápido - Conecte seu WhatsApp!",
+          description: "📱 Escaneie o QR Code para começar a vender automaticamente!",
+          duration: 5000,
+        });
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [isAuthenticated, whatsappStatus, showWhatsAppModal, toast]);
+
   if (isLoading || !isAuthenticated) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -53,14 +83,57 @@ export default function Dashboard() {
         {/* Header */}
         <header className="bg-card border-b border-border px-6 py-4">
           <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-semibold" data-testid="text-dashboard-title">Dashboard</h1>
-              <p className="text-sm text-muted-foreground">Visão geral das suas campanhas e automações</p>
+            <div className="flex items-center space-x-4">
+              <div>
+                <h1 className="text-2xl font-semibold" data-testid="text-dashboard-title">ZapRápido Dashboard</h1>
+                <p className="text-sm text-muted-foreground">Sua central de vendas automáticas no WhatsApp</p>
+              </div>
+              
+              {/* 📱 STATUS WHATSAPP */}
+              <div className={`flex items-center space-x-2 px-3 py-1 rounded-full text-sm font-medium ${
+                whatsappStatus?.connected 
+                  ? 'bg-green-100 text-green-700 border border-green-300' 
+                  : 'bg-red-100 text-red-700 border border-red-300'
+              }`}>
+                {whatsappStatus?.connected ? (
+                  <>
+                    <Wifi className="h-4 w-4" />
+                    <span>✅ WhatsApp Conectado</span>
+                  </>
+                ) : (
+                  <>
+                    <WifiOff className="h-4 w-4" />
+                    <span>❌ Desconectado</span>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="ml-2 h-6 text-xs"
+                      onClick={() => setShowWhatsAppModal(true)}
+                      data-testid="button-connect-whatsapp"
+                    >
+                      Conectar
+                    </Button>
+                  </>
+                )}
+              </div>
             </div>
-            <Button data-testid="button-new-campaign">
-              <Zap className="h-4 w-4 mr-2" />
-              Nova Campanha
-            </Button>
+            
+            <div className="flex space-x-3">
+              {whatsappStatus?.connected && (
+                <Button 
+                  variant="outline"
+                  onClick={() => setShowWhatsAppModal(true)}
+                  data-testid="button-whatsapp-settings"
+                >
+                  <MessageSquare className="h-4 w-4 mr-2" />
+                  WhatsApp
+                </Button>
+              )}
+              <Button data-testid="button-new-campaign">
+                <Zap className="h-4 w-4 mr-2" />
+                Nova Campanha
+              </Button>
+            </div>
           </div>
         </header>
 
@@ -245,6 +318,12 @@ export default function Dashboard() {
           </Card>
         </main>
       </div>
+      
+      {/* 🚀 MODAL ZAPRÁPIDO WHATSAPP - ABRIR AUTOMATICAMENTE */}
+      <WhatsAppConnectionModal 
+        open={showWhatsAppModal}
+        onOpenChange={setShowWhatsAppModal}
+      />
     </div>
   );
 }

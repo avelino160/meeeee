@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -24,6 +24,8 @@ interface WhatsAppConnectionModalProps {
 export default function WhatsAppConnectionModal({ open, onOpenChange }: WhatsAppConnectionModalProps) {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [showQR, setShowQR] = useState(false);
+  const [qrCodeData, setQrCodeData] = useState<string>("");
+  const [qrImageUrl, setQrImageUrl] = useState<string>("");
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -32,26 +34,66 @@ export default function WhatsAppConnectionModal({ open, onOpenChange }: WhatsApp
     enabled: open,
   });
 
+  // 🚀 GERAR QR CODE AUTOMATICAMENTE quando modal abrir
   const generateQRMutation = useMutation({
     mutationFn: async () => {
       const response = await apiRequest("POST", "/api/whatsapp/qr");
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      const qrCode = data.qrCode || '';
+      const qrImage = data.qrImage || ''; // 🔒 IMAGEM SEGURA DO SERVIDOR
+      
+      setQrCodeData(qrCode);
+      setQrImageUrl(qrImage); // Usar imagem segura gerada no backend
       setShowQR(true);
+      
       toast({
-        title: "QR Code Gerado",
-        description: "Escaneie o código com seu WhatsApp para conectar",
+        title: "🔥 QR Code ZapRápido Gerado!",
+        description: "📱 Escaneie com seu WhatsApp para conectar e começar a vender!",
       });
     },
     onError: (error) => {
       toast({
-        title: "Erro",
-        description: "Falha ao gerar QR Code. Tente novamente.",
+        title: "❌ Erro",
+        description: "Falha ao gerar QR Code. Tentando novamente...",
         variant: "destructive",
       });
+      // Tentar novamente em 3 segundos
+      setTimeout(() => generateQRMutation.mutate(), 3000);
     },
   });
+
+  // Gerar QR automaticamente quando modal abrir (se não conectado)
+  useEffect(() => {
+    if (open && whatsappStatus && !whatsappStatus.connected && !showQR) {
+      generateQRMutation.mutate();
+    }
+  }, [open, whatsappStatus]);
+
+  // Verificar status de conexão a cada 3 segundos E FECHAR MODAL SE CONECTADO
+  useEffect(() => {
+    if (!open) return;
+    
+    // 🎉 FECHAR MODAL AUTOMATICAMENTE QUANDO CONECTAR
+    if (whatsappStatus?.connected) {
+      toast({
+        title: "🎉 WhatsApp Conectado com Sucesso!",
+        description: "🚀 ZapRápido está ativo! Seu funil de vendas automatizado já está funcionando!",
+      });
+      setTimeout(() => {
+        onOpenChange(false);
+        setShowQR(false);
+      }, 2000); // Fechar após 2 segundos para mostrar a mensagem
+      return;
+    }
+    
+    const interval = setInterval(() => {
+      queryClient.invalidateQueries({ queryKey: ["/api/whatsapp/status"] });
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, [open, whatsappStatus?.connected, queryClient, onOpenChange, toast]);
 
   const connectMutation = useMutation({
     mutationFn: async () => {
@@ -172,34 +214,69 @@ export default function WhatsAppConnectionModal({ open, onOpenChange }: WhatsApp
 
               <Separator />
 
-              {/* QR Code Section */}
-              {showQR ? (
-                <div className="text-center space-y-4">
-                  <div className="w-48 h-48 bg-muted rounded-lg mx-auto flex items-center justify-center">
-                    <QrCode className="h-16 w-16 text-primary" />
+              {/* 🚀 QR CODE REAL ZAPRÁPIDO */}
+              {showQR && qrImageUrl ? (
+                <div className="text-center space-y-4 p-6 bg-gradient-to-br from-green-50 to-blue-50 rounded-xl border-2 border-green-200">
+                  <div className="text-center mb-4">
+                    <h3 className="text-lg font-bold text-green-700">🔥 ZapRápido - Conexão Real!</h3>
+                    <p className="text-sm text-gray-600">QR Code do seu WhatsApp Web</p>
                   </div>
-                  <div>
-                    <p className="font-medium">Escaneie o QR Code</p>
-                    <p className="text-sm text-muted-foreground">
-                      Abra o WhatsApp → Menu → Aparelhos conectados → Conectar um aparelho
-                    </p>
+                  
+                  <div className="w-64 h-64 bg-white rounded-lg mx-auto flex items-center justify-center shadow-lg border-4 border-green-300">
+                    <img 
+                      src={qrImageUrl} 
+                      alt="QR Code WhatsApp"
+                      className="w-56 h-56 rounded"
+                      data-testid="img-qr-code"
+                    />
                   </div>
+                  
+                  <div className="space-y-2">
+                    <p className="font-bold text-green-700">📱 Como Conectar:</p>
+                    <div className="text-sm text-gray-700 space-y-1">
+                      <p><strong>1.</strong> Abra o WhatsApp no seu celular</p>
+                      <p><strong>2.</strong> Toque nos 3 pontos (menu) → <strong>Aparelhos conectados</strong></p>
+                      <p><strong>3.</strong> Toque em <strong>"Conectar um aparelho"</strong></p>
+                      <p><strong>4.</strong> Aponte a câmera para este QR Code</p>
+                    </div>
+                    <p className="text-xs text-orange-600 font-medium mt-3">⚡ Aguardando conexão...</p>
+                  </div>
+                  
+                  {generateQRMutation.isPending && (
+                    <div className="flex items-center justify-center">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-green-600 mr-2"></div>
+                      <span className="text-sm text-green-600">Gerando QR Code...</span>
+                    </div>
+                  )}
                 </div>
               ) : (
-                <div className="text-center space-y-4">
-                  <Button
-                    onClick={() => generateQRMutation.mutate()}
-                    disabled={generateQRMutation.isPending}
-                    variant="outline"
-                    className="w-full"
-                    data-testid="button-generate-qr"
-                  >
-                    <QrCode className="h-4 w-4 mr-2" />
-                    {generateQRMutation.isPending ? "Gerando..." : "Gerar QR Code"}
-                  </Button>
-                  <p className="text-sm text-muted-foreground">
-                    Ou digite seu número e clique em conectar
-                  </p>
+                <div className="text-center space-y-4 p-6 bg-gradient-to-br from-blue-50 to-green-50 rounded-xl border-2 border-blue-200">
+                  <div className="text-center mb-4">
+                    <h3 className="text-lg font-bold text-blue-700">⚡ ZapRápido - Conectar WhatsApp</h3>
+                    <p className="text-sm text-gray-600">Conecte sua conta para começar a vender automaticamente!</p>
+                  </div>
+                  
+                  {generateQRMutation.isPending ? (
+                    <div className="flex flex-col items-center space-y-3">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                      <p className="font-medium text-blue-700">🚀 Gerando QR Code do WhatsApp...</p>
+                      <p className="text-sm text-gray-600">Aguarde alguns segundos...</p>
+                    </div>
+                  ) : (
+                    <>
+                      <Button
+                        onClick={() => generateQRMutation.mutate()}
+                        className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3"
+                        data-testid="button-generate-qr"
+                      >
+                        <QrCode className="h-5 w-5 mr-2" />
+                        🔥 Gerar QR Code ZapRápido
+                      </Button>
+                      <p className="text-xs text-gray-500">
+                        💡 O QR Code será gerado automaticamente para conectar seu WhatsApp
+                      </p>
+                    </>
+                  )}
                 </div>
               )}
 
@@ -224,11 +301,22 @@ export default function WhatsAppConnectionModal({ open, onOpenChange }: WhatsApp
               </div>
             </>
           ) : (
-            /* Disconnect Option */
-            <div className="space-y-4">
-              <p className="text-sm text-muted-foreground text-center">
-                Seu WhatsApp está conectado e funcionando normalmente.
-              </p>
+            /* ✅ WhatsApp Conectado */
+            <div className="space-y-4 text-center p-6 bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl border-2 border-green-300">
+              <div className="flex items-center justify-center space-x-3 mb-4">
+                <div className="w-4 h-4 bg-green-500 rounded-full animate-pulse"></div>
+                <h3 className="text-lg font-bold text-green-700">✅ WhatsApp Conectado!</h3>
+              </div>
+              
+              <div className="space-y-2">
+                <p className="font-medium text-green-800">🎉 ZapRápido está funcionando!</p>
+                <p className="text-sm text-green-700">
+                  Seu funil de vendas automático está ativo e pronto para receber clientes.
+                </p>
+                <div className="text-xs text-green-600 bg-green-100 p-2 rounded mt-3">
+                  💡 <strong>Dica:</strong> Agora envie "Oi" para seu WhatsApp e teste o funil automático!
+                </div>
+              </div>
               <div className="flex space-x-2">
                 <Button
                   variant="outline"
@@ -245,7 +333,7 @@ export default function WhatsAppConnectionModal({ open, onOpenChange }: WhatsApp
                   className="flex-1"
                   data-testid="button-disconnect"
                 >
-                  {disconnectMutation.isPending ? "Desconectando..." : "Desconectar"}
+                  {disconnectMutation.isPending ? "Desconectando..." : "🔴 Desconectar"}
                 </Button>
               </div>
             </div>

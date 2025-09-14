@@ -1,260 +1,252 @@
-import { storage } from "../storage";
-import { Client, LocalAuth, MessageMedia } from 'whatsapp-web.js';
+import makeWASocket, { 
+  ConnectionState, 
+  WASocket, 
+  useMultiFileAuthState,
+  DisconnectReason,
+  proto
+} from 'baileys';
+import { Boom } from '@hapi/boom';
 import QRCode from 'qrcode';
-import * as qrTerminal from 'qrcode-terminal';
+import pino from 'pino';
+import { storage } from '../storage';
 
-interface SendMessageParams {
-  to: string;
-  message: string;
-  type?: "text" | "image" | "video" | "audio" | "document";
-  mediaUrl?: string;
-}
-
-interface WhatsAppResponse {
-  success: boolean;
-  message: string;
-  data?: any;
+interface WhatsAppConnection {
+  connected: boolean;
+  phoneNumber?: string;
+  status: string;
 }
 
 export class WhatsAppService {
-  private client: Client | null = null;
-  private qrCode: string | null = null;
+  private sock: WASocket | null = null;
+  private qrCode: string = '';
+  private qrImage: string = '';
   private isReady: boolean = false;
-  private currentUserId: string | null = null;
+  private currentUserId: string = '';
+  private connectionStatus: WhatsAppConnection = {
+    connected: false,
+    status: 'disconnected'
+  };
 
   constructor() {
-    this.initializeClient();
+    console.log('🚀 WhatsAppService inicializado com Baileys');
   }
 
-  private async initializeClient(): Promise<void> {
+  // 📱 INICIALIZAR SOCKET BAILEYS
+  private async initializeSocket() {
     try {
-      this.client = new Client({
-        authStrategy: new LocalAuth(),
-        puppeteer: {
-          headless: true,
-          args: [
-            '--no-sandbox',
-            '--disable-setuid-sandbox',
-            '--disable-dev-shm-usage',
-            '--disable-accelerated-2d-canvas',
-            '--no-first-run',
-            '--no-zygote',
-            '--single-process',
-            '--disable-gpu'
-          ]
-        }
+      const { state, saveCreds } = await useMultiFileAuthState('./server/wa_auth');
+      
+      this.sock = makeWASocket({
+        auth: state,
+        printQRInTerminal: false,
+        logger: pino({ level: 'silent' }),
+        browser: ['ZapRápido', 'Chrome', '1.0.0'],
       });
 
-      this.client.on('qr', (qr) => {
-        this.qrCode = qr;
-        console.log('QR RECEBIDO! Escaneie com seu WhatsApp:');
-        qrTerminal.generate(qr, { small: true });
-      });
-
-      this.client.on('ready', async () => {
-        console.log('✅ WhatsApp conectado com sucesso!');
-        this.isReady = true;
+      // 🔗 LISTENER: Estado da conexão
+      this.sock.ev.on('connection.update', (update) => {
+        const { connection, lastDisconnect, qr } = update;
         
-        if (this.currentUserId) {
-          await this.updateConnectionStatus(this.currentUserId, true);
+        if (qr) {
+          // 🎯 QR CODE GERADO - CONVERTIR PARA IMAGEM
+          this.qrCode = qr;
+          QRCode.toDataURL(qr, {
+            width: 256,
+            margin: 2,
+            color: { dark: '#000000', light: '#FFFFFF' }
+          }).then(dataURL => {
+            this.qrImage = dataURL;
+          }).catch(err => console.error('Erro ao gerar QR image:', err));
+          
+          console.log('📱 QR Code gerado para conexão');
+        }
+
+        if (connection === 'open') {
+          // ✅ CONECTADO COM SUCESSO
+          this.isReady = true;
+          this.connectionStatus.connected = true;
+          this.connectionStatus.status = 'connected';
+          this.connectionStatus.phoneNumber = this.sock?.user?.id?.split(':')[0] || '';
+          
+          console.log('🎉 WhatsApp conectado com sucesso!');
+          
+          console.log('✅ WhatsApp conectado - status atualizado internamente');
+        } 
+        else if (connection === 'close') {
+          // ❌ CONEXÃO FECHADA
+          this.isReady = false;
+          this.connectionStatus.connected = false;
+          this.connectionStatus.status = 'disconnected';
+          
+          const shouldReconnect = (lastDisconnect?.error as Boom)?.output?.statusCode !== DisconnectReason.loggedOut;
+          
+          console.log('🔄 Conexão fechada. Reconectar?', shouldReconnect);
+          
+          if (shouldReconnect) {
+            // Auto-reconectar se não foi logout manual
+            setTimeout(() => this.initializeSocket(), 5000);
+          }
+          
+          console.log('❌ WhatsApp desconectado - status atualizado internamente');
         }
       });
 
-      this.client.on('authenticated', () => {
-        console.log('WhatsApp autenticado!');
-      });
-
-      this.client.on('auth_failure', (msg) => {
-        console.error('❌ Falha na autenticação:', msg);
-      });
-
-      this.client.on('disconnected', async (reason) => {
-        console.log('❌ WhatsApp desconectado:', reason);
-        this.isReady = false;
-        if (this.currentUserId) {
-          await this.updateConnectionStatus(this.currentUserId, false);
+      // 📨 LISTENER: Mensagens recebidas
+      this.sock.ev.on('messages.upsert', async (m) => {
+        const msg = m.messages[0];
+        if (!msg?.key?.fromMe && msg?.message && this.currentUserId) {
+          await this.handleIncomingMessage(msg);
         }
       });
 
-      // Listener para mensagens recebidas - FUNIL AUTOMATIZADO
-      this.client.on('message', async (message) => {
-        if (!message.from.endsWith('@c.us')) return; // Ignorar mensagens de grupos
-        
-        await this.handleIncomingMessage(message);
-      });
+      // 💾 SALVAR CREDENCIAIS QUANDO ATUALIZADAS
+      this.sock.ev.on('creds.update', saveCreds);
 
     } catch (error) {
-      console.error('Erro ao inicializar cliente WhatsApp:', error);
+      console.error('❌ Erro ao inicializar socket WhatsApp:', error);
+      throw error;
     }
   }
 
-  private async handleIncomingMessage(message: any): Promise<void> {
+  // 📥 PROCESSAR MENSAGEM RECEBIDA (FUNIL AUTOMATIZADO)
+  private async handleIncomingMessage(msg: proto.IWebMessageInfo) {
     try {
-      const phoneNumber = message.from.replace('@c.us', '');
-      const messageText = message.body.toLowerCase().trim();
-      
-      if (!this.currentUserId) return;
+      const phoneNumber = msg.key.remoteJid?.split('@')[0] || '';
+      const messageText = msg.message?.conversation || 
+                          msg.message?.extendedTextMessage?.text || '';
 
-      // Buscar ou criar contato
-      let contact = await storage.getContactByPhone(phoneNumber, this.currentUserId);
+      if (!phoneNumber || !messageText) return;
+
+      console.log(`📨 Mensagem de ${phoneNumber}: ${messageText}`);
+
+      // 💾 SALVAR CONTATO E MENSAGEM
+      const contact = await storage.getContactByPhone(phoneNumber, this.currentUserId);
+      let contactId = contact?.id;
+
       if (!contact) {
-        contact = await storage.createContact({
-          userId: this.currentUserId,
-          phoneNumber: `+${phoneNumber}`,
-          name: message._data.notifyName || 'Novo Contato',
-          isActive: true
+        const newContact = await storage.createContact({
+          name: `Cliente ${phoneNumber}`,
+          phoneNumber: phoneNumber,
+          userId: this.currentUserId
         });
+        contactId = newContact.id;
       }
 
-      // Salvar mensagem recebida
       await storage.createMessage({
-        userId: this.currentUserId,
-        contactId: contact.id,
-        type: 'text',
-        content: message.body,
-        status: 'received',
-        sentAt: new Date()
+        contactId: contactId!,
+        content: messageText,
+        direction: 'inbound',
+        userId: this.currentUserId
       });
 
-      // 🚀 FUNIL AUTOMATIZADO ZapRápido
-      await this.executeFunnelStep(phoneNumber, messageText, contact.id);
+      // 🎯 FUNIL AUTOMATIZADO DE VENDAS
+      let response = '';
+      const lowerMsg = messageText.toLowerCase();
+
+      if (lowerMsg.includes('oi') || lowerMsg.includes('olá') || lowerMsg.includes('bom dia') || 
+          lowerMsg.includes('boa tarde') || lowerMsg.includes('boa noite') || lowerMsg.includes('hey')) {
+        // 1️⃣ BOAS-VINDAS
+        response = `🎉 Olá! Bem-vindo ao *ZapRápido*! 
+
+Sou seu assistente automatizado de vendas 24/7! 🤖
+
+Estou aqui para te ajudar a descobrir como nossa solução pode *transformar seus resultados*! 
+
+Digite *"quero saber mais"* para descobrir como podemos aumentar suas vendas em até 300%! 🚀`;
+
+      } else if (lowerMsg.includes('quero saber mais') || lowerMsg.includes('interessado') || lowerMsg.includes('contar mais')) {
+        // 2️⃣ DESPERTAR CURIOSIDADE
+        response = `🔥 Que incrível! Você está a um passo de descobrir o segredo que *milhares de empresas* já estão usando!
+
+Nossa plataforma *ZapRápido* já ajudou mais de 10.000 empreendedores a:
+
+✅ *Automatizar 100% das conversas*  
+✅ *Responder clientes 24/7 sem parar*  
+✅ *Aumentar vendas em até 300%*  
+✅ *Economizar 15+ horas por semana*  
+
+😱 Imagina ter um *vendedor que nunca dorme*, nunca tira férias e converte *3x mais*?
+
+Digite *"quero essa solução"* para conhecer nossa oferta especial! 💰`;
+
+      } else if (lowerMsg.includes('quero essa solução') || lowerMsg.includes('oferta') || lowerMsg.includes('preço') || lowerMsg.includes('valor')) {
+        // 3️⃣ OFERTA IRRESISTÍVEL
+        response = `🎯 *OFERTA EXCLUSIVA* - Apenas hoje!
+
+Por apenas *R$ 97/mês* (menos de R$ 3 por dia ☕), você terá acesso COMPLETO ao ZapRápido:
+
+🎁 *BÔNUS INCLUSOS:*  
+✅ Setup completo gratuito (valor R$ 500)  
+✅ 30 dias de suporte premium  
+✅ Templates de funil prontos  
+✅ Treinamento completo em vídeo  
+
+⏰ *OFERTA LIMITADA:* Só até meia-noite!  
+💥 *GARANTIA:* 7 dias para testar, risco ZERO!  
+
+Digite *"quero comprar agora"* para garantir com *50% DE DESCONTO*! 🔥`;
+
+      } else if (lowerMsg.includes('quero comprar') || lowerMsg.includes('fechar') || lowerMsg.includes('contratar')) {
+        // 4️⃣ CALL-TO-ACTION
+        response = `🎉 *PERFEITO!* Decisão inteligente!
+
+Para finalizar seu acesso ao ZapRápido com *50% OFF*, clique no link abaixo:
+
+🔗 *https://zaprapido.com/checkout*
+
+Ou fale diretamente com nosso especialista:
+📞 *WhatsApp:* (11) 99999-9999
+
+✅ *Pagamento 100% seguro*  
+✅ *Acesso liberado em 5 minutos*  
+✅ *Suporte premium incluído*  
+
+*Parabéns!* Você está prestes a revolucionar suas vendas! 🚀
+
+Alguma dúvida antes de finalizar?`;
+
+      } else {
+        // 🤝 RESPOSTA PADRÃO AMIGÁVEL
+        response = `🤖 Olá! Sou o assistente automático do *ZapRápido*!
+
+Para te ajudar melhor, digite uma das opções:
+
+🔹 *"quero saber mais"* - Conhecer nossa solução  
+🔹 *"oferta"* - Ver promoções especiais  
+🔹 *"suporte"* - Falar com especialista  
+
+Estou aqui 24/7 para te ajudar! 🚀`;
+      }
+
+      // 📤 ENVIAR RESPOSTA AUTOMATIZADA
+      await this.sendMessage(phoneNumber, response);
+
+      // 💾 SALVAR RESPOSTA ENVIADA
+      await storage.createMessage({
+        contactId: contactId!,
+        content: response,
+        direction: 'outbound',
+        userId: this.currentUserId
+      });
 
     } catch (error) {
-      console.error('Erro ao processar mensagem recebida:', error);
+      console.error('❌ Erro ao processar mensagem:', error);
     }
   }
 
-  private async executeFunnelStep(phoneNumber: string, messageText: string, contactId: string): Promise<void> {
-    try {
-      // ETAPA 1: Boas-vindas
-      if (messageText.includes('oi') || messageText.includes('olá') || messageText.includes('hello')) {
-        await this.sendFunnelMessage(phoneNumber, 
-          '👋 Olá! Bem-vindo ao ZapRápido!\n\n🎯 Aqui você vai descobrir como automatizar suas vendas no WhatsApp e aumentar seus resultados!\n\n📱 Digite *"quero saber mais"* para conhecer nossa solução completa!'
-        );
-        return;
-      }
-
-      // ETAPA 2: Despertar curiosidade
-      if (messageText.includes('quero saber mais') || messageText.includes('saber mais')) {
-        await this.sendFunnelMessage(phoneNumber,
-          '🚀 Que ótimo!\n\nImagine poder:\n\n✅ Responder clientes automaticamente 24/7\n✅ Criar funis de venda no WhatsApp\n✅ Agendar mensagens\n✅ Gerenciar todos os contatos\n✅ Aumentar suas vendas em até 300%\n\n💡 Isso é possível com nosso sistema!\n\n🎁 Digite *"quero a oferta"* para ver nossa condição especial!'
-        );
-        return;
-      }
-
-      // ETAPA 3: Oferta irresistível
-      if (messageText.includes('quero a oferta') || messageText.includes('oferta')) {
-        await this.sendFunnelMessage(phoneNumber,
-          '🔥 OFERTA ESPECIAL PARA VOCÊ!\n\n💎 ZapRápido PRO por apenas:\n\n~~R$ 297,00~~\n🎯 **R$ 97,00** (67% OFF)\n\n🎁 BÔNUS INCLUSOS:\n✅ Setup completo gratuito\n✅ Suporte VIP por 30 dias\n✅ Templates prontos\n✅ Treinamento exclusivo\n\n⏰ *Oferta válida apenas hoje!*\n\n💳 Digite *"quero comprar"* para garantir!'
-        );
-        return;
-      }
-
-      // ETAPA 4: Call-to-action final
-      if (messageText.includes('quero comprar') || messageText.includes('comprar')) {
-        await this.sendFunnelMessage(phoneNumber,
-          '🎉 PERFEITO! Você tomou a melhor decisão!\n\n📲 Clique no link abaixo para finalizar sua compra:\n👉 https://pay.hotmart.com/zaprápido-pro\n\n🔒 Pagamento 100% seguro\n💳 Parcelamos em até 12x\n✅ Acesso imediato após aprovação\n\n❓ Dúvidas? Digite *"suporte"*\n\n🚀 Bem-vindo ao time ZapRápido!'
-        );
-        return;
-      }
-
-      // Mensagens de suporte
-      if (messageText.includes('suporte') || messageText.includes('ajuda') || messageText.includes('dúvida')) {
-        await this.sendFunnelMessage(phoneNumber,
-          '🆘 Suporte ZapRápido\n\n📞 WhatsApp: (11) 99999-9999\n📧 Email: suporte@zaprápido.com\n🕐 Atendimento: 8h às 18h\n\n💬 Ou digite sua dúvida que respondo em breve!\n\n🔄 Para ver a oferta novamente, digite *"quero a oferta"*'
-        );
-        return;
-      }
-
-      // Mensagem padrão para textos não reconhecidos
-      if (Math.random() > 0.7) { // 30% de chance de responder
-        await this.sendFunnelMessage(phoneNumber,
-          '👋 Oi! Vi sua mensagem!\n\n🎯 Para conhecer o ZapRápido, digite:\n*"quero saber mais"*\n\n🎁 Para ver nossa oferta especial:\n*"quero a oferta"*\n\n✨ Estou aqui para ajudar!'
-        );
-      }
-
-    } catch (error) {
-      console.error('Erro ao executar etapa do funil:', error);
-    }
-  }
-
-  private async sendFunnelMessage(to: string, message: string): Promise<void> {
-    try {
-      if (!this.client || !this.isReady) return;
-      
-      const chatId = `${to}@c.us`;
-      await this.client.sendMessage(chatId, message);
-      
-      // Salvar mensagem enviada no banco
-      if (this.currentUserId) {
-        const contact = await storage.getContactByPhone(`+${to}`, this.currentUserId);
-        if (contact) {
-          await storage.createMessage({
-            userId: this.currentUserId,
-            contactId: contact.id,
-            type: 'text',
-            content: message,
-            status: 'sent',
-            sentAt: new Date()
-          });
-        }
-      }
-    } catch (error) {
-      console.error('Erro ao enviar mensagem do funil:', error);
-    }
-  }
-
-  async sendMessage(params: SendMessageParams): Promise<WhatsAppResponse> {
-    try {
-      if (!this.client || !this.isReady) {
-        return {
-          success: false,
-          message: 'WhatsApp não está conectado. Escaneie o QR Code primeiro.'
-        };
-      }
-
-      const chatId = `${params.to.replace('+', '')}@c.us`;
-      let sentMessage;
-
-      if (params.type === 'text' || !params.type) {
-        sentMessage = await this.client.sendMessage(chatId, params.message);
-      } else if (params.mediaUrl) {
-        const media = await MessageMedia.fromUrl(params.mediaUrl);
-        sentMessage = await this.client.sendMessage(chatId, media, { caption: params.message });
-      }
-
-      return {
-        success: true,
-        message: 'Mensagem enviada com sucesso!',
-        data: { id: sentMessage?.id?.id }
-      };
-    } catch (error) {
-      console.error('Erro ao enviar mensagem:', error);
-      return {
-        success: false,
-        message: `Erro ao enviar mensagem: ${error instanceof Error ? error.message : 'Erro desconhecido'}`
-      };
-    }
-  }
-
+  // 🚀 OBTER QR CODE (Interface pública para routes.ts)
   async getQRCode(userId: string): Promise<string> {
     try {
       this.currentUserId = userId;
-      
+
       if (this.isReady) {
         throw new Error('WhatsApp já está conectado');
       }
 
-      if (!this.client) {
-        await this.initializeClient();
+      if (!this.sock) {
+        console.log('🔄 Inicializando socket Baileys...');
+        await this.initializeSocket();
       }
-
-      // Inicializar cliente se ainda não foi
-      if (!this.client) {
-        throw new Error('Erro ao inicializar cliente WhatsApp');
-      }
-
-      await this.client.initialize();
 
       // Aguardar QR Code ser gerado
       return new Promise((resolve, reject) => {
@@ -274,75 +266,58 @@ export class WhatsAppService {
       });
 
     } catch (error) {
-      console.error('Erro ao gerar QR Code:', error);
+      console.error('❌ Erro ao gerar QR Code:', error);
       throw error;
     }
   }
 
+  // 📊 OBTER STATUS DA CONEXÃO
+  async getConnectionStatus(userId: string): Promise<WhatsAppConnection> {
+    this.currentUserId = userId;
+    return this.connectionStatus;
+  }
+
+  // 🔗 CONECTAR WHATSAPP (Compatibilidade com routes.ts)
   async connectWhatsApp(userId: string, phoneNumber: string): Promise<boolean> {
-    // Esta função será chamada automaticamente quando o QR for escaneado
+    this.currentUserId = userId;
     return this.isReady;
   }
 
-  async disconnectWhatsApp(userId: string): Promise<boolean> {
+  // 📤 ENVIAR MENSAGEM
+  async sendMessage(phoneNumber: string, message: string): Promise<boolean> {
     try {
-      if (this.client) {
-        await this.client.destroy();
-        this.client = null;
-        this.isReady = false;
-        this.qrCode = null;
-        this.currentUserId = null;
+      if (!this.sock || !this.isReady) {
+        throw new Error('WhatsApp não está conectado');
       }
 
-      await this.updateConnectionStatus(userId, false);
+      const jid = `${phoneNumber}@s.whatsapp.net`;
+      await this.sock.sendMessage(jid, { text: message });
+      
+      console.log(`✅ Mensagem enviada para ${phoneNumber}: ${message.substring(0, 50)}...`);
       return true;
     } catch (error) {
-      console.error('Erro ao desconectar WhatsApp:', error);
+      console.error(`❌ Erro ao enviar mensagem para ${phoneNumber}:`, error);
       return false;
     }
   }
 
-  async getConnectionStatus(userId: string): Promise<{ connected: boolean; phoneNumber?: string }> {
-    try {
-      const connection = await storage.getWhatsappConnection(userId);
-      
-      return {
-        connected: this.isReady && (connection?.isConnected || false),
-        phoneNumber: connection?.phoneNumber,
-      };
-    } catch (error) {
-      console.error('Erro ao obter status da conexão:', error);
-      return { connected: false };
+  // 🔌 DESCONECTAR
+  async disconnect(): Promise<void> {
+    if (this.sock) {
+      this.sock.end(undefined);
+      this.sock = null;
+      this.isReady = false;
+      this.qrCode = '';
+      this.qrImage = '';
+      console.log('🔌 WhatsApp desconectado');
     }
   }
 
-  async validatePhoneNumber(phoneNumber: string): Promise<boolean> {
-    const phoneRegex = /^\+?[1-9]\d{1,14}$/;
-    return phoneRegex.test(phoneNumber.replace(/\s+/g, ''));
-  }
-
-  private async updateConnectionStatus(userId: string, connected: boolean): Promise<void> {
-    try {
-      const connection = await storage.getWhatsappConnection(userId);
-      
-      if (connection) {
-        await storage.updateWhatsappConnection(connection.id, {
-          isConnected: connected,
-          lastConnectedAt: connected ? new Date() : connection.lastConnectedAt,
-          qrCode: connected ? null : connection.qrCode,
-        });
-      } else if (connected) {
-        await storage.createWhatsappConnection({
-          userId,
-          phoneNumber: '',
-          isConnected: connected,
-          lastConnectedAt: new Date(),
-        });
-      }
-    } catch (error) {
-      console.error('Erro ao atualizar status da conexão:', error);
-    }
+  // 🎯 GETTER PARA QR IMAGE (usado pelo routes.ts)
+  get qrCodeImage(): string {
+    return this.qrImage;
   }
 }
 
+// Singleton instance
 export const whatsappService = new WhatsAppService();
