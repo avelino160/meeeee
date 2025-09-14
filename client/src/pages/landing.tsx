@@ -13,7 +13,7 @@ export default function Landing() {
             <h1 className="text-2xl font-bold text-primary">RanZap</h1>
           </div>
           <Button asChild data-testid="button-login">
-            <a href="/api/login">Entrar</a>
+            <a href="/login">Entrar</a>
           </Button>
         </div>
       </header>
@@ -30,7 +30,7 @@ export default function Landing() {
             com a plataforma mais completa de marketing no WhatsApp.
           </p>
           <Button size="lg" asChild className="text-lg px-8 py-3" data-testid="button-start">
-            <a href="/api/login">Começar Agora</a>
+            <a href="/login">Começar Agora</a>
           </Button>
         </div>
       </section>
@@ -153,7 +153,7 @@ export default function Landing() {
             Transforme seu atendimento e vendas com automação profissional
           </p>
           <Button size="lg" asChild className="text-lg px-8 py-3" data-testid="button-cta">
-            <a href="/api/login">Criar Conta Grátis</a>
+            <a href="/login">Criar Conta Grátis</a>
           </Button>
         </div>
       </section>

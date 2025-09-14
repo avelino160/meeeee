@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { setupAuth, isAuthenticated } from "./replitAuth";
+import { setupAuth, isAuthenticated } from "./simpleAuth";
 import { whatsappService } from "./services/whatsappService";
 import { funnelService } from "./services/funnelService";
 import { schedulerService } from "./services/schedulerService";
@@ -18,22 +18,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
   await setupAuth(app);
 
-  // Auth routes
-  app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
-    try {
-      const userId = req.user.claims.sub;
-      const user = await storage.getUser(userId);
-      res.json(user);
-    } catch (error) {
-      console.error("Error fetching user:", error);
-      res.status(500).json({ message: "Failed to fetch user" });
-    }
-  });
+  // Auth routes are handled in simpleAuth.ts
 
   // WhatsApp connection routes
   app.get('/api/whatsapp/status', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = (req.session as any).user.id;
       const status = await whatsappService.getConnectionStatus(userId);
       res.json(status);
     } catch (error) {
@@ -44,7 +34,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/whatsapp/qr', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = (req.session as any).user.id;
       const qrCode = await whatsappService.getQRCode(userId);
       res.json({ qrCode });
     } catch (error) {
@@ -55,7 +45,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/whatsapp/connect', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = (req.session as any).user.id;
       const { phoneNumber } = req.body;
 
       if (!phoneNumber) {
@@ -77,7 +67,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/whatsapp/disconnect', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = (req.session as any).user.id;
       const success = await whatsappService.disconnectWhatsApp(userId);
       res.json({ success });
     } catch (error) {
@@ -89,7 +79,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Campaign routes
   app.get('/api/campaigns', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = (req.session as any).user.id;
       const campaigns = await storage.getCampaigns(userId);
       res.json(campaigns);
     } catch (error) {
@@ -100,7 +90,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/campaigns', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = (req.session as any).user.id;
       const campaignData = insertCampaignSchema.parse({ ...req.body, userId });
       const campaign = await storage.createCampaign(campaignData);
       res.status(201).json(campaign);
@@ -112,7 +102,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/campaigns/:id', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = (req.session as any).user.id;
       const { id } = req.params;
       const campaign = await storage.getCampaign(id, userId);
       
@@ -129,7 +119,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put('/api/campaigns/:id', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = (req.session as any).user.id;
       const { id } = req.params;
       
       // Verify ownership
@@ -148,7 +138,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete('/api/campaigns/:id', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = (req.session as any).user.id;
       const { id } = req.params;
       
       const success = await storage.deleteCampaign(id, userId);
@@ -225,7 +215,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Contact routes
   app.get('/api/contacts', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = (req.session as any).user.id;
       const contacts = await storage.getContacts(userId);
       res.json(contacts);
     } catch (error) {
@@ -236,7 +226,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/contacts', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = (req.session as any).user.id;
       const contactData = insertContactSchema.parse({ ...req.body, userId });
       const contact = await storage.createContact(contactData);
       res.status(201).json(contact);
@@ -248,7 +238,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put('/api/contacts/:id', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = (req.session as any).user.id;
       const { id } = req.params;
       
       // Verify ownership
@@ -267,7 +257,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete('/api/contacts/:id', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = (req.session as any).user.id;
       const { id } = req.params;
       
       const success = await storage.deleteContact(id, userId);
@@ -285,7 +275,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Message routes
   app.get('/api/messages', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = (req.session as any).user.id;
       const { limit } = req.query;
       const messages = await storage.getMessages(userId, limit ? parseInt(limit as string) : undefined);
       res.json(messages);
@@ -297,7 +287,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/messages/send', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = (req.session as any).user.id;
       const { contactId, content, type, mediaUrl, scheduledAt } = req.body;
 
       if (scheduledAt) {
@@ -347,7 +337,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Message template routes
   app.get('/api/templates', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = (req.session as any).user.id;
       const templates = await storage.getMessageTemplates(userId);
       res.json(templates);
     } catch (error) {
@@ -358,7 +348,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/templates', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = (req.session as any).user.id;
       const templateData = insertMessageTemplateSchema.parse({ ...req.body, userId });
       const template = await storage.createMessageTemplate(templateData);
       res.status(201).json(template);
@@ -370,7 +360,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put('/api/templates/:id', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = (req.session as any).user.id;
       const { id } = req.params;
       
       // Verify ownership
@@ -389,7 +379,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete('/api/templates/:id', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = (req.session as any).user.id;
       const { id } = req.params;
       
       const success = await storage.deleteMessageTemplate(id, userId);
@@ -407,7 +397,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Analytics routes
   app.get('/api/analytics/dashboard', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = (req.session as any).user.id;
       
       // Get basic stats
       const campaigns = await storage.getCampaigns(userId);
