@@ -1,0 +1,179 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: hsl(240, 10%, 10%);
+  --foreground: hsl(0, 0%, 95%);
+  --card: hsl(240, 10%, 15%);
+  --card-foreground: hsl(0, 0%, 95%);
+  --popover: hsl(240, 10%, 15%);
+  --popover-foreground: hsl(0, 0%, 95%);
+  --primary: hsl(25, 95%, 53%);
+  --primary-foreground: hsl(0, 0%, 100%);
+  --secondary: hsl(240, 4%, 24%);
+  --secondary-foreground: hsl(0, 0%, 85%);
+  --muted: hsl(240, 4%, 16%);
+  --muted-foreground: hsl(240, 5%, 65%);
+  --accent: hsl(25, 95%, 53%);
+  --accent-foreground: hsl(0, 0%, 100%);
+  --destructive: hsl(0, 84%, 60%);
+  --destructive-foreground: hsl(0, 0%, 100%);
+  --border: hsl(240, 6%, 25%);
+  --input: hsl(240, 6%, 20%);
+  --ring: hsl(25, 95%, 53%);
+  --chart-1: hsl(25, 95%, 53%);
+  --chart-2: hsl(159, 100%, 36%);
+  --chart-3: hsl(42, 93%, 56%);
+  --chart-4: hsl(147, 79%, 42%);
+  --chart-5: hsl(341, 75%, 51%);
+  --sidebar: hsl(240, 10%, 15%);
+  --sidebar-foreground: hsl(0, 0%, 95%);
+  --sidebar-primary: hsl(25, 95%, 53%);
+  --sidebar-primary-foreground: hsl(0, 0%, 100%);
+  --sidebar-accent: hsl(240, 4%, 24%);
+  --sidebar-accent-foreground: hsl(0, 0%, 85%);
+  --sidebar-border: hsl(240, 6%, 25%);
+  --sidebar-ring: hsl(25, 95%, 53%);
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-serif: Georgia, serif;
+  --font-mono: Menlo, monospace;
+  --radius: 0.5rem;
+  --shadow-2xs: 0px 2px 0px 0px hsl(25, 95%, 53%, 0.00);
+  --shadow-xs: 0px 2px 0px 0px hsl(25, 95%, 53%, 0.00);
+  --shadow-sm: 0px 2px 0px 0px hsl(25, 95%, 53%, 0.00), 0px 1px 2px -1px hsl(25, 95%, 53%, 0.00);
+  --shadow: 0px 2px 0px 0px hsl(25, 95%, 53%, 0.00), 0px 1px 2px -1px hsl(25, 95%, 53%, 0.00);
+  --shadow-md: 0px 2px 0px 0px hsl(25, 95%, 53%, 0.00), 0px 2px 4px -1px hsl(25, 95%, 53%, 0.00);
+  --shadow-lg: 0px 2px 0px 0px hsl(25, 95%, 53%, 0.00), 0px 4px 6px -1px hsl(25, 95%, 53%, 0.00);
+  --shadow-xl: 0px 2px 0px 0px hsl(25, 95%, 53%, 0.00), 0px 8px 10px -1px hsl(25, 95%, 53%, 0.00);
+  --shadow-2xl: 0px 2px 0px 0px hsl(25, 95%, 53%, 0.00);
+  --tracking-normal: 0em;
+  --spacing: 0.25rem;
+}
+
+.dark {
+  --background: hsl(240, 10%, 10%);
+  --foreground: hsl(0, 0%, 95%);
+  --card: hsl(240, 10%, 15%);
+  --card-foreground: hsl(0, 0%, 95%);
+  --popover: hsl(240, 10%, 15%);
+  --popover-foreground: hsl(0, 0%, 95%);
+  --primary: hsl(25, 95%, 53%);
+  --primary-foreground: hsl(0, 0%, 100%);
+  --secondary: hsl(240, 4%, 24%);
+  --secondary-foreground: hsl(0, 0%, 85%);
+  --muted: hsl(240, 4%, 16%);
+  --muted-foreground: hsl(240, 5%, 65%);
+  --accent: hsl(25, 95%, 53%);
+  --accent-foreground: hsl(0, 0%, 100%);
+  --destructive: hsl(0, 84%, 60%);
+  --destructive-foreground: hsl(0, 0%, 100%);
+  --border: hsl(240, 6%, 25%);
+  --input: hsl(240, 6%, 20%);
+  --ring: hsl(25, 95%, 53%);
+  --chart-1: hsl(25, 95%, 53%);
+  --chart-2: hsl(159, 100%, 36%);
+  --chart-3: hsl(42, 93%, 56%);
+  --chart-4: hsl(147, 79%, 42%);
+  --chart-5: hsl(341, 75%, 51%);
+  --sidebar: hsl(240, 10%, 15%);
+  --sidebar-foreground: hsl(0, 0%, 95%);
+  --sidebar-primary: hsl(25, 95%, 53%);
+  --sidebar-primary-foreground: hsl(0, 0%, 100%);
+  --sidebar-accent: hsl(240, 4%, 24%);
+  --sidebar-accent-foreground: hsl(0, 0%, 85%);
+  --sidebar-border: hsl(240, 6%, 25%);
+  --sidebar-ring: hsl(25, 95%, 53%);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+}
+
+/* Custom styles for funnel builder */
+.funnel-node {
+  transition: all 0.2s ease;
+}
+
+.funnel-node:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(255, 140, 0, 0.3);
+}
+
+.connection-line {
+  stroke: #FF8C00;
+  stroke-width: 2;
+  fill: none;
+}
+
+.sidebar-item:hover {
+  background-color: hsl(240, 4%, 24%);
+}
+
+.status-connected {
+  background-color: #10B981;
+}
+
+.status-disconnected {
+  background-color: #EF4444;
+}
+
+.drag-drop-area {
+  background: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 10px,
+    rgba(255, 140, 0, 0.1) 10px,
+    rgba(255, 140, 0, 0.1) 20px
+  );
+}
+
+/* React Flow custom styles */
+.react-flow__node {
+  background: hsl(240, 10%, 15%);
+  border: 1px solid hsl(240, 6%, 25%);
+  border-radius: 0.5rem;
+  color: hsl(0, 0%, 95%);
+}
+
+.react-flow__node.selected {
+  border-color: hsl(25, 95%, 53%);
+  box-shadow: 0 0 0 2px hsl(25, 95%, 53%, 0.2);
+}
+
+.react-flow__edge-path {
+  stroke: hsl(25, 95%, 53%);
+  stroke-width: 2;
+}
+
+.react-flow__controls {
+  background: hsl(240, 10%, 15%);
+  border: 1px solid hsl(240, 6%, 25%);
+}
+
+.react-flow__controls button {
+  background: hsl(240, 10%, 15%);
+  border-bottom: 1px solid hsl(240, 6%, 25%);
+  color: hsl(0, 0%, 95%);
+}
+
+.react-flow__controls button:hover {
+  background: hsl(240, 4%, 24%);
+}
+
+.react-flow__minimap {
+  background: hsl(240, 10%, 15%);
+  border: 1px solid hsl(240, 6%, 25%);
+}
+
+.react-flow__background {
+  background: hsl(240, 10%, 10%);
+}
