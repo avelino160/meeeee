@@ -186,93 +186,95 @@ export default function FunnelBuilder() {
         {/* Main Content */}
         <div className="flex-1 flex">
           {/* Left Toolbox */}
-          <div className="w-64 bg-card border-r border-border p-4 overflow-y-auto">
-            <div className="space-y-6">
+          <div className="w-48 bg-card border-r border-border p-3 overflow-y-auto">
+            <div className="space-y-4">
               {/* Message Types */}
               <div>
-                <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">
+                <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
                   Mensagens
                 </h3>
-                <div className="grid grid-cols-2 gap-2">
-                  <div className="p-3 bg-muted rounded-lg cursor-pointer hover:bg-secondary transition-colors" data-testid="tool-text">
-                    <MessageSquare className="h-5 w-5 text-primary mb-2" />
-                    <p className="text-xs font-medium">Texto</p>
+                <div className="grid grid-cols-2 gap-1.5">
+                  <div className="p-2 bg-muted rounded cursor-pointer hover:bg-secondary transition-colors" data-testid="tool-text">
+                    <MessageSquare className="h-4 w-4 text-primary mb-1" />
+                    <p className="text-[10px] font-medium">Texto</p>
                   </div>
-                  <div className="p-3 bg-muted rounded-lg cursor-pointer hover:bg-secondary transition-colors" data-testid="tool-image">
-                    <Image className="h-5 w-5 text-primary mb-2" />
-                    <p className="text-xs font-medium">Imagem</p>
+                  <div className="p-2 bg-muted rounded cursor-pointer hover:bg-secondary transition-colors" data-testid="tool-image">
+                    <Image className="h-4 w-4 text-primary mb-1" />
+                    <p className="text-[10px] font-medium">Imagem</p>
                   </div>
-                  <div className="p-3 bg-muted rounded-lg cursor-pointer hover:bg-secondary transition-colors" data-testid="tool-video">
-                    <Video className="h-5 w-5 text-primary mb-2" />
-                    <p className="text-xs font-medium">Vídeo</p>
+                  <div className="p-2 bg-muted rounded cursor-pointer hover:bg-secondary transition-colors" data-testid="tool-video">
+                    <Video className="h-4 w-4 text-primary mb-1" />
+                    <p className="text-[10px] font-medium">Vídeo</p>
                   </div>
-                  <div className="p-3 bg-muted rounded-lg cursor-pointer hover:bg-secondary transition-colors" data-testid="tool-audio">
-                    <Mic className="h-5 w-5 text-primary mb-2" />
-                    <p className="text-xs font-medium">Áudio</p>
+                  <div className="p-2 bg-muted rounded cursor-pointer hover:bg-secondary transition-colors" data-testid="tool-audio">
+                    <Mic className="h-4 w-4 text-primary mb-1" />
+                    <p className="text-[10px] font-medium">Áudio</p>
                   </div>
-                  <div className="p-3 bg-muted rounded-lg cursor-pointer hover:bg-secondary transition-colors" data-testid="tool-document">
-                    <FileText className="h-5 w-5 text-primary mb-2" />
-                    <p className="text-xs font-medium">Documento</p>
+                  <div className="p-2 bg-muted rounded cursor-pointer hover:bg-secondary transition-colors" data-testid="tool-document">
+                    <FileText className="h-4 w-4 text-primary mb-1" />
+                    <p className="text-[10px] font-medium">Documento</p>
                   </div>
-                  <div className="p-3 bg-muted rounded-lg cursor-pointer hover:bg-secondary transition-colors" data-testid="tool-location">
-                    <MapPin className="h-5 w-5 text-primary mb-2" />
-                    <p className="text-xs font-medium">Localização</p>
+                  <div className="p-2 bg-muted rounded cursor-pointer hover:bg-secondary transition-colors" data-testid="tool-location">
+                    <MapPin className="h-4 w-4 text-primary mb-1" />
+                    <p className="text-[10px] font-medium">Local</p>
                   </div>
                 </div>
               </div>
               
               {/* Logic Elements */}
               <div>
-                <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">
+                <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
                   Lógica
                 </h3>
-                <div className="space-y-2">
-                  <div className="p-3 bg-muted rounded-lg cursor-pointer hover:bg-secondary transition-colors flex items-center" data-testid="tool-condition">
-                    <GitBranch className="h-5 w-5 text-primary mr-3" />
-                    <span className="text-sm font-medium">Condição</span>
+                <div className="space-y-1">
+                  <div className="p-2 bg-muted rounded cursor-pointer hover:bg-secondary transition-colors flex items-center" data-testid="tool-condition">
+                    <GitBranch className="h-4 w-4 text-primary mr-2" />
+                    <span className="text-xs font-medium">Condição</span>
                   </div>
-                  <div className="p-3 bg-muted rounded-lg cursor-pointer hover:bg-secondary transition-colors flex items-center" data-testid="tool-delay">
-                    <Clock className="h-5 w-5 text-primary mr-3" />
-                    <span className="text-sm font-medium">Esperar</span>
+                  <div className="p-2 bg-muted rounded cursor-pointer hover:bg-secondary transition-colors flex items-center" data-testid="tool-delay">
+                    <Clock className="h-4 w-4 text-primary mr-2" />
+                    <span className="text-xs font-medium">Esperar</span>
                   </div>
-                  <div className="p-3 bg-muted rounded-lg cursor-pointer hover:bg-secondary transition-colors flex items-center" data-testid="tool-question">
-                    <HelpCircle className="h-5 w-5 text-primary mr-3" />
-                    <span className="text-sm font-medium">Pergunta</span>
+                  <div className="p-2 bg-muted rounded cursor-pointer hover:bg-secondary transition-colors flex items-center" data-testid="tool-question">
+                    <HelpCircle className="h-4 w-4 text-primary mr-2" />
+                    <span className="text-xs font-medium">Pergunta</span>
                   </div>
-                  <div className="p-3 bg-muted rounded-lg cursor-pointer hover:bg-secondary transition-colors flex items-center" data-testid="tool-tag">
-                    <Tag className="h-5 w-5 text-primary mr-3" />
-                    <span className="text-sm font-medium">Tag</span>
+                  <div className="p-2 bg-muted rounded cursor-pointer hover:bg-secondary transition-colors flex items-center" data-testid="tool-tag">
+                    <Tag className="h-4 w-4 text-primary mr-2" />
+                    <span className="text-xs font-medium">Tag</span>
                   </div>
-                  <div className="p-3 bg-muted rounded-lg cursor-pointer hover:bg-secondary transition-colors flex items-center" data-testid="tool-verify">
-                    <CheckCircle className="h-5 w-5 text-primary mr-3" />
-                    <span className="text-sm font-medium">Verificar</span>
+                  <div className="p-2 bg-muted rounded cursor-pointer hover:bg-secondary transition-colors flex items-center" data-testid="tool-verify">
+                    <CheckCircle className="h-4 w-4 text-primary mr-2" />
+                    <span className="text-xs font-medium">Verificar</span>
                   </div>
                 </div>
               </div>
               
               {/* Trigger Configuration */}
               <div>
-                <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">
+                <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
                   Gatilho Inicial
                 </h3>
-                <div className="space-y-3">
+                <div className="space-y-2">
                   <div>
-                    <Label className="text-xs font-medium text-muted-foreground mb-1">Frase Gatilho</Label>
+                    <Label className="text-[10px] font-medium text-muted-foreground mb-1">Frase Gatilho</Label>
                     <Input 
                       type="text" 
                       placeholder="Ex: Estou interessado"
                       value={triggerPhrase}
                       onChange={(e) => setTriggerPhrase(e.target.value)}
+                      className="h-8 text-xs"
                       data-testid="input-trigger-phrase"
                     />
                   </div>
                   <div>
-                    <Label className="text-xs font-medium text-muted-foreground mb-1">Delay Inicial (minutos)</Label>
+                    <Label className="text-[10px] font-medium text-muted-foreground mb-1">Delay (min)</Label>
                     <Input 
                       type="number" 
                       min="0"
                       value={initialDelay}
                       onChange={(e) => setInitialDelay(parseInt(e.target.value) || 0)}
+                      className="h-8 text-xs"
                       data-testid="input-initial-delay"
                     />
                   </div>
