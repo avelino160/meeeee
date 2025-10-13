@@ -54,7 +54,7 @@ export default function Dashboard() {
         {/* Header */}
         <header className="bg-card border-b border-border px-4 sm:px-6 py-3 sm:py-4">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
-            <div className="flex items-center space-x-2 sm:space-x-4 w-full sm:w-auto pr-12 sm:pr-0 lg:pr-0">
+            <div className="flex items-center space-x-2 sm:space-x-4 w-full sm:w-auto pl-14 sm:pl-0 lg:pl-0">
               <div className="flex-1 sm:flex-initial">
                 <h1 className="text-lg sm:text-2xl font-semibold" data-testid="text-dashboard-title">RanZap Dashboard</h1>
                 <p className="text-xs sm:text-sm text-muted-foreground hidden sm:block">Sua central de vendas automáticas no WhatsApp</p>
