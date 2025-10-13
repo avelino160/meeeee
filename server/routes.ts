@@ -5,11 +5,9 @@ import { whatsappService } from "./services/whatsappService";
 import { funnelService } from "./services/funnelService";
 import { schedulerService } from "./services/schedulerService";
 import { 
-  insertCampaignSchema,
   insertFunnelSchema,
   insertContactSchema,
   insertMessageSchema,
-  insertMessageTemplateSchema,
 } from "@shared/schema";
 import { z } from "zod";
 
@@ -70,88 +68,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Campaign routes
-  app.get('/api/campaigns', async (req, res) => {
-    try {
-      const userId = DEFAULT_USER_ID;
-      const campaigns = await storage.getCampaigns(userId);
-      res.json(campaigns);
-    } catch (error) {
-      console.error("Error fetching campaigns:", error);
-      res.status(500).json({ message: "Failed to fetch campaigns" });
-    }
-  });
-
-  app.post('/api/campaigns', async (req, res) => {
-    try {
-      const userId = DEFAULT_USER_ID;
-      const campaignData = insertCampaignSchema.parse({ ...req.body, userId });
-      const campaign = await storage.createCampaign(campaignData);
-      res.status(201).json(campaign);
-    } catch (error) {
-      console.error("Error creating campaign:", error);
-      res.status(500).json({ message: "Failed to create campaign" });
-    }
-  });
-
-  app.get('/api/campaigns/:id', async (req, res) => {
-    try {
-      const userId = DEFAULT_USER_ID;
-      const { id } = req.params;
-      const campaign = await storage.getCampaign(id, userId);
-      
-      if (!campaign) {
-        return res.status(404).json({ message: "Campaign not found" });
-      }
-
-      res.json(campaign);
-    } catch (error) {
-      console.error("Error fetching campaign:", error);
-      res.status(500).json({ message: "Failed to fetch campaign" });
-    }
-  });
-
-  app.put('/api/campaigns/:id', async (req, res) => {
-    try {
-      const userId = DEFAULT_USER_ID;
-      const { id } = req.params;
-      
-      // Verify ownership
-      const existingCampaign = await storage.getCampaign(id, userId);
-      if (!existingCampaign) {
-        return res.status(404).json({ message: "Campaign not found" });
-      }
-
-      const campaign = await storage.updateCampaign(id, req.body);
-      res.json(campaign);
-    } catch (error) {
-      console.error("Error updating campaign:", error);
-      res.status(500).json({ message: "Failed to update campaign" });
-    }
-  });
-
-  app.delete('/api/campaigns/:id', async (req, res) => {
-    try {
-      const userId = DEFAULT_USER_ID;
-      const { id } = req.params;
-      
-      const success = await storage.deleteCampaign(id, userId);
-      if (!success) {
-        return res.status(404).json({ message: "Campaign not found" });
-      }
-
-      res.json({ success: true });
-    } catch (error) {
-      console.error("Error deleting campaign:", error);
-      res.status(500).json({ message: "Failed to delete campaign" });
-    }
-  });
-
   // Funnel routes
-  app.get('/api/campaigns/:campaignId/funnels', async (req, res) => {
+  app.get('/api/funnels', async (req, res) => {
     try {
-      const { campaignId } = req.params;
-      const funnels = await storage.getFunnels(campaignId);
+      const userId = DEFAULT_USER_ID;
+      const funnels = await storage.getAllFunnels(userId);
       res.json(funnels);
     } catch (error) {
       console.error("Error fetching funnels:", error);
@@ -159,10 +80,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/campaigns/:campaignId/funnels', async (req, res) => {
+  app.post('/api/funnels', async (req, res) => {
     try {
-      const { campaignId } = req.params;
-      const funnelData = insertFunnelSchema.parse({ ...req.body, campaignId });
+      const userId = DEFAULT_USER_ID;
+      const funnelData = insertFunnelSchema.parse({ ...req.body, userId });
       const funnel = await storage.createFunnel(funnelData);
       res.status(201).json(funnel);
     } catch (error) {
@@ -325,73 +246,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Message template routes
-  app.get('/api/templates', async (req, res) => {
-    try {
-      const userId = DEFAULT_USER_ID;
-      const templates = await storage.getMessageTemplates(userId);
-      res.json(templates);
-    } catch (error) {
-      console.error("Error fetching templates:", error);
-      res.status(500).json({ message: "Failed to fetch templates" });
-    }
-  });
-
-  app.post('/api/templates', async (req, res) => {
-    try {
-      const userId = DEFAULT_USER_ID;
-      const templateData = insertMessageTemplateSchema.parse({ ...req.body, userId });
-      const template = await storage.createMessageTemplate(templateData);
-      res.status(201).json(template);
-    } catch (error) {
-      console.error("Error creating template:", error);
-      res.status(500).json({ message: "Failed to create template" });
-    }
-  });
-
-  app.put('/api/templates/:id', async (req, res) => {
-    try {
-      const userId = DEFAULT_USER_ID;
-      const { id } = req.params;
-      
-      // Verify ownership
-      const existingTemplate = await storage.getMessageTemplate(id, userId);
-      if (!existingTemplate) {
-        return res.status(404).json({ message: "Template not found" });
-      }
-
-      const template = await storage.updateMessageTemplate(id, req.body);
-      res.json(template);
-    } catch (error) {
-      console.error("Error updating template:", error);
-      res.status(500).json({ message: "Failed to update template" });
-    }
-  });
-
-  app.delete('/api/templates/:id', async (req, res) => {
-    try {
-      const userId = DEFAULT_USER_ID;
-      const { id } = req.params;
-      
-      const success = await storage.deleteMessageTemplate(id, userId);
-      if (!success) {
-        return res.status(404).json({ message: "Template not found" });
-      }
-
-      res.json({ success: true });
-    } catch (error) {
-      console.error("Error deleting template:", error);
-      res.status(500).json({ message: "Failed to delete template" });
-    }
-  });
-
   // Analytics routes
   app.get('/api/analytics/dashboard', async (req, res) => {
     try {
       const userId = DEFAULT_USER_ID;
       
       // Get basic stats
-      const campaigns = await storage.getCampaigns(userId);
+      const funnels = await storage.getAllFunnels(userId);
       const contacts = await storage.getContacts(userId);
       const messages = await storage.getMessages(userId, 1000);
       
@@ -406,8 +267,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const deliveredMessages = messages.filter(m => m.status === 'delivered');
       
       const analytics = {
-        totalCampaigns: campaigns.length,
-        activeCampaigns: campaigns.filter(c => c.status === 'active').length,
+        totalFunnels: funnels.length,
+        activeFunnels: funnels.filter(f => f.status === 'active').length,
         totalContacts: contacts.length,
         activeContacts: contacts.filter(c => c.isActive).length,
         totalMessages: messages.length,

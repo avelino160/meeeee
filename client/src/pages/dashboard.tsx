@@ -12,7 +12,7 @@ import WhatsAppConnectionModal from "@/components/whatsapp-connection-modal";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { BarChart3, MessageSquare, Users, Zap, TrendingUp, Clock, Wifi, WifiOff } from "lucide-react";
+import { BarChart3, MessageSquare, Users, TrendingUp, Clock, Wifi, WifiOff } from "lucide-react";
 
 export default function Dashboard() {
   const { toast } = useToast();
@@ -100,9 +100,9 @@ export default function Dashboard() {
                   WhatsApp
                 </Button>
               )}
-              <Button data-testid="button-new-campaign">
-                <Zap className="h-4 w-4 mr-2" />
-                Nova Campanha
+              <Button data-testid="button-new-funnel">
+                <BarChart3 className="h-4 w-4 mr-2" />
+                Novo Funil
               </Button>
             </div>
           </div>
@@ -114,15 +114,15 @@ export default function Dashboard() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Campanhas Ativas</CardTitle>
-                <Zap className="h-4 w-4 text-muted-foreground" />
+                <CardTitle className="text-sm font-medium">Funis Ativos</CardTitle>
+                <BarChart3 className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold" data-testid="text-active-campaigns">
-                  {analyticsLoading ? "..." : analytics?.activeCampaigns || 0}
+                <div className="text-2xl font-bold" data-testid="text-active-funnels">
+                  {analyticsLoading ? "..." : analytics?.activeFunnels || 0}
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  +{analyticsLoading ? "..." : ((analytics?.activeCampaigns || 0) * 0.2).toFixed(0)} desde ontem
+                  +{analyticsLoading ? "..." : ((analytics?.activeFunnels || 0) * 0.2).toFixed(0)} desde ontem
                 </p>
               </CardContent>
             </Card>
@@ -187,7 +187,7 @@ export default function Dashboard() {
                   <div className="flex items-center">
                     <div className="w-2 h-2 bg-primary rounded-full mr-3"></div>
                     <div className="flex-1">
-                      <p className="text-sm font-medium">Campanha "Interesse Produto" iniciada</p>
+                      <p className="text-sm font-medium">Funil "Interesse Produto" iniciado</p>
                       <p className="text-xs text-muted-foreground">2 minutos atrás</p>
                     </div>
                   </div>
@@ -218,16 +218,16 @@ export default function Dashboard() {
 
             <Card>
               <CardHeader>
-                <CardTitle>Performance das Campanhas</CardTitle>
+                <CardTitle>Performance dos Funis</CardTitle>
                 <CardDescription>
-                  Taxa de sucesso das suas campanhas ativas
+                  Taxa de sucesso dos seus funis ativos
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
                   <div>
                     <div className="flex justify-between text-sm mb-2">
-                      <span>Campanha Interesse</span>
+                      <span>Funil Interesse</span>
                       <span>87%</span>
                     </div>
                     <Progress value={87} className="h-2" />

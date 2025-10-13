@@ -1,8 +1,6 @@
 import {
   type User,
   type UpsertUser,
-  type Campaign,
-  type InsertCampaign,
   type Funnel,
   type InsertFunnel,
   type FunnelNode,
@@ -10,8 +8,6 @@ import {
   type InsertContact,
   type Message,
   type InsertMessage,
-  type MessageTemplate,
-  type InsertMessageTemplate,
   type WhatsappConnection,
   type InsertWhatsappConnection,
   type FunnelExecution,
@@ -29,15 +25,8 @@ export interface IStorage {
   createWhatsappConnection(connection: InsertWhatsappConnection): Promise<WhatsappConnection>;
   updateWhatsappConnection(id: string, updates: Partial<WhatsappConnection>): Promise<WhatsappConnection | undefined>;
   
-  // Campaign operations
-  getCampaigns(userId: string): Promise<Campaign[]>;
-  getCampaign(id: string, userId: string): Promise<Campaign | undefined>;
-  createCampaign(campaign: InsertCampaign): Promise<Campaign>;
-  updateCampaign(id: string, updates: Partial<Campaign>): Promise<Campaign | undefined>;
-  deleteCampaign(id: string, userId: string): Promise<boolean>;
-  
   // Funnel operations
-  getFunnels(campaignId: string): Promise<Funnel[]>;
+  getAllFunnels(userId: string): Promise<Funnel[]>;
   getFunnel(id: string): Promise<Funnel | undefined>;
   createFunnel(funnel: InsertFunnel): Promise<Funnel>;
   updateFunnel(id: string, updates: Partial<Funnel>): Promise<Funnel | undefined>;
@@ -65,13 +54,6 @@ export interface IStorage {
   getPendingMessages(): Promise<Message[]>;
   getScheduledMessages(): Promise<Message[]>;
   
-  // Message template operations
-  getMessageTemplates(userId: string): Promise<MessageTemplate[]>;
-  getMessageTemplate(id: string, userId: string): Promise<MessageTemplate | undefined>;
-  createMessageTemplate(template: InsertMessageTemplate): Promise<MessageTemplate>;
-  updateMessageTemplate(id: string, updates: Partial<MessageTemplate>): Promise<MessageTemplate | undefined>;
-  deleteMessageTemplate(id: string, userId: string): Promise<boolean>;
-  
   // Funnel execution operations
   getFunnelExecutions(funnelId: string): Promise<FunnelExecution[]>;
   createFunnelExecution(execution: InsertFunnelExecution): Promise<FunnelExecution>;
@@ -82,12 +64,10 @@ export interface IStorage {
 export class MemStorage implements IStorage {
   private users: Map<string, User> = new Map();
   private whatsappConnections: Map<string, WhatsappConnection> = new Map();
-  private campaigns: Map<string, Campaign> = new Map();
   private funnels: Map<string, Funnel> = new Map();
   private funnelNodes: Map<string, FunnelNode> = new Map();
   private contacts: Map<string, Contact> = new Map();
   private messages: Map<string, Message> = new Map();
-  private messageTemplates: Map<string, MessageTemplate> = new Map();
   private funnelExecutions: Map<string, FunnelExecution> = new Map();
   
   private defaultUserId = "default-user";
@@ -141,46 +121,9 @@ export class MemStorage implements IStorage {
     return updated;
   }
 
-  async getCampaigns(userId: string): Promise<Campaign[]> {
-    return Array.from(this.campaigns.values())
-      .filter(c => c.userId === userId)
-      .sort((a, b) => b.createdAt!.getTime() - a.createdAt!.getTime());
-  }
-
-  async getCampaign(id: string, userId: string): Promise<Campaign | undefined> {
-    const campaign = this.campaigns.get(id);
-    return campaign?.userId === userId ? campaign : undefined;
-  }
-
-  async createCampaign(campaign: InsertCampaign): Promise<Campaign> {
-    const newCampaign: Campaign = {
-      id: nanoid(),
-      ...campaign,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-    this.campaigns.set(newCampaign.id, newCampaign);
-    return newCampaign;
-  }
-
-  async updateCampaign(id: string, updates: Partial<Campaign>): Promise<Campaign | undefined> {
-    const campaign = this.campaigns.get(id);
-    if (!campaign) return undefined;
-    const updated = { ...campaign, ...updates, updatedAt: new Date() };
-    this.campaigns.set(id, updated);
-    return updated;
-  }
-
-  async deleteCampaign(id: string, userId: string): Promise<boolean> {
-    const campaign = this.campaigns.get(id);
-    if (!campaign || campaign.userId !== userId) return false;
-    this.campaigns.delete(id);
-    return true;
-  }
-
-  async getFunnels(campaignId: string): Promise<Funnel[]> {
+  async getAllFunnels(userId: string): Promise<Funnel[]> {
     return Array.from(this.funnels.values())
-      .filter(f => f.campaignId === campaignId)
+      .filter(f => f.userId === userId)
       .sort((a, b) => b.createdAt!.getTime() - a.createdAt!.getTime());
   }
 
@@ -329,43 +272,6 @@ export class MemStorage implements IStorage {
     return Array.from(this.messages.values()).filter(
       m => m.status === "pending" && m.scheduledAt && m.scheduledAt.getTime() <= now
     );
-  }
-
-  async getMessageTemplates(userId: string): Promise<MessageTemplate[]> {
-    return Array.from(this.messageTemplates.values())
-      .filter(t => t.userId === userId)
-      .sort((a, b) => b.createdAt!.getTime() - a.createdAt!.getTime());
-  }
-
-  async getMessageTemplate(id: string, userId: string): Promise<MessageTemplate | undefined> {
-    const template = this.messageTemplates.get(id);
-    return template?.userId === userId ? template : undefined;
-  }
-
-  async createMessageTemplate(template: InsertMessageTemplate): Promise<MessageTemplate> {
-    const newTemplate: MessageTemplate = {
-      id: nanoid(),
-      ...template,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-    this.messageTemplates.set(newTemplate.id, newTemplate);
-    return newTemplate;
-  }
-
-  async updateMessageTemplate(id: string, updates: Partial<MessageTemplate>): Promise<MessageTemplate | undefined> {
-    const template = this.messageTemplates.get(id);
-    if (!template) return undefined;
-    const updated = { ...template, ...updates, updatedAt: new Date() };
-    this.messageTemplates.set(id, updated);
-    return updated;
-  }
-
-  async deleteMessageTemplate(id: string, userId: string): Promise<boolean> {
-    const template = this.messageTemplates.get(id);
-    if (!template || template.userId !== userId) return false;
-    this.messageTemplates.delete(id);
-    return true;
   }
 
   async getFunnelExecutions(funnelId: string): Promise<FunnelExecution[]> {

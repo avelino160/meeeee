@@ -49,7 +49,6 @@ export const whatsappConnections = pgTable("whatsapp_connections", {
 });
 
 // Enums
-export const campaignStatusEnum = pgEnum("campaign_status", ["active", "paused", "completed", "draft"]);
 export const messageTypeEnum = pgEnum("message_type", ["text", "image", "video", "audio", "document", "location"]);
 export const nodeTypeEnum = pgEnum("node_type", ["trigger", "message", "delay", "condition", "question", "tag", "verify"]);
 export const funnelStatusEnum = pgEnum("funnel_status", ["active", "paused", "inactive", "draft"]);
@@ -70,7 +69,7 @@ export const campaigns = pgTable("campaigns", {
 // Funnels
 export const funnels = pgTable("funnels", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  campaignId: varchar("campaign_id").notNull().references(() => campaigns.id, { onDelete: "cascade" }),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
   name: varchar("name").notNull(),
   status: funnelStatusEnum("status").default("draft"),
   flowData: jsonb("flow_data").notNull(), // React Flow data
@@ -148,24 +147,17 @@ export const funnelExecutions = pgTable("funnel_executions", {
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   whatsappConnections: many(whatsappConnections),
-  campaigns: many(campaigns),
+  funnels: many(funnels),
   contacts: many(contacts),
   messages: many(messages),
-  messageTemplates: many(messageTemplates),
 }));
 
 export const whatsappConnectionsRelations = relations(whatsappConnections, ({ one }) => ({
   user: one(users, { fields: [whatsappConnections.userId], references: [users.id] }),
 }));
 
-export const campaignsRelations = relations(campaigns, ({ one, many }) => ({
-  user: one(users, { fields: [campaigns.userId], references: [users.id] }),
-  funnels: many(funnels),
-  messages: many(messages),
-}));
-
 export const funnelsRelations = relations(funnels, ({ one, many }) => ({
-  campaign: one(campaigns, { fields: [funnels.campaignId], references: [campaigns.id] }),
+  user: one(users, { fields: [funnels.userId], references: [users.id] }),
   nodes: many(funnelNodes),
   executions: many(funnelExecutions),
 }));
@@ -181,13 +173,8 @@ export const contactsRelations = relations(contacts, ({ one, many }) => ({
 }));
 
 export const messagesRelations = relations(messages, ({ one }) => ({
-  campaign: one(campaigns, { fields: [messages.campaignId], references: [campaigns.id] }),
   contact: one(contacts, { fields: [messages.contactId], references: [contacts.id] }),
   user: one(users, { fields: [messages.userId], references: [users.id] }),
-}));
-
-export const messageTemplatesRelations = relations(messageTemplates, ({ one }) => ({
-  user: one(users, { fields: [messageTemplates.userId], references: [users.id] }),
 }));
 
 export const funnelExecutionsRelations = relations(funnelExecutions, ({ one }) => ({
@@ -196,12 +183,6 @@ export const funnelExecutionsRelations = relations(funnelExecutions, ({ one }) =
 }));
 
 // Insert schemas
-export const insertCampaignSchema = createInsertSchema(campaigns).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-});
-
 export const insertFunnelSchema = createInsertSchema(funnels).omit({
   id: true,
   createdAt: true,
@@ -219,12 +200,6 @@ export const insertMessageSchema = createInsertSchema(messages).omit({
   createdAt: true,
 });
 
-export const insertMessageTemplateSchema = createInsertSchema(messageTemplates).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-});
-
 export const insertWhatsappConnectionSchema = createInsertSchema(whatsappConnections).omit({
   id: true,
   createdAt: true,
@@ -239,8 +214,6 @@ export const insertFunnelExecutionSchema = createInsertSchema(funnelExecutions).
 // Types
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
-export type Campaign = typeof campaigns.$inferSelect;
-export type InsertCampaign = z.infer<typeof insertCampaignSchema>;
 export type Funnel = typeof funnels.$inferSelect;
 export type InsertFunnel = z.infer<typeof insertFunnelSchema>;
 export type FunnelNode = typeof funnelNodes.$inferSelect;
@@ -248,8 +221,6 @@ export type Contact = typeof contacts.$inferSelect;
 export type InsertContact = z.infer<typeof insertContactSchema>;
 export type Message = typeof messages.$inferSelect;
 export type InsertMessage = z.infer<typeof insertMessageSchema>;
-export type MessageTemplate = typeof messageTemplates.$inferSelect;
-export type InsertMessageTemplate = z.infer<typeof insertMessageTemplateSchema>;
 export type WhatsappConnection = typeof whatsappConnections.$inferSelect;
 export type InsertWhatsappConnection = z.infer<typeof insertWhatsappConnectionSchema>;
 export type FunnelExecution = typeof funnelExecutions.$inferSelect;
