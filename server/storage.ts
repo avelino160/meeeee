@@ -1,13 +1,4 @@
 import {
-  users,
-  campaigns,
-  funnels,
-  funnelNodes,
-  contacts,
-  messages,
-  messageTemplates,
-  whatsappConnections,
-  funnelExecutions,
   type User,
   type UpsertUser,
   type Campaign,
@@ -26,8 +17,7 @@ import {
   type FunnelExecution,
   type InsertFunnelExecution,
 } from "@shared/schema";
-import { db } from "./db";
-import { eq, and, desc, asc } from "drizzle-orm";
+import { nanoid } from "nanoid";
 
 export interface IStorage {
   // User operations
@@ -89,353 +79,323 @@ export interface IStorage {
   getActiveFunnelExecutions(): Promise<FunnelExecution[]>;
 }
 
-export class DatabaseStorage implements IStorage {
-  // User operations
+export class MemStorage implements IStorage {
+  private users: Map<string, User> = new Map();
+  private whatsappConnections: Map<string, WhatsappConnection> = new Map();
+  private campaigns: Map<string, Campaign> = new Map();
+  private funnels: Map<string, Funnel> = new Map();
+  private funnelNodes: Map<string, FunnelNode> = new Map();
+  private contacts: Map<string, Contact> = new Map();
+  private messages: Map<string, Message> = new Map();
+  private messageTemplates: Map<string, MessageTemplate> = new Map();
+  private funnelExecutions: Map<string, FunnelExecution> = new Map();
+  
+  private defaultUserId = "default-user";
+
+  constructor() {
+    this.users.set(this.defaultUserId, {
+      id: this.defaultUserId,
+      email: "user@example.com",
+      firstName: "Demo",
+      lastName: "User",
+      profileImageUrl: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+  }
+
   async getUser(id: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.id, id));
-    return user;
+    return this.users.get(id);
   }
 
   async upsertUser(userData: UpsertUser): Promise<User> {
-    const [user] = await db
-      .insert(users)
-      .values(userData)
-      .onConflictDoUpdate({
-        target: users.id,
-        set: {
-          ...userData,
-          updatedAt: new Date(),
-        },
-      })
-      .returning();
+    const user: User = {
+      ...userData,
+      createdAt: this.users.get(userData.id)?.createdAt || new Date(),
+      updatedAt: new Date(),
+    };
+    this.users.set(userData.id, user);
     return user;
   }
 
-  // WhatsApp connection operations
   async getWhatsappConnection(userId: string): Promise<WhatsappConnection | undefined> {
-    const [connection] = await db
-      .select()
-      .from(whatsappConnections)
-      .where(eq(whatsappConnections.userId, userId));
-    return connection;
+    return Array.from(this.whatsappConnections.values()).find(c => c.userId === userId);
   }
 
   async createWhatsappConnection(connection: InsertWhatsappConnection): Promise<WhatsappConnection> {
-    const [newConnection] = await db
-      .insert(whatsappConnections)
-      .values(connection)
-      .returning();
+    const newConnection: WhatsappConnection = {
+      id: nanoid(),
+      ...connection,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    this.whatsappConnections.set(newConnection.id, newConnection);
     return newConnection;
   }
 
   async updateWhatsappConnection(id: string, updates: Partial<WhatsappConnection>): Promise<WhatsappConnection | undefined> {
-    const [connection] = await db
-      .update(whatsappConnections)
-      .set({ ...updates, updatedAt: new Date() })
-      .where(eq(whatsappConnections.id, id))
-      .returning();
-    return connection;
+    const connection = this.whatsappConnections.get(id);
+    if (!connection) return undefined;
+    const updated = { ...connection, ...updates, updatedAt: new Date() };
+    this.whatsappConnections.set(id, updated);
+    return updated;
   }
 
-  // Campaign operations
   async getCampaigns(userId: string): Promise<Campaign[]> {
-    return await db
-      .select()
-      .from(campaigns)
-      .where(eq(campaigns.userId, userId))
-      .orderBy(desc(campaigns.createdAt));
+    return Array.from(this.campaigns.values())
+      .filter(c => c.userId === userId)
+      .sort((a, b) => b.createdAt!.getTime() - a.createdAt!.getTime());
   }
 
   async getCampaign(id: string, userId: string): Promise<Campaign | undefined> {
-    const [campaign] = await db
-      .select()
-      .from(campaigns)
-      .where(and(eq(campaigns.id, id), eq(campaigns.userId, userId)));
-    return campaign;
+    const campaign = this.campaigns.get(id);
+    return campaign?.userId === userId ? campaign : undefined;
   }
 
   async createCampaign(campaign: InsertCampaign): Promise<Campaign> {
-    const [newCampaign] = await db
-      .insert(campaigns)
-      .values(campaign)
-      .returning();
+    const newCampaign: Campaign = {
+      id: nanoid(),
+      ...campaign,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    this.campaigns.set(newCampaign.id, newCampaign);
     return newCampaign;
   }
 
   async updateCampaign(id: string, updates: Partial<Campaign>): Promise<Campaign | undefined> {
-    const [campaign] = await db
-      .update(campaigns)
-      .set({ ...updates, updatedAt: new Date() })
-      .where(eq(campaigns.id, id))
-      .returning();
-    return campaign;
+    const campaign = this.campaigns.get(id);
+    if (!campaign) return undefined;
+    const updated = { ...campaign, ...updates, updatedAt: new Date() };
+    this.campaigns.set(id, updated);
+    return updated;
   }
 
   async deleteCampaign(id: string, userId: string): Promise<boolean> {
-    const result = await db
-      .delete(campaigns)
-      .where(and(eq(campaigns.id, id), eq(campaigns.userId, userId)));
-    return (result.rowCount ?? 0) > 0;
+    const campaign = this.campaigns.get(id);
+    if (!campaign || campaign.userId !== userId) return false;
+    this.campaigns.delete(id);
+    return true;
   }
 
-  // Funnel operations
   async getFunnels(campaignId: string): Promise<Funnel[]> {
-    return await db
-      .select()
-      .from(funnels)
-      .where(eq(funnels.campaignId, campaignId))
-      .orderBy(desc(funnels.createdAt));
+    return Array.from(this.funnels.values())
+      .filter(f => f.campaignId === campaignId)
+      .sort((a, b) => b.createdAt!.getTime() - a.createdAt!.getTime());
   }
 
   async getFunnel(id: string): Promise<Funnel | undefined> {
-    const [funnel] = await db
-      .select()
-      .from(funnels)
-      .where(eq(funnels.id, id));
-    return funnel;
+    return this.funnels.get(id);
   }
 
   async createFunnel(funnel: InsertFunnel): Promise<Funnel> {
-    const [newFunnel] = await db
-      .insert(funnels)
-      .values(funnel)
-      .returning();
+    const newFunnel: Funnel = {
+      id: nanoid(),
+      ...funnel,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    this.funnels.set(newFunnel.id, newFunnel);
     return newFunnel;
   }
 
   async updateFunnel(id: string, updates: Partial<Funnel>): Promise<Funnel | undefined> {
-    const [funnel] = await db
-      .update(funnels)
-      .set({ ...updates, updatedAt: new Date() })
-      .where(eq(funnels.id, id))
-      .returning();
-    return funnel;
+    const funnel = this.funnels.get(id);
+    if (!funnel) return undefined;
+    const updated = { ...funnel, ...updates, updatedAt: new Date() };
+    this.funnels.set(id, updated);
+    return updated;
   }
 
   async deleteFunnel(id: string): Promise<boolean> {
-    const result = await db
-      .delete(funnels)
-      .where(eq(funnels.id, id));
-    return (result.rowCount ?? 0) > 0;
+    return this.funnels.delete(id);
   }
 
-  // Funnel node operations
   async getFunnelNodes(funnelId: string): Promise<FunnelNode[]> {
-    return await db
-      .select()
-      .from(funnelNodes)
-      .where(eq(funnelNodes.funnelId, funnelId));
+    return Array.from(this.funnelNodes.values()).filter(n => n.funnelId === funnelId);
   }
 
   async createFunnelNode(node: Omit<FunnelNode, "id" | "createdAt">): Promise<FunnelNode> {
-    const [newNode] = await db
-      .insert(funnelNodes)
-      .values(node)
-      .returning();
+    const newNode: FunnelNode = {
+      id: nanoid(),
+      ...node,
+      createdAt: new Date(),
+    };
+    this.funnelNodes.set(newNode.id, newNode);
     return newNode;
   }
 
   async updateFunnelNode(id: string, updates: Partial<FunnelNode>): Promise<FunnelNode | undefined> {
-    const [node] = await db
-      .update(funnelNodes)
-      .set(updates)
-      .where(eq(funnelNodes.id, id))
-      .returning();
-    return node;
+    const node = this.funnelNodes.get(id);
+    if (!node) return undefined;
+    const updated = { ...node, ...updates };
+    this.funnelNodes.set(id, updated);
+    return updated;
   }
 
   async deleteFunnelNode(id: string): Promise<boolean> {
-    const result = await db
-      .delete(funnelNodes)
-      .where(eq(funnelNodes.id, id));
-    return (result.rowCount ?? 0) > 0;
+    return this.funnelNodes.delete(id);
   }
 
-  // Contact operations
   async getContacts(userId: string): Promise<Contact[]> {
-    return await db
-      .select()
-      .from(contacts)
-      .where(eq(contacts.userId, userId))
-      .orderBy(desc(contacts.createdAt));
+    return Array.from(this.contacts.values())
+      .filter(c => c.userId === userId)
+      .sort((a, b) => b.createdAt!.getTime() - a.createdAt!.getTime());
   }
 
   async getContact(id: string, userId: string): Promise<Contact | undefined> {
-    const [contact] = await db
-      .select()
-      .from(contacts)
-      .where(and(eq(contacts.id, id), eq(contacts.userId, userId)));
-    return contact;
+    const contact = this.contacts.get(id);
+    return contact?.userId === userId ? contact : undefined;
   }
 
-  // Internal method for service use - gets contact by ID without userId restriction
   async getContactById(id: string): Promise<Contact | undefined> {
-    const [contact] = await db
-      .select()
-      .from(contacts)
-      .where(eq(contacts.id, id));
-    return contact;
+    return this.contacts.get(id);
   }
 
   async getContactByPhone(phoneNumber: string, userId: string): Promise<Contact | undefined> {
-    const [contact] = await db
-      .select()
-      .from(contacts)
-      .where(and(eq(contacts.phoneNumber, phoneNumber), eq(contacts.userId, userId)));
-    return contact;
+    return Array.from(this.contacts.values()).find(
+      c => c.phoneNumber === phoneNumber && c.userId === userId
+    );
   }
 
   async createContact(contact: InsertContact): Promise<Contact> {
-    const [newContact] = await db
-      .insert(contacts)
-      .values(contact)
-      .returning();
+    const newContact: Contact = {
+      id: nanoid(),
+      ...contact,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    this.contacts.set(newContact.id, newContact);
     return newContact;
   }
 
   async updateContact(id: string, updates: Partial<Contact>): Promise<Contact | undefined> {
-    const [contact] = await db
-      .update(contacts)
-      .set({ ...updates, updatedAt: new Date() })
-      .where(eq(contacts.id, id))
-      .returning();
-    return contact;
+    const contact = this.contacts.get(id);
+    if (!contact) return undefined;
+    const updated = { ...contact, ...updates, updatedAt: new Date() };
+    this.contacts.set(id, updated);
+    return updated;
   }
 
   async deleteContact(id: string, userId: string): Promise<boolean> {
-    const result = await db
-      .delete(contacts)
-      .where(and(eq(contacts.id, id), eq(contacts.userId, userId)));
-    return (result.rowCount ?? 0) > 0;
+    const contact = this.contacts.get(id);
+    if (!contact || contact.userId !== userId) return false;
+    this.contacts.delete(id);
+    return true;
   }
 
-  // Message operations
   async getMessages(userId: string, limit = 100): Promise<Message[]> {
-    return await db
-      .select()
-      .from(messages)
-      .where(eq(messages.userId, userId))
-      .orderBy(desc(messages.createdAt))
-      .limit(limit);
+    return Array.from(this.messages.values())
+      .filter(m => m.userId === userId)
+      .sort((a, b) => b.createdAt!.getTime() - a.createdAt!.getTime())
+      .slice(0, limit);
   }
 
   async getMessage(id: string, userId: string): Promise<Message | undefined> {
-    const [message] = await db
-      .select()
-      .from(messages)
-      .where(and(eq(messages.id, id), eq(messages.userId, userId)));
-    return message;
+    const message = this.messages.get(id);
+    return message?.userId === userId ? message : undefined;
   }
 
   async createMessage(message: InsertMessage): Promise<Message> {
-    const [newMessage] = await db
-      .insert(messages)
-      .values(message)
-      .returning();
+    const newMessage: Message = {
+      id: nanoid(),
+      ...message,
+      createdAt: new Date(),
+    };
+    this.messages.set(newMessage.id, newMessage);
     return newMessage;
   }
 
   async updateMessage(id: string, updates: Partial<Message>): Promise<Message | undefined> {
-    const [message] = await db
-      .update(messages)
-      .set(updates)
-      .where(eq(messages.id, id))
-      .returning();
-    return message;
+    const message = this.messages.get(id);
+    if (!message) return undefined;
+    const updated = { ...message, ...updates };
+    this.messages.set(id, updated);
+    return updated;
   }
 
   async getPendingMessages(): Promise<Message[]> {
-    return await db
-      .select()
-      .from(messages)
-      .where(eq(messages.status, "pending"))
-      .orderBy(asc(messages.scheduledAt));
+    return Array.from(this.messages.values())
+      .filter(m => m.status === "pending")
+      .sort((a, b) => {
+        const timeA = a.scheduledAt?.getTime() || 0;
+        const timeB = b.scheduledAt?.getTime() || 0;
+        return timeA - timeB;
+      });
   }
 
   async getScheduledMessages(): Promise<Message[]> {
-    const now = new Date();
-    return await db
-      .select()
-      .from(messages)
-      .where(and(
-        eq(messages.status, "pending"),
-        eq(messages.scheduledAt, now)
-      ));
+    const now = new Date().getTime();
+    return Array.from(this.messages.values()).filter(
+      m => m.status === "pending" && m.scheduledAt && m.scheduledAt.getTime() <= now
+    );
   }
 
-  // Message template operations
   async getMessageTemplates(userId: string): Promise<MessageTemplate[]> {
-    return await db
-      .select()
-      .from(messageTemplates)
-      .where(eq(messageTemplates.userId, userId))
-      .orderBy(desc(messageTemplates.createdAt));
+    return Array.from(this.messageTemplates.values())
+      .filter(t => t.userId === userId)
+      .sort((a, b) => b.createdAt!.getTime() - a.createdAt!.getTime());
   }
 
   async getMessageTemplate(id: string, userId: string): Promise<MessageTemplate | undefined> {
-    const [template] = await db
-      .select()
-      .from(messageTemplates)
-      .where(and(eq(messageTemplates.id, id), eq(messageTemplates.userId, userId)));
-    return template;
+    const template = this.messageTemplates.get(id);
+    return template?.userId === userId ? template : undefined;
   }
 
   async createMessageTemplate(template: InsertMessageTemplate): Promise<MessageTemplate> {
-    const [newTemplate] = await db
-      .insert(messageTemplates)
-      .values(template)
-      .returning();
+    const newTemplate: MessageTemplate = {
+      id: nanoid(),
+      ...template,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    this.messageTemplates.set(newTemplate.id, newTemplate);
     return newTemplate;
   }
 
   async updateMessageTemplate(id: string, updates: Partial<MessageTemplate>): Promise<MessageTemplate | undefined> {
-    const [template] = await db
-      .update(messageTemplates)
-      .set({ ...updates, updatedAt: new Date() })
-      .where(eq(messageTemplates.id, id))
-      .returning();
-    return template;
+    const template = this.messageTemplates.get(id);
+    if (!template) return undefined;
+    const updated = { ...template, ...updates, updatedAt: new Date() };
+    this.messageTemplates.set(id, updated);
+    return updated;
   }
 
   async deleteMessageTemplate(id: string, userId: string): Promise<boolean> {
-    const result = await db
-      .delete(messageTemplates)
-      .where(and(eq(messageTemplates.id, id), eq(messageTemplates.userId, userId)));
-    return (result.rowCount ?? 0) > 0;
+    const template = this.messageTemplates.get(id);
+    if (!template || template.userId !== userId) return false;
+    this.messageTemplates.delete(id);
+    return true;
   }
 
-  // Funnel execution operations
   async getFunnelExecutions(funnelId: string): Promise<FunnelExecution[]> {
-    return await db
-      .select()
-      .from(funnelExecutions)
-      .where(eq(funnelExecutions.funnelId, funnelId))
-      .orderBy(desc(funnelExecutions.startedAt));
+    return Array.from(this.funnelExecutions.values())
+      .filter(e => e.funnelId === funnelId)
+      .sort((a, b) => b.startedAt!.getTime() - a.startedAt!.getTime());
   }
 
   async createFunnelExecution(execution: InsertFunnelExecution): Promise<FunnelExecution> {
-    const [newExecution] = await db
-      .insert(funnelExecutions)
-      .values(execution)
-      .returning();
+    const newExecution: FunnelExecution = {
+      id: nanoid(),
+      ...execution,
+      startedAt: new Date(),
+      completedAt: null,
+    };
+    this.funnelExecutions.set(newExecution.id, newExecution);
     return newExecution;
   }
 
   async updateFunnelExecution(id: string, updates: Partial<FunnelExecution>): Promise<FunnelExecution | undefined> {
-    const [execution] = await db
-      .update(funnelExecutions)
-      .set(updates)
-      .where(eq(funnelExecutions.id, id))
-      .returning();
-    return execution;
+    const execution = this.funnelExecutions.get(id);
+    if (!execution) return undefined;
+    const updated = { ...execution, ...updates };
+    this.funnelExecutions.set(id, updated);
+    return updated;
   }
 
   async getActiveFunnelExecutions(): Promise<FunnelExecution[]> {
-    return await db
-      .select()
-      .from(funnelExecutions)
-      .where(eq(funnelExecutions.status, "active"));
+    return Array.from(this.funnelExecutions.values()).filter(e => e.status === "active");
   }
 }
 
-export const storage = new DatabaseStorage();
+export const storage = new MemStorage();
