@@ -125,7 +125,7 @@ export default function Sidebar() {
           <Button
             variant="ghost"
             size="icon"
-            className="lg:hidden fixed top-3 left-3 z-40 bg-card/80 backdrop-blur-sm border border-border shadow-sm"
+            className="lg:hidden fixed top-3 right-3 z-40 bg-card border border-border shadow-md"
             data-testid="button-mobile-menu"
           >
             <Menu className="h-5 w-5" />
