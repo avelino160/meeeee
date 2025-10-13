@@ -51,6 +51,7 @@ export const whatsappConnections = pgTable("whatsapp_connections", {
 // Enums
 export const messageTypeEnum = pgEnum("message_type", ["text", "image", "video", "audio", "document", "location"]);
 export const nodeTypeEnum = pgEnum("node_type", ["trigger", "message", "delay", "condition", "question", "tag", "verify"]);
+export const campaignStatusEnum = pgEnum("campaign_status", ["active", "paused", "inactive", "draft"]);
 export const funnelStatusEnum = pgEnum("funnel_status", ["active", "paused", "inactive", "draft"]);
 
 // Campaigns
