@@ -240,26 +240,27 @@ export default function Contacts() {
       
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Header */}
-        <header className="bg-card border-b border-border px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-semibold" data-testid="text-page-title">Contatos</h1>
-              <p className="text-sm text-muted-foreground">Gerencie sua lista de contatos</p>
+        <header className="bg-card border-b border-border px-4 sm:px-6 py-3 sm:py-4">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
+            <div className="w-full sm:w-auto pl-12 sm:pl-0 lg:pl-0">
+              <h1 className="text-lg sm:text-2xl font-semibold" data-testid="text-page-title">Contatos</h1>
+              <p className="text-xs sm:text-sm text-muted-foreground hidden sm:block">Gerencie sua lista de contatos</p>
             </div>
-            <div className="flex space-x-2">
-              <Button variant="outline" data-testid="button-import-contacts">
-                <Upload className="h-4 w-4 mr-2" />
-                Importar
+            <div className="flex space-x-2 w-full sm:w-auto">
+              <Button variant="outline" size="sm" className="hidden sm:flex" data-testid="button-import-contacts">
+                <Upload className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">Importar</span>
               </Button>
-              <Button variant="outline" data-testid="button-export-contacts">
-                <Download className="h-4 w-4 mr-2" />
-                Exportar
+              <Button variant="outline" size="sm" className="hidden sm:flex" data-testid="button-export-contacts">
+                <Download className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">Exportar</span>
               </Button>
               <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
                 <DialogTrigger asChild>
-                  <Button data-testid="button-create-contact">
-                    <Plus className="h-4 w-4 mr-2" />
-                    Novo Contato
+                  <Button size="sm" className="flex-1 sm:flex-initial" data-testid="button-create-contact">
+                    <Plus className="h-4 w-4 sm:mr-2" />
+                    <span className="hidden sm:inline">Novo Contato</span>
+                    <span className="sm:hidden">Novo</span>
                   </Button>
                 </DialogTrigger>
                 <DialogContent data-testid="dialog-create-contact">
@@ -352,45 +353,47 @@ export default function Contacts() {
         </header>
 
         {/* Filters */}
-        <div className="bg-card border-b border-border px-6 py-3">
-          <div className="flex items-center space-x-4">
+        <div className="bg-card border-b border-border px-3 sm:px-6 py-3">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-4">
             <div className="flex-1 relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
               <Input
-                placeholder="Buscar por nome, telefone ou email..."
-                className="pl-10"
+                placeholder="Buscar..."
+                className="pl-10 text-sm"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 data-testid="input-search-contacts"
               />
             </div>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-32" data-testid="select-status-filter">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todos</SelectItem>
-                <SelectItem value="active">Ativos</SelectItem>
-                <SelectItem value="inactive">Inativos</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select value={tagFilter} onValueChange={setTagFilter}>
-              <SelectTrigger className="w-40" data-testid="select-tag-filter">
-                <Filter className="h-4 w-4 mr-2" />
-                <SelectValue placeholder="Tags" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todas as tags</SelectItem>
-                {allTags.map((tag) => (
-                  <SelectItem key={tag} value={tag}>{tag}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <div className="flex gap-2">
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-full sm:w-32" data-testid="select-status-filter">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos</SelectItem>
+                  <SelectItem value="active">Ativos</SelectItem>
+                  <SelectItem value="inactive">Inativos</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select value={tagFilter} onValueChange={setTagFilter}>
+                <SelectTrigger className="w-full sm:w-40" data-testid="select-tag-filter">
+                  <Filter className="h-4 w-4 mr-2" />
+                  <SelectValue placeholder="Tags" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todas</SelectItem>
+                  {allTags.map((tag) => (
+                    <SelectItem key={tag} value={tag}>{tag}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
         </div>
 
         {/* Main Content */}
-        <main className="flex-1 p-6 overflow-auto">
+        <main className="flex-1 p-3 sm:p-6 overflow-auto">
           {contactsLoading ? (
             <div className="flex items-center justify-center h-64">
               <div className="text-center">
@@ -416,7 +419,7 @@ export default function Contacts() {
               )}
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
               {filteredContacts.map((contact: Contact) => (
                 <Card key={contact.id} className="relative" data-testid={`contact-card-${contact.id}`}>
                   <CardHeader className="pb-3">

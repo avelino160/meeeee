@@ -1,6 +1,7 @@
 import { Link, useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import WhatsAppConnectionModal from "@/components/whatsapp-connection-modal";
 import { useState, useEffect } from "react";
 import type { WhatsAppStatus } from "@shared/api-types";
@@ -13,12 +14,15 @@ import {
   Home,
   ChevronLeft,
   ChevronRight,
+  Menu,
+  X,
 } from "lucide-react";
 
 export default function Sidebar() {
   const [location] = useLocation();
   const [showWhatsAppModal, setShowWhatsAppModal] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     setIsMinimized(location === "/funnel-builder");
@@ -26,7 +30,7 @@ export default function Sidebar() {
 
   const { data: whatsappStatus } = useQuery<WhatsAppStatus>({
     queryKey: ["/api/whatsapp/status"],
-    refetchInterval: 30000, // Refetch every 30 seconds
+    refetchInterval: 30000,
   });
 
   const menuItems = [
@@ -37,30 +41,30 @@ export default function Sidebar() {
     { href: "/settings", icon: Settings, label: "Configurações" },
   ];
 
-  return (
-    <>
-      <div className={`bg-card border-r border-border flex flex-col transition-all duration-300 ${isMinimized ? 'w-16' : 'w-64'}`}>
-        {/* Logo/Brand */}
-        <div className="p-6 border-b border-border flex items-center justify-between">
-          {!isMinimized && (
+  const SidebarContent = ({ isMobile = false }: { isMobile?: boolean }) => {
+    const showMinimized = !isMobile && isMinimized;
+    
+    return (
+      <>
+        <div className="p-4 sm:p-6 border-b border-border flex items-center justify-between">
+          {!showMinimized && (
             <div>
-              <h1 className="text-2xl font-bold text-primary" data-testid="text-brand">RanZap</h1>
-              <p className="text-sm text-muted-foreground">Automação WhatsApp</p>
+              <h1 className="text-xl sm:text-2xl font-bold text-primary" data-testid="text-brand">RanZap</h1>
+              <p className="text-xs sm:text-sm text-muted-foreground">Automação WhatsApp</p>
             </div>
           )}
           <Button
             variant="ghost"
             size="icon"
             onClick={() => setIsMinimized(!isMinimized)}
-            className={isMinimized ? 'mx-auto' : ''}
+            className={`hidden lg:flex ${showMinimized ? 'mx-auto' : ''}`}
             data-testid="button-toggle-sidebar"
           >
-            {isMinimized ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+            {showMinimized ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
           </Button>
         </div>
         
-        {/* WhatsApp Connection Status */}
-        {!isMinimized && (
+        {!showMinimized && (
           <div className="p-4 border-b border-border">
             <div className="flex items-center justify-between">
               <span className="text-sm font-medium">WhatsApp</span>
@@ -78,7 +82,10 @@ export default function Sidebar() {
             </div>
             <Button 
               className="w-full mt-2 px-3 py-2 bg-primary text-primary-foreground rounded-md text-sm font-medium hover:bg-primary/90 transition-colors"
-              onClick={() => setShowWhatsAppModal(true)}
+              onClick={() => {
+                setShowWhatsAppModal(true);
+                setIsMobileMenuOpen(false);
+              }}
               data-testid="button-manage-whatsapp"
             >
               <MessageSquare className="h-4 w-4 mr-2" />
@@ -87,25 +94,53 @@ export default function Sidebar() {
           </div>
         )}
         
-        {/* Navigation Menu */}
         <nav className="flex-1 p-4 space-y-1">
           {menuItems.map((item) => {
             const isActive = location === item.href;
             return (
               <Link key={item.href} href={item.href}>
                 <Button
+                  onClick={() => setIsMobileMenuOpen(false)}
                   variant={isActive ? "secondary" : "ghost"}
-                  className={`w-full ${isMinimized ? 'justify-center px-2' : 'justify-start'} ${isActive ? 'bg-secondary text-secondary-foreground' : ''}`}
+                  className={`w-full ${showMinimized ? 'justify-center px-2' : 'justify-start'} ${isActive ? 'bg-secondary text-secondary-foreground' : ''}`}
                   data-testid={`button-nav-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
-                  title={isMinimized ? item.label : undefined}
+                  title={showMinimized ? item.label : undefined}
                 >
-                  <item.icon className={`h-4 w-4 ${isMinimized ? '' : 'mr-3'}`} />
-                  {!isMinimized && item.label}
+                  <item.icon className={`h-4 w-4 ${showMinimized ? '' : 'mr-3'}`} />
+                  {!showMinimized && item.label}
                 </Button>
               </Link>
             );
           })}
         </nav>
+      </>
+    );
+  };
+
+  return (
+    <>
+      {/* Mobile Menu Button */}
+      <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
+        <SheetTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="lg:hidden fixed top-4 left-4 z-50 bg-card border border-border"
+            data-testid="button-mobile-menu"
+          >
+            <Menu className="h-5 w-5" />
+          </Button>
+        </SheetTrigger>
+        <SheetContent side="left" className="w-64 p-0">
+          <div className="bg-card flex flex-col h-full">
+            <SidebarContent isMobile={true} />
+          </div>
+        </SheetContent>
+      </Sheet>
+
+      {/* Desktop Sidebar */}
+      <div className={`hidden lg:flex bg-card border-r border-border flex-col transition-all duration-300 ${isMinimized ? 'w-16' : 'w-64'}`}>
+        <SidebarContent isMobile={false} />
       </div>
 
       <WhatsAppConnectionModal 

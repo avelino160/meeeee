@@ -52,16 +52,16 @@ export default function Dashboard() {
       
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Header */}
-        <header className="bg-card border-b border-border px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <div>
-                <h1 className="text-2xl font-semibold" data-testid="text-dashboard-title">RanZap Dashboard</h1>
-                <p className="text-sm text-muted-foreground">Sua central de vendas automáticas no WhatsApp</p>
+        <header className="bg-card border-b border-border px-4 sm:px-6 py-3 sm:py-4">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
+            <div className="flex items-center space-x-2 sm:space-x-4 w-full sm:w-auto pl-12 sm:pl-0 lg:pl-0">
+              <div className="flex-1 sm:flex-initial">
+                <h1 className="text-lg sm:text-2xl font-semibold" data-testid="text-dashboard-title">RanZap Dashboard</h1>
+                <p className="text-xs sm:text-sm text-muted-foreground hidden sm:block">Sua central de vendas automáticas no WhatsApp</p>
               </div>
               
-              {/* 📱 STATUS WHATSAPP */}
-              <div className={`flex items-center space-x-2 px-3 py-1 rounded-full text-sm font-medium ${
+              {/* 📱 STATUS WHATSAPP - Desktop */}
+              <div className={`hidden sm:flex items-center space-x-2 px-3 py-1 rounded-full text-sm font-medium ${
                 whatsappStatus?.connected 
                   ? 'bg-green-100 text-green-700 border border-green-300' 
                   : 'bg-red-100 text-red-700 border border-red-300'
@@ -69,12 +69,14 @@ export default function Dashboard() {
                 {whatsappStatus?.connected ? (
                   <>
                     <Wifi className="h-4 w-4" />
-                    <span>✅ WhatsApp Conectado</span>
+                    <span className="hidden md:inline">✅ WhatsApp Conectado</span>
+                    <span className="md:hidden">✅ Conectado</span>
                   </>
                 ) : (
                   <>
                     <WifiOff className="h-4 w-4" />
-                    <span>❌ Desconectado</span>
+                    <span className="hidden md:inline">❌ Desconectado</span>
+                    <span className="md:hidden">❌ Off</span>
                     <Button
                       size="sm"
                       variant="outline"
@@ -89,29 +91,55 @@ export default function Dashboard() {
               </div>
             </div>
             
-            <div className="flex space-x-3">
+            <div className="flex space-x-2 sm:space-x-3 w-full sm:w-auto">
               {whatsappStatus?.connected && (
                 <Button 
                   variant="outline"
+                  size="sm"
+                  className="hidden sm:flex"
                   onClick={() => setShowWhatsAppModal(true)}
                   data-testid="button-whatsapp-settings"
                 >
-                  <MessageSquare className="h-4 w-4 mr-2" />
-                  WhatsApp
+                  <MessageSquare className="h-4 w-4 sm:mr-2" />
+                  <span className="hidden sm:inline">WhatsApp</span>
                 </Button>
               )}
-              <Button data-testid="button-new-funnel">
-                <BarChart3 className="h-4 w-4 mr-2" />
-                Novo Funil
+              <Button 
+                size="sm" 
+                className="flex-1 sm:flex-initial text-xs sm:text-sm"
+                data-testid="button-new-funnel"
+              >
+                <BarChart3 className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">Novo Funil</span>
+                <span className="sm:hidden">Novo</span>
               </Button>
             </div>
+          </div>
+          
+          {/* 📱 STATUS WHATSAPP - Mobile */}
+          <div className={`sm:hidden flex items-center justify-center space-x-2 px-3 py-2 rounded-lg text-xs font-medium mt-3 ${
+            whatsappStatus?.connected 
+              ? 'bg-green-100 text-green-700 border border-green-300' 
+              : 'bg-red-100 text-red-700 border border-red-300'
+          }`}>
+            {whatsappStatus?.connected ? (
+              <>
+                <Wifi className="h-3 w-3" />
+                <span>WhatsApp Conectado</span>
+              </>
+            ) : (
+              <>
+                <WifiOff className="h-3 w-3" />
+                <span>WhatsApp Desconectado</span>
+              </>
+            )}
           </div>
         </header>
 
         {/* Main Content */}
-        <main className="flex-1 p-6 overflow-auto">
+        <main className="flex-1 p-3 sm:p-6 overflow-auto">
           {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 mb-6 sm:mb-8">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Funis Ativos</CardTitle>
@@ -174,7 +202,7 @@ export default function Dashboard() {
           </div>
 
           {/* Charts and Activity */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-6 mb-6 sm:mb-8">
             <Card>
               <CardHeader>
                 <CardTitle>Atividade Recente</CardTitle>
@@ -267,7 +295,7 @@ export default function Dashboard() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 gap-3 sm:gap-4">
                 <Button variant="outline" className="h-24 flex flex-col" data-testid="button-create-funnel">
                   <BarChart3 className="h-6 w-6 mb-2" />
                   <span>Criar Funil</span>

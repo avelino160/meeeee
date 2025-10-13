@@ -156,7 +156,7 @@ export default function WhatsAppConnectionModal({ open, onOpenChange }: WhatsApp
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md" data-testid="modal-whatsapp-connection">
+      <DialogContent className="w-[95vw] max-w-md" data-testid="modal-whatsapp-connection">
         <DialogHeader>
           <DialogTitle className="flex items-center">
             <MessageSquare className="h-5 w-5 mr-2 text-primary" />
@@ -222,22 +222,22 @@ export default function WhatsAppConnectionModal({ open, onOpenChange }: WhatsApp
                     <p className="text-sm text-gray-600">QR Code do seu WhatsApp Web</p>
                   </div>
                   
-                  <div className="w-64 h-64 bg-white rounded-lg mx-auto flex items-center justify-center shadow-lg border-4 border-green-300">
+                  <div className="w-48 h-48 sm:w-64 sm:h-64 bg-white rounded-lg mx-auto flex items-center justify-center shadow-lg border-4 border-green-300">
                     <img 
                       src={qrImageUrl} 
                       alt="QR Code WhatsApp"
-                      className="w-56 h-56 rounded"
+                      className="w-44 h-44 sm:w-56 sm:h-56 rounded"
                       data-testid="img-qr-code"
                     />
                   </div>
                   
                   <div className="space-y-2">
-                    <p className="font-bold text-green-700">📱 Como Conectar:</p>
-                    <div className="text-sm text-gray-700 space-y-1">
-                      <p><strong>1.</strong> Abra o WhatsApp no seu celular</p>
-                      <p><strong>2.</strong> Toque nos 3 pontos (menu) → <strong>Aparelhos conectados</strong></p>
-                      <p><strong>3.</strong> Toque em <strong>"Conectar um aparelho"</strong></p>
-                      <p><strong>4.</strong> Aponte a câmera para este QR Code</p>
+                    <p className="font-bold text-green-700 text-sm sm:text-base">📱 Como Conectar:</p>
+                    <div className="text-xs sm:text-sm text-gray-700 space-y-1">
+                      <p><strong>1.</strong> Abra o WhatsApp</p>
+                      <p><strong>2.</strong> Menu → <strong>Aparelhos conectados</strong></p>
+                      <p><strong>3.</strong> <strong>"Conectar um aparelho"</strong></p>
+                      <p><strong>4.</strong> Escaneie o QR Code</p>
                     </div>
                     <p className="text-xs text-orange-600 font-medium mt-3">⚡ Aguardando conexão...</p>
                   </div>
