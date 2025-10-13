@@ -1,8 +1,6 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { isUnauthorizedError } from "@/lib/authUtils";
 import { apiRequest } from "@/lib/queryClient";
 import type { CampaignsResponse } from "@shared/api-types";
 import Sidebar from "@/components/sidebar";
@@ -45,7 +43,6 @@ interface Campaign {
 
 export default function Campaigns() {
   const { toast } = useToast();
-  const { isAuthenticated, isLoading } = useAuth();
   const queryClient = useQueryClient();
   
   const [searchTerm, setSearchTerm] = useState("");
@@ -68,21 +65,6 @@ export default function Campaigns() {
     isActive: false,
   });
 
-  // Redirect to home if not authenticated
-  useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      toast({
-        title: "Unauthorized",
-        description: "You are logged out. Logging in again...",
-        variant: "destructive",
-      });
-      setTimeout(() => {
-        window.location.href = "/api/login";
-      }, 500);
-      return;
-    }
-  }, [isAuthenticated, isLoading, toast]);
-
   const { data: campaigns, isLoading: campaignsLoading } = useQuery<CampaignsResponse>({
     queryKey: ["/api/campaigns"],
     retry: false,
@@ -102,18 +84,7 @@ export default function Campaigns() {
       setShowCreateDialog(false);
       resetForm();
     },
-    onError: (error) => {
-      if (isUnauthorizedError(error)) {
-        toast({
-          title: "Unauthorized",
-          description: "You are logged out. Logging in again...",
-          variant: "destructive",
-        });
-        setTimeout(() => {
-          window.location.href = "/api/login";
-        }, 500);
-        return;
-      }
+    onError: () => {
       toast({
         title: "Erro",
         description: "Falha ao criar campanha. Tente novamente.",
@@ -135,18 +106,7 @@ export default function Campaigns() {
       });
       setEditingCampaign(null);
     },
-    onError: (error) => {
-      if (isUnauthorizedError(error)) {
-        toast({
-          title: "Unauthorized",
-          description: "You are logged out. Logging in again...",
-          variant: "destructive",
-        });
-        setTimeout(() => {
-          window.location.href = "/api/login";
-        }, 500);
-        return;
-      }
+    onError: () => {
       toast({
         title: "Erro",
         description: "Falha ao atualizar campanha.",
@@ -166,18 +126,7 @@ export default function Campaigns() {
         description: "A campanha foi removida com sucesso!",
       });
     },
-    onError: (error) => {
-      if (isUnauthorizedError(error)) {
-        toast({
-          title: "Unauthorized",
-          description: "You are logged out. Logging in again...",
-          variant: "destructive",
-        });
-        setTimeout(() => {
-          window.location.href = "/api/login";
-        }, 500);
-        return;
-      }
+    onError: () => {
       toast({
         title: "Erro",
         description: "Falha ao excluir campanha.",
@@ -278,17 +227,6 @@ export default function Campaigns() {
     };
     return labels[status] || status;
   };
-
-  if (isLoading || !isAuthenticated) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Carregando...</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="flex h-screen bg-background">

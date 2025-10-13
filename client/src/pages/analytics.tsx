@@ -1,8 +1,5 @@
-import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { isUnauthorizedError } from "@/lib/authUtils";
 import type { AnalyticsResponse, CampaignsResponse, ContactsResponse } from "@shared/api-types";
 import Sidebar from "@/components/sidebar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -39,22 +36,6 @@ interface AnalyticsData {
 
 export default function Analytics() {
   const { toast } = useToast();
-  const { isAuthenticated, isLoading } = useAuth();
-
-  // Redirect to home if not authenticated
-  useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      toast({
-        title: "Unauthorized",
-        description: "You are logged out. Logging in again...",
-        variant: "destructive",
-      });
-      setTimeout(() => {
-        window.location.href = "/api/login";
-      }, 500);
-      return;
-    }
-  }, [isAuthenticated, isLoading, toast]);
 
   const { data: analytics, isLoading: analyticsLoading, error } = useQuery<AnalyticsResponse>({
     queryKey: ["/api/analytics/dashboard"],
@@ -77,19 +58,6 @@ export default function Analytics() {
     retry: false,
   });
 
-  // Handle unauthorized errors
-  useEffect(() => {
-    if (error && isUnauthorizedError(error)) {
-      toast({
-        title: "Unauthorized",
-        description: "You are logged out. Logging in again...",
-        variant: "destructive",
-      });
-      setTimeout(() => {
-        window.location.href = "/api/login";
-      }, 500);
-    }
-  }, [error, toast]);
 
   // Calculate additional metrics from data
   const calculateMetrics = () => {
@@ -156,17 +124,6 @@ export default function Analytics() {
   };
 
   const metrics = calculateMetrics();
-
-  if (isLoading || !isAuthenticated) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Carregando...</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="flex h-screen bg-background">

@@ -1,8 +1,6 @@
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { isUnauthorizedError } from "@/lib/authUtils";
 import type { DashboardAnalytics } from "@shared/api-types";
 
 type WhatsAppStatus = {
@@ -18,23 +16,7 @@ import { BarChart3, MessageSquare, Users, Zap, TrendingUp, Clock, Wifi, WifiOff 
 
 export default function Dashboard() {
   const { toast } = useToast();
-  const { isAuthenticated, isLoading } = useAuth();
   const [showWhatsAppModal, setShowWhatsAppModal] = useState(false);
-
-  // Redirect to home if not authenticated
-  useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      toast({
-        title: "Unauthorized",
-        description: "You are logged out. Logging in again...",
-        variant: "destructive",
-      });
-      setTimeout(() => {
-        window.location.href = "/api/login";
-      }, 500);
-      return;
-    }
-  }, [isAuthenticated, isLoading, toast]);
 
   const { data: analytics, isLoading: analyticsLoading } = useQuery<DashboardAnalytics>({
     queryKey: ["/api/analytics/dashboard"],
@@ -50,7 +32,7 @@ export default function Dashboard() {
 
   // 💥 ABRIR MODAL AUTOMATICAMENTE SE NÃO CONECTADO
   useEffect(() => {
-    if (isAuthenticated && whatsappStatus && !whatsappStatus.connected && !showWhatsAppModal) {
+    if (whatsappStatus && !whatsappStatus.connected && !showWhatsAppModal) {
       // Aguardar 2 segundos para dar tempo do dashboard carregar
       const timer = setTimeout(() => {
         setShowWhatsAppModal(true);
@@ -62,18 +44,7 @@ export default function Dashboard() {
       }, 2000);
       return () => clearTimeout(timer);
     }
-  }, [isAuthenticated, whatsappStatus, showWhatsAppModal, toast]);
-
-  if (isLoading || !isAuthenticated) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Carregando...</p>
-        </div>
-      </div>
-    );
-  }
+  }, [whatsappStatus, showWhatsAppModal, toast]);
 
   return (
     <div className="flex h-screen bg-background">

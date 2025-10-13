@@ -1,8 +1,6 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { isUnauthorizedError } from "@/lib/authUtils";
 import { apiRequest } from "@/lib/queryClient";
 import type { ContactsResponse } from "@shared/api-types";
 import Sidebar from "@/components/sidebar";
@@ -44,7 +42,6 @@ interface Contact {
 
 export default function Contacts() {
   const { toast } = useToast();
-  const { isAuthenticated, isLoading } = useAuth();
   const queryClient = useQueryClient();
   
   const [searchTerm, setSearchTerm] = useState("");
@@ -63,21 +60,6 @@ export default function Contacts() {
   });
 
   const [newTag, setNewTag] = useState("");
-
-  // Redirect to home if not authenticated
-  useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      toast({
-        title: "Unauthorized",
-        description: "You are logged out. Logging in again...",
-        variant: "destructive",
-      });
-      setTimeout(() => {
-        window.location.href = "/api/login";
-      }, 500);
-      return;
-    }
-  }, [isAuthenticated, isLoading, toast]);
 
   const { data: contacts, isLoading: contactsLoading } = useQuery<ContactsResponse>({
     queryKey: ["/api/contacts"],
@@ -98,18 +80,7 @@ export default function Contacts() {
       setShowCreateDialog(false);
       resetForm();
     },
-    onError: (error) => {
-      if (isUnauthorizedError(error)) {
-        toast({
-          title: "Unauthorized",
-          description: "You are logged out. Logging in again...",
-          variant: "destructive",
-        });
-        setTimeout(() => {
-          window.location.href = "/api/login";
-        }, 500);
-        return;
-      }
+    onError: () => {
       toast({
         title: "Erro",
         description: "Falha ao criar contato. Tente novamente.",
@@ -131,18 +102,7 @@ export default function Contacts() {
       });
       setEditingContact(null);
     },
-    onError: (error) => {
-      if (isUnauthorizedError(error)) {
-        toast({
-          title: "Unauthorized",
-          description: "You are logged out. Logging in again...",
-          variant: "destructive",
-        });
-        setTimeout(() => {
-          window.location.href = "/api/login";
-        }, 500);
-        return;
-      }
+    onError: () => {
       toast({
         title: "Erro",
         description: "Falha ao atualizar contato.",
@@ -162,18 +122,7 @@ export default function Contacts() {
         description: "O contato foi removido com sucesso!",
       });
     },
-    onError: (error) => {
-      if (isUnauthorizedError(error)) {
-        toast({
-          title: "Unauthorized",
-          description: "You are logged out. Logging in again...",
-          variant: "destructive",
-        });
-        setTimeout(() => {
-          window.location.href = "/api/login";
-        }, 500);
-        return;
-      }
+    onError: () => {
       toast({
         title: "Erro",
         description: "Falha ao excluir contato.",
@@ -284,17 +233,6 @@ export default function Contacts() {
     }
     return phone.slice(-2);
   };
-
-  if (isLoading || !isAuthenticated) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Carregando...</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="flex h-screen bg-background">
