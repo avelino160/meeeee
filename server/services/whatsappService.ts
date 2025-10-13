@@ -43,7 +43,7 @@ export class WhatsAppService {
         auth: state,
         printQRInTerminal: false,
         logger: pino({ level: 'silent' }),
-        browser: ['renzap', 'Chrome', '1.0.0'],
+        browser: ['RanZap', 'Chrome', '1.0.0'],
       });
 
       console.log('✅ Socket criado com sucesso');
@@ -160,7 +160,7 @@ export class WhatsAppService {
       if (lowerMsg.includes('oi') || lowerMsg.includes('olá') || lowerMsg.includes('bom dia') || 
           lowerMsg.includes('boa tarde') || lowerMsg.includes('boa noite') || lowerMsg.includes('hey')) {
         // 1️⃣ BOAS-VINDAS
-        response = `🎉 Olá! Bem-vindo ao *renzap*! 
+        response = `🎉 Olá! Bem-vindo ao *RanZap*! 
 
 Sou seu assistente automatizado de vendas 24/7! 🤖
 
@@ -172,7 +172,7 @@ Digite *"quero saber mais"* para descobrir como podemos aumentar suas vendas em 
         // 2️⃣ DESPERTAR CURIOSIDADE
         response = `🔥 Que incrível! Você está a um passo de descobrir o segredo que *milhares de empresas* já estão usando!
 
-Nossa plataforma *renzap* já ajudou mais de 10.000 empreendedores a:
+Nossa plataforma *RanZap* já ajudou mais de 10.000 empreendedores a:
 
 ✅ *Automatizar 100% das conversas*  
 ✅ *Responder clientes 24/7 sem parar*  
@@ -187,7 +187,7 @@ Digite *"quero essa solução"* para conhecer nossa oferta especial! 💰`;
         // 3️⃣ OFERTA IRRESISTÍVEL
         response = `🎯 *OFERTA EXCLUSIVA* - Apenas hoje!
 
-Por apenas *R$ 97/mês* (menos de R$ 3 por dia ☕), você terá acesso COMPLETO ao renzap:
+Por apenas *R$ 97/mês* (menos de R$ 3 por dia ☕), você terá acesso COMPLETO ao RanZap:
 
 🎁 *BÔNUS INCLUSOS:*  
 ✅ Setup completo gratuito (valor R$ 500)  
@@ -204,9 +204,9 @@ Digite *"quero comprar agora"* para garantir com *50% DE DESCONTO*! 🔥`;
         // 4️⃣ CALL-TO-ACTION
         response = `🎉 *PERFEITO!* Decisão inteligente!
 
-Para finalizar seu acesso ao renzap com *50% OFF*, clique no link abaixo:
+Para finalizar seu acesso ao RanZap com *50% OFF*, clique no link abaixo:
 
-🔗 *https://renzap.com/checkout*
+🔗 *https://RanZap.com/checkout*
 
 Ou fale diretamente com nosso especialista:
 📞 *WhatsApp:* (11) 99999-9999
@@ -221,7 +221,7 @@ Alguma dúvida antes de finalizar?`;
 
       } else {
         // 🤝 RESPOSTA PADRÃO AMIGÁVEL
-        response = `🤖 Olá! Sou o assistente automático do *renzap*!
+        response = `🤖 Olá! Sou o assistente automático do *RanZap*!
 
 Para te ajudar melhor, digite uma das opções:
 
