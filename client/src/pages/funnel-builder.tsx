@@ -6,7 +6,27 @@ import type { CampaignsResponse } from "@shared/api-types";
 import Sidebar from "@/components/sidebar";
 import FunnelCanvas from "@/components/funnel-canvas";
 import { Button } from "@/components/ui/button";
-import { Save, ArrowLeft } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
+import { Checkbox } from "@/components/ui/checkbox";
+import { 
+  Save, 
+  Eye, 
+  MessageSquare, 
+  Image, 
+  Video, 
+  Mic, 
+  FileText, 
+  MapPin,
+  GitBranch,
+  Clock,
+  HelpCircle,
+  Tag,
+  CheckCircle
+} from "lucide-react";
 
 interface FunnelNode {
   id: string;
@@ -135,36 +155,264 @@ export default function FunnelBuilder() {
       <Sidebar />
       
       <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Top Header - Simplified */}
-        <header className="bg-card border-b border-border px-6 py-3">
+        {/* Top Header */}
+        <header className="bg-card border-b border-border px-6 py-4">
           <div className="flex items-center justify-between">
-            <Button 
-              variant="ghost"
-              size="icon"
-              onClick={() => window.history.back()}
-              data-testid="button-back"
-            >
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
-            <Button 
-              variant="ghost"
-              size="icon"
-              onClick={handleSaveFunnel}
-              disabled={saveFunnelMutation.isPending}
-              data-testid="button-save-funnel"
-            >
-              <Save className="h-5 w-5" />
-            </Button>
+            <div>
+              <h2 className="text-xl font-semibold" data-testid="text-page-title">Construtor de Funil</h2>
+              <p className="text-sm text-muted-foreground">Crie e gerencie suas sequências de mensagens automatizadas</p>
+            </div>
+            <div className="flex items-center space-x-4">
+              <Button 
+                variant="outline"
+                onClick={handlePreviewFunnel}
+                data-testid="button-preview-funnel"
+              >
+                <Eye className="h-4 w-4 mr-2" />
+                Visualizar
+              </Button>
+              <Button 
+                onClick={handleSaveFunnel}
+                disabled={saveFunnelMutation.isPending}
+                data-testid="button-save-funnel"
+              >
+                <Save className="h-4 w-4 mr-2" />
+                {saveFunnelMutation.isPending ? "Salvando..." : "Salvar Funil"}
+              </Button>
+            </div>
           </div>
         </header>
 
-        {/* Main Content - Full Canvas */}
-        <div className="flex-1 relative">
-          <FunnelCanvas
-            data={funnelData}
-            onDataChange={handleFunnelDataChange}
-            onNodeSelect={handleNodeSelect}
-          />
+        {/* Main Content */}
+        <div className="flex-1 flex">
+          {/* Left Toolbox */}
+          <div className="w-64 bg-card border-r border-border p-4 overflow-y-auto">
+            <div className="space-y-6">
+              {/* Message Types */}
+              <div>
+                <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">
+                  Mensagens
+                </h3>
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="p-3 bg-muted rounded-lg cursor-pointer hover:bg-secondary transition-colors" data-testid="tool-text">
+                    <MessageSquare className="h-5 w-5 text-primary mb-2" />
+                    <p className="text-xs font-medium">Texto</p>
+                  </div>
+                  <div className="p-3 bg-muted rounded-lg cursor-pointer hover:bg-secondary transition-colors" data-testid="tool-image">
+                    <Image className="h-5 w-5 text-primary mb-2" />
+                    <p className="text-xs font-medium">Imagem</p>
+                  </div>
+                  <div className="p-3 bg-muted rounded-lg cursor-pointer hover:bg-secondary transition-colors" data-testid="tool-video">
+                    <Video className="h-5 w-5 text-primary mb-2" />
+                    <p className="text-xs font-medium">Vídeo</p>
+                  </div>
+                  <div className="p-3 bg-muted rounded-lg cursor-pointer hover:bg-secondary transition-colors" data-testid="tool-audio">
+                    <Mic className="h-5 w-5 text-primary mb-2" />
+                    <p className="text-xs font-medium">Áudio</p>
+                  </div>
+                  <div className="p-3 bg-muted rounded-lg cursor-pointer hover:bg-secondary transition-colors" data-testid="tool-document">
+                    <FileText className="h-5 w-5 text-primary mb-2" />
+                    <p className="text-xs font-medium">Documento</p>
+                  </div>
+                  <div className="p-3 bg-muted rounded-lg cursor-pointer hover:bg-secondary transition-colors" data-testid="tool-location">
+                    <MapPin className="h-5 w-5 text-primary mb-2" />
+                    <p className="text-xs font-medium">Localização</p>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Logic Elements */}
+              <div>
+                <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">
+                  Lógica
+                </h3>
+                <div className="space-y-2">
+                  <div className="p-3 bg-muted rounded-lg cursor-pointer hover:bg-secondary transition-colors flex items-center" data-testid="tool-condition">
+                    <GitBranch className="h-5 w-5 text-primary mr-3" />
+                    <span className="text-sm font-medium">Condição</span>
+                  </div>
+                  <div className="p-3 bg-muted rounded-lg cursor-pointer hover:bg-secondary transition-colors flex items-center" data-testid="tool-delay">
+                    <Clock className="h-5 w-5 text-primary mr-3" />
+                    <span className="text-sm font-medium">Esperar</span>
+                  </div>
+                  <div className="p-3 bg-muted rounded-lg cursor-pointer hover:bg-secondary transition-colors flex items-center" data-testid="tool-question">
+                    <HelpCircle className="h-5 w-5 text-primary mr-3" />
+                    <span className="text-sm font-medium">Pergunta</span>
+                  </div>
+                  <div className="p-3 bg-muted rounded-lg cursor-pointer hover:bg-secondary transition-colors flex items-center" data-testid="tool-tag">
+                    <Tag className="h-5 w-5 text-primary mr-3" />
+                    <span className="text-sm font-medium">Tag</span>
+                  </div>
+                  <div className="p-3 bg-muted rounded-lg cursor-pointer hover:bg-secondary transition-colors flex items-center" data-testid="tool-verify">
+                    <CheckCircle className="h-5 w-5 text-primary mr-3" />
+                    <span className="text-sm font-medium">Verificar</span>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Trigger Configuration */}
+              <div>
+                <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">
+                  Gatilho Inicial
+                </h3>
+                <div className="space-y-3">
+                  <div>
+                    <Label className="text-xs font-medium text-muted-foreground mb-1">Frase Gatilho</Label>
+                    <Input 
+                      type="text" 
+                      placeholder="Ex: Estou interessado"
+                      value={triggerPhrase}
+                      onChange={(e) => setTriggerPhrase(e.target.value)}
+                      data-testid="input-trigger-phrase"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-xs font-medium text-muted-foreground mb-1">Delay Inicial (minutos)</Label>
+                    <Input 
+                      type="number" 
+                      min="0"
+                      value={initialDelay}
+                      onChange={(e) => setInitialDelay(parseInt(e.target.value) || 0)}
+                      data-testid="input-initial-delay"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          {/* Canvas Area */}
+          <div className="flex-1 relative">
+            <FunnelCanvas
+              data={funnelData}
+              onDataChange={handleFunnelDataChange}
+              onNodeSelect={handleNodeSelect}
+            />
+          </div>
+          
+          {/* Right Properties Panel */}
+          <div className="w-80 bg-card border-l border-border p-4 overflow-y-auto">
+            <div className="space-y-6">
+              {/* Node Properties */}
+              <div>
+                <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">
+                  Propriedades do Nó
+                </h3>
+                {selectedNode ? (
+                  <div className="space-y-4">
+                    <div>
+                      <Label className="text-xs font-medium text-muted-foreground mb-1">Tipo</Label>
+                      <div className="px-3 py-2 bg-muted rounded-md text-sm" data-testid="text-node-type">
+                        {selectedNode.type === 'message' ? 'Mensagem' : 
+                         selectedNode.type === 'delay' ? 'Esperar' :
+                         selectedNode.type === 'condition' ? 'Condição' :
+                         selectedNode.type}
+                      </div>
+                    </div>
+                    {selectedNode.type === 'message' && (
+                      <>
+                        <div>
+                          <Label className="text-xs font-medium text-muted-foreground mb-1">Conteúdo</Label>
+                          <Textarea 
+                            placeholder="Digite sua mensagem aqui..."
+                            value={selectedNode.data.content || ''}
+                            onChange={(e) => updateNodeContent(e.target.value)}
+                            className="h-24 resize-none"
+                            data-testid="textarea-node-content"
+                          />
+                        </div>
+                        <div>
+                          <Label className="text-xs font-medium text-muted-foreground mb-1">Delay (minutos)</Label>
+                          <Input 
+                            type="number" 
+                            min="0"
+                            value={selectedNode.data.delayMinutes || 0}
+                            onChange={(e) => updateNodeDelay(parseInt(e.target.value) || 0)}
+                            data-testid="input-node-delay"
+                          />
+                        </div>
+                      </>
+                    )}
+                  </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground" data-testid="text-no-node-selected">
+                    Selecione um nó para editar suas propriedades
+                  </p>
+                )}
+              </div>
+              
+              <Separator />
+              
+              {/* Funnel Settings */}
+              <div>
+                <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">
+                  Configurações do Funil
+                </h3>
+                <div className="space-y-4">
+                  <div>
+                    <Label className="text-xs font-medium text-muted-foreground mb-1">Nome do Funil</Label>
+                    <Input 
+                      type="text"
+                      value={funnelName}
+                      onChange={(e) => setFunnelName(e.target.value)}
+                      data-testid="input-funnel-name"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-xs font-medium text-muted-foreground mb-1">Status</Label>
+                    <Select value={funnelStatus} onValueChange={setFunnelStatus}>
+                      <SelectTrigger data-testid="select-funnel-status">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="active">Ativo</SelectItem>
+                        <SelectItem value="paused">Pausado</SelectItem>
+                        <SelectItem value="inactive">Inativo</SelectItem>
+                        <SelectItem value="draft">Rascunho</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox 
+                      id="activeForNewContacts"
+                      checked={isActiveForNewContacts}
+                      onCheckedChange={(checked) => setIsActiveForNewContacts(checked === true)}
+                      data-testid="checkbox-active-for-new-contacts"
+                    />
+                    <Label htmlFor="activeForNewContacts" className="text-xs text-muted-foreground">
+                      Ativar para novos contatos
+                    </Label>
+                  </div>
+                </div>
+              </div>
+              
+              <Separator />
+              
+              {/* Analytics Preview */}
+              <div>
+                <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">
+                  Estatísticas
+                </h3>
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs text-muted-foreground">Disparos hoje</span>
+                    <span className="text-sm font-medium text-primary" data-testid="text-today-triggers">0</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs text-muted-foreground">Taxa de resposta</span>
+                    <span className="text-sm font-medium text-green-500" data-testid="text-response-rate">0%</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs text-muted-foreground">Ativos no funil</span>
+                    <span className="text-sm font-medium" data-testid="text-active-in-funnel">0</span>
+                  </div>
+                  <div className="w-full bg-muted rounded-full h-2 mt-2">
+                    <div className="bg-primary h-2 rounded-full" style={{width: '0%'}}></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
