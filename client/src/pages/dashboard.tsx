@@ -37,7 +37,7 @@ export default function Dashboard() {
       const timer = setTimeout(() => {
         setShowWhatsAppModal(true);
         toast({
-          title: "🚀 ZapRápido - Conecte seu WhatsApp!",
+          title: "🚀 renzap - Conecte seu WhatsApp!",
           description: "📱 Escaneie o QR Code para começar a vender automaticamente!",
           duration: 5000,
         });
@@ -56,7 +56,7 @@ export default function Dashboard() {
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <div>
-                <h1 className="text-2xl font-semibold" data-testid="text-dashboard-title">ZapRápido Dashboard</h1>
+                <h1 className="text-2xl font-semibold" data-testid="text-dashboard-title">renzap Dashboard</h1>
                 <p className="text-sm text-muted-foreground">Sua central de vendas automáticas no WhatsApp</p>
               </div>
               

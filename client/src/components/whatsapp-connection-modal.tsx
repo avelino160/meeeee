@@ -49,7 +49,7 @@ export default function WhatsAppConnectionModal({ open, onOpenChange }: WhatsApp
       setShowQR(true);
       
       toast({
-        title: "🔥 QR Code ZapRápido Gerado!",
+        title: "🔥 QR Code renzap Gerado!",
         description: "📱 Escaneie com seu WhatsApp para conectar e começar a vender!",
       });
     },
@@ -79,7 +79,7 @@ export default function WhatsAppConnectionModal({ open, onOpenChange }: WhatsApp
     if (whatsappStatus?.connected) {
       toast({
         title: "🎉 WhatsApp Conectado com Sucesso!",
-        description: "🚀 ZapRápido está ativo! Seu funil de vendas automatizado já está funcionando!",
+        description: "🚀 renzap está ativo! Seu funil de vendas automatizado já está funcionando!",
       });
       setTimeout(() => {
         onOpenChange(false);
@@ -218,7 +218,7 @@ export default function WhatsAppConnectionModal({ open, onOpenChange }: WhatsApp
               {showQR && qrImageUrl ? (
                 <div className="text-center space-y-4 p-6 bg-gradient-to-br from-green-50 to-blue-50 rounded-xl border-2 border-green-200">
                   <div className="text-center mb-4">
-                    <h3 className="text-lg font-bold text-green-700">🔥 ZapRápido - Conexão Real!</h3>
+                    <h3 className="text-lg font-bold text-green-700">🔥 renzap - Conexão Real!</h3>
                     <p className="text-sm text-gray-600">QR Code do seu WhatsApp Web</p>
                   </div>
                   
@@ -252,7 +252,7 @@ export default function WhatsAppConnectionModal({ open, onOpenChange }: WhatsApp
               ) : (
                 <div className="text-center space-y-4 p-6 bg-gradient-to-br from-blue-50 to-green-50 rounded-xl border-2 border-blue-200">
                   <div className="text-center mb-4">
-                    <h3 className="text-lg font-bold text-blue-700">⚡ ZapRápido - Conectar WhatsApp</h3>
+                    <h3 className="text-lg font-bold text-blue-700">⚡ renzap - Conectar WhatsApp</h3>
                     <p className="text-sm text-gray-600">Conecte sua conta para começar a vender automaticamente!</p>
                   </div>
                   
@@ -270,7 +270,7 @@ export default function WhatsAppConnectionModal({ open, onOpenChange }: WhatsApp
                         data-testid="button-generate-qr"
                       >
                         <QrCode className="h-5 w-5 mr-2" />
-                        🔥 Gerar QR Code ZapRápido
+                        🔥 Gerar QR Code renzap
                       </Button>
                       <p className="text-xs text-gray-500">
                         💡 O QR Code será gerado automaticamente para conectar seu WhatsApp
@@ -309,7 +309,7 @@ export default function WhatsAppConnectionModal({ open, onOpenChange }: WhatsApp
               </div>
               
               <div className="space-y-2">
-                <p className="font-medium text-green-800">🎉 ZapRápido está funcionando!</p>
+                <p className="font-medium text-green-800">🎉 renzap está funcionando!</p>
                 <p className="text-sm text-green-700">
                   Seu funil de vendas automático está ativo e pronto para receber clientes.
                 </p>
