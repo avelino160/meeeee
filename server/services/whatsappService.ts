@@ -22,6 +22,7 @@ export class WhatsAppService {
   private qrImage: string = '';
   private isReady: boolean = false;
   private currentUserId: string = '';
+  private qrRefreshTimer: NodeJS.Timeout | null = null;
   private connectionStatus: WhatsAppConnection = {
     connected: false,
     status: 'disconnected'
@@ -36,6 +37,8 @@ export class WhatsAppService {
     try {
       const { state, saveCreds } = await useMultiFileAuthState('./server/wa_auth');
       
+      console.log('🔧 Estado de autenticação carregado, creds:', !!state.creds?.me);
+      
       this.sock = makeWASocket({
         auth: state,
         printQRInTerminal: false,
@@ -43,9 +46,13 @@ export class WhatsAppService {
         browser: ['ZapRápido', 'Chrome', '1.0.0'],
       });
 
+      console.log('✅ Socket criado com sucesso');
+
       // 🔗 LISTENER: Estado da conexão
       this.sock.ev.on('connection.update', (update) => {
         const { connection, lastDisconnect, qr } = update;
+        
+        console.log('🔔 Connection update:', { connection, hasQR: !!qr, hasLastDisconnect: !!lastDisconnect });
         
         if (qr) {
           // 🎯 QR CODE GERADO - CONVERTIR PARA IMAGEM
@@ -59,6 +66,9 @@ export class WhatsAppService {
           }).catch(err => console.error('Erro ao gerar QR image:', err));
           
           console.log('📱 QR Code gerado para conexão');
+          
+          // 🔄 Iniciar timer de renovação automática do QR (2 minutos)
+          this.startQRRefreshTimer();
         }
 
         if (connection === 'open') {
@@ -67,6 +77,9 @@ export class WhatsAppService {
           this.connectionStatus.connected = true;
           this.connectionStatus.status = 'connected';
           this.connectionStatus.phoneNumber = this.sock?.user?.id?.split(':')[0] || '';
+          
+          // 🛑 Parar timer de renovação do QR quando conectado
+          this.stopQRRefreshTimer();
           
           console.log('🎉 WhatsApp conectado com sucesso!');
           
@@ -135,7 +148,8 @@ export class WhatsAppService {
       await storage.createMessage({
         contactId: contactId!,
         content: messageText,
-        direction: 'inbound',
+        type: 'text',
+        status: 'delivered',
         userId: this.currentUserId
       });
 
@@ -225,7 +239,8 @@ Estou aqui 24/7 para te ajudar! 🚀`;
       await storage.createMessage({
         contactId: contactId!,
         content: response,
-        direction: 'outbound',
+        type: 'text',
+        status: 'sent',
         userId: this.currentUserId
       });
 
@@ -243,7 +258,18 @@ Estou aqui 24/7 para te ajudar! 🚀`;
         throw new Error('WhatsApp já está conectado');
       }
 
+      // Limpar credenciais antigas antes de gerar novo QR
       if (!this.sock) {
+        console.log('🧹 Limpando credenciais antigas...');
+        const fs = await import('fs/promises');
+        const authPath = './server/wa_auth';
+        try {
+          await fs.rm(authPath, { recursive: true, force: true });
+          console.log('✅ Credenciais antigas removidas');
+        } catch (err) {
+          // Ignorar erro se pasta não existir
+        }
+        
         console.log('🔄 Inicializando socket Baileys...');
         await this.initializeSocket();
       }
@@ -301,8 +327,77 @@ Estou aqui 24/7 para te ajudar! 🚀`;
     }
   }
 
-  // 🔌 DESCONECTAR
+  // 🔄 INICIAR TIMER DE RENOVAÇÃO DO QR CODE (a cada 2 minutos)
+  private startQRRefreshTimer() {
+    // Limpar timer anterior se existir
+    this.stopQRRefreshTimer();
+    
+    // Iniciar novo timer de 2 minutos (120000ms)
+    this.qrRefreshTimer = setTimeout(async () => {
+      if (!this.isReady) {
+        console.log('🔄 Renovando QR Code após 2 minutos...');
+        await this.forceNewQRCode();
+      }
+    }, 120000); // 2 minutos
+    
+    console.log('⏱️ Timer de renovação do QR Code iniciado (2 minutos)');
+  }
+
+  // 🛑 PARAR TIMER DE RENOVAÇÃO DO QR CODE
+  private stopQRRefreshTimer() {
+    if (this.qrRefreshTimer) {
+      clearTimeout(this.qrRefreshTimer);
+      this.qrRefreshTimer = null;
+      console.log('⏹️ Timer de renovação do QR Code parado');
+    }
+  }
+
+  // 🆕 FORÇAR GERAÇÃO DE NOVO QR CODE
+  private async forceNewQRCode() {
+    try {
+      console.log('🔄 Forçando geração de novo QR Code...');
+      
+      // Fechar socket atual
+      if (this.sock) {
+        this.sock.end(undefined);
+        this.sock = null;
+      }
+      
+      // Limpar credenciais para forçar novo QR
+      const fs = await import('fs/promises');
+      const authPath = './server/wa_auth';
+      try {
+        await fs.rm(authPath, { recursive: true, force: true });
+        console.log('🗑️ Credenciais antigas removidas');
+      } catch (err) {
+        // Ignorar erro se pasta não existir
+      }
+      
+      // Reinicializar socket para gerar novo QR
+      this.qrCode = '';
+      this.qrImage = '';
+      await this.initializeSocket();
+      
+      // Reiniciar o timer de renovação mesmo que o QR não seja gerado imediatamente
+      // Isso garante que a renovação continue acontecendo a cada 2 minutos
+      if (!this.isReady) {
+        this.startQRRefreshTimer();
+      }
+      
+    } catch (error) {
+      console.error('❌ Erro ao forçar novo QR Code:', error);
+      // Mesmo em caso de erro, reiniciar o timer para tentar novamente
+      if (!this.isReady) {
+        this.startQRRefreshTimer();
+      }
+    }
+  }
+
+  // 🔌 DESCONECTAR E GERAR NOVO QR CODE
   async disconnect(): Promise<void> {
+    // Parar timer de renovação
+    this.stopQRRefreshTimer();
+    
     if (this.sock) {
       this.sock.end(undefined);
       this.sock = null;
@@ -310,6 +405,16 @@ Estou aqui 24/7 para te ajudar! 🚀`;
       this.qrCode = '';
       this.qrImage = '';
       console.log('🔌 WhatsApp desconectado');
+      
+      // Limpar credenciais para permitir conectar outro número
+      const fs = await import('fs/promises');
+      const authPath = './server/wa_auth';
+      try {
+        await fs.rm(authPath, { recursive: true, force: true });
+        console.log('🗑️ Credenciais removidas - pronto para conectar outro número');
+      } catch (err) {
+        console.error('❌ Erro ao remover credenciais:', err);
+      }
     }
   }
 

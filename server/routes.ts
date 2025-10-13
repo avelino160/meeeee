@@ -52,11 +52,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Phone number is required" });
       }
 
-      const isValid = await whatsappService.validatePhoneNumber(phoneNumber);
-      if (!isValid) {
-        return res.status(400).json({ message: "Invalid phone number format" });
-      }
-
       const success = await whatsappService.connectWhatsApp(userId, phoneNumber);
       res.json({ success });
     } catch (error) {
@@ -67,9 +62,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/whatsapp/disconnect', async (req, res) => {
     try {
-      const userId = DEFAULT_USER_ID;
-      const success = await whatsappService.disconnectWhatsApp(userId);
-      res.json({ success });
+      await whatsappService.disconnect();
+      res.json({ success: true });
     } catch (error) {
       console.error("Error disconnecting WhatsApp:", error);
       res.status(500).json({ message: "Failed to disconnect WhatsApp" });
@@ -308,12 +302,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           return res.status(404).json({ message: "Contact not found" });
         }
 
-        const response = await whatsappService.sendMessage({
-          to: contact.phoneNumber,
-          message: content,
-          type,
-          mediaUrl,
-        });
+        const success = await whatsappService.sendMessage(
+          contact.phoneNumber,
+          content
+        );
 
         const message = await storage.createMessage({
           userId,
@@ -321,9 +313,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           type,
           content,
           mediaUrl,
-          status: 'sent',
+          status: success ? 'sent' : 'failed',
           sentAt: new Date(),
-          externalId: response.data?.id,
         });
 
         res.json(message);
