@@ -32,9 +32,6 @@ export default function Sidebar() {
     { href: "/contacts", icon: Users, label: "Contatos" },
     { href: "/templates", icon: FileText, label: "Templates" },
     { href: "/analytics", icon: TrendingUp, label: "Relatórios" },
-  ];
-
-  const toolItems = [
     { href: "/settings", icon: Settings, label: "Configurações" },
   ];
 
@@ -74,47 +71,22 @@ export default function Sidebar() {
         </div>
         
         {/* Navigation Menu */}
-        <nav className="flex-1 p-4 space-y-2">
-          <div className="space-y-1">
-            {menuItems.map((item) => {
-              const isActive = location === item.href;
-              return (
-                <Link key={item.href} href={item.href}>
-                  <Button
-                    variant={isActive ? "secondary" : "ghost"}
-                    className={`w-full justify-start ${isActive ? 'bg-secondary text-secondary-foreground' : ''}`}
-                    data-testid={`button-nav-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
-                  >
-                    <item.icon className="h-4 w-4 mr-3" />
-                    {item.label}
-                  </Button>
-                </Link>
-              );
-            })}
-          </div>
-          
-          <Separator />
-          
-          <div className="pt-4 space-y-1">
-            <h3 className="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-              Ferramentas
-            </h3>
-            {toolItems.map((item) => {
-              const isActive = location === item.href;
-              return (
-                <Link key={item.href} href={item.href}>
-                  <Button
-                    variant={isActive ? "secondary" : "ghost"}
-                    className={`w-full justify-start ${isActive ? 'bg-secondary text-secondary-foreground' : ''}`}
-                    data-testid={`button-tool-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
-                  >
-                    <item.icon className="h-4 w-4 mr-3" />
-                    {item.label}
-                  </Button>
-                </Link>
-              );
-            })}
-          </div>
+        <nav className="flex-1 p-4 space-y-1">
+          {menuItems.map((item) => {
+            const isActive = location === item.href;
+            return (
+              <Link key={item.href} href={item.href}>
+                <Button
+                  variant={isActive ? "secondary" : "ghost"}
+                  className={`w-full justify-start ${isActive ? 'bg-secondary text-secondary-foreground' : ''}`}
+                  data-testid={`button-nav-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
+                >
+                  <item.icon className="h-4 w-4 mr-3" />
+                  {item.label}
+                </Button>
+              </Link>
+            );
+          })}
         </nav>
       </div>
 
