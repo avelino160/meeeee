@@ -11,9 +11,7 @@ import {
   Users,
   FileText,
   TrendingUp,
-  Clock,
   Zap,
-  Puzzle,
   Settings,
   Home,
 } from "lucide-react";
@@ -37,9 +35,6 @@ export default function Sidebar() {
   ];
 
   const toolItems = [
-    { href: "/scheduler", icon: Clock, label: "Agendamentos" },
-    { href: "/triggers", icon: Zap, label: "Gatilhos" },
-    { href: "/integrations", icon: Puzzle, label: "Integrações" },
     { href: "/settings", icon: Settings, label: "Configurações" },
   ];
 
