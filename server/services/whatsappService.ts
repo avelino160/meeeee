@@ -3,8 +3,9 @@ import makeWASocket, {
   WASocket, 
   useMultiFileAuthState,
   DisconnectReason,
-  proto
-} from 'baileys';
+  proto,
+  Browsers
+} from '@whiskeysockets/baileys';
 import { Boom } from '@hapi/boom';
 import QRCode from 'qrcode';
 import pino from 'pino';
@@ -23,6 +24,7 @@ export class WhatsAppService {
   private isReady: boolean = false;
   private currentUserId: string = '';
   private qrRefreshTimer: NodeJS.Timeout | null = null;
+  private isGeneratingQR: boolean = false;
   private connectionStatus: WhatsAppConnection = {
     connected: false,
     status: 'disconnected'
@@ -41,9 +43,10 @@ export class WhatsAppService {
       
       this.sock = makeWASocket({
         auth: state,
-        printQRInTerminal: false,
+        printQRInTerminal: true,
         logger: pino({ level: 'silent' }),
-        browser: ['RanZap', 'Chrome', '1.0.0'],
+        browser: Browsers.macOS('Desktop'),
+        syncFullHistory: false,
       });
 
       console.log('✅ Socket criado com sucesso');
@@ -52,7 +55,14 @@ export class WhatsAppService {
       this.sock.ev.on('connection.update', (update) => {
         const { connection, lastDisconnect, qr } = update;
         
-        console.log('🔔 Connection update:', { connection, hasQR: !!qr, hasLastDisconnect: !!lastDisconnect });
+        console.log('🔔 Connection update:', { 
+          connection, 
+          hasQR: !!qr, 
+          hasLastDisconnect: !!lastDisconnect,
+          disconnectReason: (lastDisconnect?.error as Boom)?.output?.statusCode,
+          errorMessage: lastDisconnect?.error?.message,
+          fullUpdate: JSON.stringify(update)
+        });
         
         if (qr) {
           // 🎯 QR CODE GERADO - CONVERTIR PARA IMAGEM
@@ -93,10 +103,10 @@ export class WhatsAppService {
           
           const shouldReconnect = (lastDisconnect?.error as Boom)?.output?.statusCode !== DisconnectReason.loggedOut;
           
-          console.log('🔄 Conexão fechada. Reconectar?', shouldReconnect);
+          console.log('🔄 Conexão fechada. Reconectar?', shouldReconnect, 'Gerando QR?', this.isGeneratingQR);
           
-          if (shouldReconnect) {
-            // Auto-reconectar se não foi logout manual
+          if (shouldReconnect && !this.isGeneratingQR) {
+            // Auto-reconectar se não foi logout manual E não estamos gerando QR
             setTimeout(() => this.initializeSocket(), 5000);
           }
           
@@ -258,31 +268,50 @@ Estou aqui 24/7 para te ajudar! 🚀`;
         throw new Error('WhatsApp já está conectado');
       }
 
-      // Limpar credenciais antigas antes de gerar novo QR
-      if (!this.sock) {
-        console.log('🧹 Limpando credenciais antigas...');
-        const fs = await import('fs/promises');
-        const authPath = './server/wa_auth';
-        try {
-          await fs.rm(authPath, { recursive: true, force: true });
-          console.log('✅ Credenciais antigas removidas');
-        } catch (err) {
-          // Ignorar erro se pasta não existir
-        }
-        
-        console.log('🔄 Inicializando socket Baileys...');
-        await this.initializeSocket();
+      // Marcar que estamos gerando QR para evitar auto-reconnect
+      this.isGeneratingQR = true;
+
+      // Limpar socket antigo se existir
+      if (this.sock) {
+        console.log('🔌 Fechando socket antigo...');
+        this.sock.end(undefined);
+        this.sock = null;
+        // Aguardar um pouco para garantir que fechou
+        await new Promise(resolve => setTimeout(resolve, 1000));
       }
+
+      // Limpar credenciais antigas antes de gerar novo QR
+      console.log('🧹 Limpando credenciais antigas...');
+      const fs = await import('fs/promises');
+      const authPath = './server/wa_auth';
+      try {
+        await fs.rm(authPath, { recursive: true, force: true });
+        console.log('✅ Credenciais antigas removidas');
+      } catch (err) {
+        // Ignorar erro se pasta não existir
+      }
+
+      // Resetar QR codes
+      this.qrCode = '';
+      this.qrImage = '';
+      
+      // Aguardar um pouco após limpar as credenciais
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      console.log('🔄 Inicializando socket Baileys...');
+      await this.initializeSocket();
 
       // Aguardar QR Code ser gerado
       return new Promise((resolve, reject) => {
         const timeout = setTimeout(() => {
+          this.isGeneratingQR = false;
           reject(new Error('Timeout aguardando QR Code'));
         }, 30000);
 
         const checkQR = () => {
           if (this.qrCode) {
             clearTimeout(timeout);
+            this.isGeneratingQR = false;
             resolve(this.qrCode);
           } else {
             setTimeout(checkQR, 1000);
@@ -292,6 +321,7 @@ Estou aqui 24/7 para te ajudar! 🚀`;
       });
 
     } catch (error) {
+      this.isGeneratingQR = false;
       console.error('❌ Erro ao gerar QR Code:', error);
       throw error;
     }
@@ -357,10 +387,13 @@ Estou aqui 24/7 para te ajudar! 🚀`;
     try {
       console.log('🔄 Forçando geração de novo QR Code...');
       
+      this.isGeneratingQR = true;
+      
       // Fechar socket atual
       if (this.sock) {
         this.sock.end(undefined);
         this.sock = null;
+        await new Promise(resolve => setTimeout(resolve, 1000));
       }
       
       // Limpar credenciais para forçar novo QR
@@ -376,7 +409,12 @@ Estou aqui 24/7 para te ajudar! 🚀`;
       // Reinicializar socket para gerar novo QR
       this.qrCode = '';
       this.qrImage = '';
+      
+      await new Promise(resolve => setTimeout(resolve, 500));
       await this.initializeSocket();
+      
+      // Resetar flag após inicializar
+      this.isGeneratingQR = false;
       
       // Reiniciar o timer de renovação mesmo que o QR não seja gerado imediatamente
       // Isso garante que a renovação continue acontecendo a cada 2 minutos
@@ -386,6 +424,7 @@ Estou aqui 24/7 para te ajudar! 🚀`;
       
     } catch (error) {
       console.error('❌ Erro ao forçar novo QR Code:', error);
+      this.isGeneratingQR = false;
       // Mesmo em caso de erro, reiniciar o timer para tentar novamente
       if (!this.isReady) {
         this.startQRRefreshTimer();
