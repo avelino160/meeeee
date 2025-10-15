@@ -4,7 +4,8 @@ import makeWASocket, {
   useMultiFileAuthState,
   DisconnectReason,
   proto,
-  Browsers
+  Browsers,
+  makeCacheableSignalKeyStore
 } from '@whiskeysockets/baileys';
 import { Boom } from '@hapi/boom';
 import QRCode from 'qrcode';
@@ -21,6 +22,7 @@ export class WhatsAppService {
   private sock: WASocket | null = null;
   private qrCode: string = '';
   private qrImage: string = '';
+  private pairingCode: string = '';
   private isReady: boolean = false;
   private currentUserId: string = '';
   private qrRefreshTimer: NodeJS.Timeout | null = null;
@@ -34,22 +36,44 @@ export class WhatsAppService {
     console.log('🚀 WhatsAppService inicializado com Baileys');
   }
 
-  // 📱 INICIALIZAR SOCKET BAILEYS
-  private async initializeSocket() {
+  // 📱 INICIALIZAR SOCKET BAILEYS COM PAIRING CODE
+  private async initializeSocket(phoneNumber?: string) {
     try {
       const { state, saveCreds } = await useMultiFileAuthState('./server/wa_auth');
       
       console.log('🔧 Estado de autenticação carregado, creds:', !!state.creds?.me);
       
       this.sock = makeWASocket({
-        auth: state,
-        printQRInTerminal: true,
+        auth: {
+          creds: state.creds,
+          keys: makeCacheableSignalKeyStore(state.keys, pino({ level: 'silent' }))
+        },
+        printQRInTerminal: false,
         logger: pino({ level: 'silent' }),
         browser: Browsers.macOS('Desktop'),
         syncFullHistory: false,
+        generateHighQualityLinkPreview: true,
       });
 
       console.log('✅ Socket criado com sucesso');
+      
+      // Se tiver número de telefone, aguardar conexão e usar pairing code
+      if (phoneNumber && !state.creds?.registered) {
+        console.log('📱 Aguardando conexão para solicitar pairing code...');
+        
+        // Aguardar um pouco para a conexão estabilizar
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        
+        try {
+          console.log('📱 Solicitando pairing code para:', phoneNumber);
+          const code = await this.sock.requestPairingCode(phoneNumber);
+          this.pairingCode = code;
+          console.log('✅ Pairing code gerado:', code);
+        } catch (err) {
+          console.error('❌ Erro ao gerar pairing code:', err);
+          throw err;
+        }
+      }
 
       // 🔗 LISTENER: Estado da conexão
       this.sock.ev.on('connection.update', (update) => {
@@ -259,7 +283,74 @@ Estou aqui 24/7 para te ajudar! 🚀`;
     }
   }
 
-  // 🚀 OBTER QR CODE (Interface pública para routes.ts)
+  // 🚀 OBTER PAIRING CODE (Interface pública para routes.ts)
+  async getPairingCode(userId: string, phoneNumber: string): Promise<string> {
+    try {
+      this.currentUserId = userId;
+
+      if (this.isReady) {
+        throw new Error('WhatsApp já está conectado');
+      }
+
+      // Marcar que estamos gerando código
+      this.isGeneratingQR = true;
+
+      // Limpar socket antigo se existir
+      if (this.sock) {
+        console.log('🔌 Fechando socket antigo...');
+        this.sock.end(undefined);
+        this.sock = null;
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
+
+      // Limpar credenciais antigas antes de gerar novo código
+      console.log('🧹 Limpando credenciais antigas...');
+      const fs = await import('fs/promises');
+      const authPath = './server/wa_auth';
+      try {
+        await fs.rm(authPath, { recursive: true, force: true });
+        console.log('✅ Credenciais antigas removidas');
+      } catch (err) {
+        // Ignorar erro se pasta não existir
+      }
+
+      // Resetar códigos
+      this.pairingCode = '';
+      this.qrCode = '';
+      this.qrImage = '';
+      
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      console.log('🔄 Inicializando socket Baileys com pairing code...');
+      await this.initializeSocket(phoneNumber);
+
+      // Aguardar pairing code ser gerado
+      return new Promise((resolve, reject) => {
+        const timeout = setTimeout(() => {
+          this.isGeneratingQR = false;
+          reject(new Error('Timeout aguardando Pairing Code'));
+        }, 10000);
+
+        const checkCode = () => {
+          if (this.pairingCode) {
+            clearTimeout(timeout);
+            this.isGeneratingQR = false;
+            resolve(this.pairingCode);
+          } else {
+            setTimeout(checkCode, 500);
+          }
+        };
+        checkCode();
+      });
+
+    } catch (error) {
+      this.isGeneratingQR = false;
+      console.error('❌ Erro ao gerar Pairing Code:', error);
+      throw error;
+    }
+  }
+
+  // 🚀 OBTER QR CODE (Mantido para compatibilidade)
   async getQRCode(userId: string): Promise<string> {
     try {
       this.currentUserId = userId;
@@ -276,7 +367,6 @@ Estou aqui 24/7 para te ajudar! 🚀`;
         console.log('🔌 Fechando socket antigo...');
         this.sock.end(undefined);
         this.sock = null;
-        // Aguardar um pouco para garantir que fechou
         await new Promise(resolve => setTimeout(resolve, 1000));
       }
 
@@ -294,8 +384,8 @@ Estou aqui 24/7 para te ajudar! 🚀`;
       // Resetar QR codes
       this.qrCode = '';
       this.qrImage = '';
+      this.pairingCode = '';
       
-      // Aguardar um pouco após limpar as credenciais
       await new Promise(resolve => setTimeout(resolve, 500));
       
       console.log('🔄 Inicializando socket Baileys...');
