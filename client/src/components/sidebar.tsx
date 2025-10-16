@@ -35,7 +35,7 @@ export default function Sidebar() {
 
   const menuItems = [
     { href: "/", icon: Home, label: "Dashboard" },
-    { href: "/funnel-builder", icon: BarChart3, label: "Funis de Disparo" },
+    { href: "/funnel-builder", icon: BarChart3, label: "Funis de venda" },
     { href: "/contacts", icon: Users, label: "Contatos" },
     { href: "/analytics", icon: TrendingUp, label: "Relatórios" },
     { href: "/settings", icon: Settings, label: "Configurações" },
