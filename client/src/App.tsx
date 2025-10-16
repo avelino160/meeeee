@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import Dashboard from "@/pages/dashboard";
 import FunnelBuilder from "@/pages/funnel-builder";
+import FunnelEditor from "@/pages/funnel-editor";
 import Contacts from "@/pages/contacts";
 import Analytics from "@/pages/analytics";
 import NotFound from "@/pages/not-found";
@@ -14,6 +15,7 @@ function Router() {
     <Switch>
       <Route path="/" component={Dashboard} />
       <Route path="/funnel-builder" component={FunnelBuilder} />
+      <Route path="/funnel-editor/:id" component={FunnelEditor} />
       <Route path="/contacts" component={Contacts} />
       <Route path="/analytics" component={Analytics} />
       <Route component={NotFound} />

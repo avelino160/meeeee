@@ -147,6 +147,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get('/api/funnels/:id', async (req, res) => {
+    try {
+      const { id } = req.params;
+      const funnel = await storage.getFunnel(id);
+      if (!funnel) {
+        return res.status(404).json({ message: "Funnel not found" });
+      }
+      res.json(funnel);
+    } catch (error) {
+      console.error("Error fetching funnel:", error);
+      res.status(500).json({ message: "Failed to fetch funnel" });
+    }
+  });
+
   app.post('/api/funnels', async (req, res) => {
     try {
       const userId = DEFAULT_USER_ID;

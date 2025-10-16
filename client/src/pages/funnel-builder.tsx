@@ -2,10 +2,12 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
+import { useLocation } from "wouter";
 import type { Funnel } from "@shared/schema";
 import Sidebar from "@/components/sidebar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Switch } from "@/components/ui/switch";
 import { 
   Plus,
   Trash2,
@@ -27,6 +29,7 @@ import { Textarea } from "@/components/ui/textarea";
 export default function FunnelBuilder() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [, setLocation] = useLocation();
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [newFunnelName, setNewFunnelName] = useState("");
   const [newFunnelTrigger, setNewFunnelTrigger] = useState("");
@@ -80,6 +83,25 @@ export default function FunnelBuilder() {
       toast({
         title: "Erro",
         description: "Falha ao remover funil.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const toggleFunnelStatusMutation = useMutation({
+    mutationFn: async ({ funnelId, newStatus }: { funnelId: string; newStatus: string }) => {
+      const response = await apiRequest("PUT", `/api/funnels/${funnelId}`, {
+        status: newStatus,
+      });
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/funnels"] });
+    },
+    onError: () => {
+      toast({
+        title: "Erro",
+        description: "Falha ao atualizar status do funil.",
         variant: "destructive",
       });
     },
@@ -163,11 +185,23 @@ export default function FunnelBuilder() {
                         <p className="text-sm text-muted-foreground">
                           Ola, quem sere...
                         </p>
-                        <div className="flex items-center space-x-2">
-                          <div className={`w-2 h-2 rounded-full ${funnel.status === 'active' ? 'bg-green-500' : 'bg-red-500'}`}></div>
-                          <span className="text-xs text-muted-foreground" data-testid={`text-funnel-status-${funnel.id}`}>
-                            {getActiveFunnelsCount(funnel)} ativo
-                          </span>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-2">
+                            <div className={`w-2 h-2 rounded-full ${funnel.status === 'active' ? 'bg-green-500' : 'bg-red-500'}`}></div>
+                            <span className="text-xs text-muted-foreground" data-testid={`text-funnel-status-${funnel.id}`}>
+                              {funnel.status === 'active' ? 'Ativo' : 'Inativo'}
+                            </span>
+                          </div>
+                          <Switch
+                            checked={funnel.status === 'active'}
+                            onCheckedChange={(checked) => {
+                              toggleFunnelStatusMutation.mutate({
+                                funnelId: funnel.id,
+                                newStatus: checked ? 'active' : 'inactive'
+                              });
+                            }}
+                            data-testid={`switch-funnel-status-${funnel.id}`}
+                          />
                         </div>
                       </div>
 
@@ -185,6 +219,7 @@ export default function FunnelBuilder() {
                         <Button
                           size="icon"
                           className="rounded-full w-10 h-10 bg-yellow-600 hover:bg-yellow-700"
+                          onClick={() => setLocation(`/funnel-editor/${funnel.id}`)}
                           data-testid={`button-edit-funnel-${funnel.id}`}
                         >
                           <Edit className="h-4 w-4" />
