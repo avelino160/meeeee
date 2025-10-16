@@ -16,6 +16,7 @@ import {
   ChevronRight,
   Menu,
   X,
+  CreditCard,
 } from "lucide-react";
 
 export default function Sidebar() {
@@ -38,6 +39,7 @@ export default function Sidebar() {
     { href: "/funnel-builder", icon: BarChart3, label: "Funis de venda" },
     { href: "/contacts", icon: Users, label: "Contatos" },
     { href: "/analytics", icon: TrendingUp, label: "Relatórios" },
+    { href: "/plans", icon: CreditCard, label: "Planos" },
     { href: "/settings", icon: Settings, label: "Configurações" },
   ];
 
