@@ -108,29 +108,29 @@ export default function WhatsAppConnectionModal({ open, onOpenChange }: WhatsApp
     },
   });
 
-  // Verificar status de conexão a cada 3 segundos E FECHAR MODAL SE CONECTADO
-  useEffect(() => {
-    if (!open) return;
-    
-    // 🎉 FECHAR MODAL AUTOMATICAMENTE QUANDO CONECTAR
-    if (whatsappStatus?.connected) {
-      toast({
-        title: "🎉 WhatsApp Conectado com Sucesso!",
-        description: "🚀 RanZap está ativo! Seu funil de vendas automatizado já está funcionando!",
-      });
-      setTimeout(() => {
-        onOpenChange(false);
-        setShowQR(false);
-      }, 2000); // Fechar após 2 segundos para mostrar a mensagem
-      return;
-    }
-    
-    const interval = setInterval(() => {
-      queryClient.invalidateQueries({ queryKey: ["/api/whatsapp/status"] });
-    }, 3000);
-
-    return () => clearInterval(interval);
-  }, [open, whatsappStatus?.connected, queryClient, onOpenChange, toast]);
+  // ⏸️ POLLING DESATIVADO - Só funciona quando clicar em "Conectar"
+  // useEffect(() => {
+  //   if (!open) return;
+  //   
+  //   // 🎉 FECHAR MODAL AUTOMATICAMENTE QUANDO CONECTAR
+  //   if (whatsappStatus?.connected) {
+  //     toast({
+  //       title: "🎉 WhatsApp Conectado com Sucesso!",
+  //       description: "🚀 RanZap está ativo! Seu funil de vendas automatizado já está funcionando!",
+  //     });
+  //     setTimeout(() => {
+  //       onOpenChange(false);
+  //       setShowQR(false);
+  //     }, 2000); // Fechar após 2 segundos para mostrar a mensagem
+  //     return;
+  //   }
+  //   
+  //   const interval = setInterval(() => {
+  //     queryClient.invalidateQueries({ queryKey: ["/api/whatsapp/status"] });
+  //   }, 3000);
+  //
+  //   return () => clearInterval(interval);
+  // }, [open, whatsappStatus?.connected, queryClient, onOpenChange, toast]);
 
   const connectMutation = useMutation({
     mutationFn: async () => {
