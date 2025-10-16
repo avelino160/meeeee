@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useRef } from 'react';
 import ReactFlow, {
   Node,
   Edge,
@@ -11,6 +11,8 @@ import ReactFlow, {
   Background,
   BackgroundVariant,
   NodeTypes,
+  useReactFlow,
+  ReactFlowProvider,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 import FunnelNode from './funnel-node';
@@ -38,13 +40,44 @@ const nodeTypes: NodeTypes = {
   funnelNode: FunnelNode,
 };
 
-export default function FunnelCanvas({ data, onDataChange, onNodeSelect }: FunnelCanvasProps) {
-  const [nodes, setNodes, onNodesChange] = useNodesState([]);
-  const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+function FunnelCanvasInner({ data, onDataChange, onNodeSelect }: FunnelCanvasProps) {
+  const [nodes, setNodes, _onNodesChange] = useNodesState([]);
+  const [edges, setEdges, _onEdgesChange] = useEdgesState([]);
+  const reactFlowInstance = useReactFlow();
+  const reactFlowWrapper = useRef<HTMLDivElement>(null);
 
-  // Initialize with sample nodes if empty
+  // Wrap onNodesChange
+  const onNodesChange = useCallback(
+    (changes: any) => {
+      _onNodesChange(changes);
+    },
+    [_onNodesChange]
+  );
+
+  // Wrap onEdgesChange
+  const onEdgesChange = useCallback(
+    (changes: any) => {
+      _onEdgesChange(changes);
+    },
+    [_onEdgesChange]
+  );
+
+  // Sync nodes/edges changes back to parent
   React.useEffect(() => {
-    if (data.nodes.length === 0) {
+    // Debounce the onDataChange call to avoid excessive updates
+    const timeoutId = setTimeout(() => {
+      onDataChange({
+        nodes,
+        edges,
+      });
+    }, 100);
+    
+    return () => clearTimeout(timeoutId);
+  }, [nodes, edges, onDataChange]);
+
+  // Initialize with sample nodes if empty, or sync from parent data
+  React.useEffect(() => {
+    if (data.nodes.length === 0 && nodes.length === 0) {
       const initialNodes = [
         {
           id: 'start',
@@ -87,21 +120,25 @@ export default function FunnelCanvas({ data, onDataChange, onNodeSelect }: Funne
         nodes: initialNodes,
         edges: initialEdges,
       });
-    } else {
-      // Convert data format for ReactFlow
-      const flowNodes = data.nodes.map(node => ({
-        ...node,
-        type: 'funnelNode',
-        data: {
-          ...node.data,
-          nodeType: node.type,
-        }
-      }));
-      
-      setNodes(flowNodes);
+    } else if (data.nodes.length > 0) {
+      // Update nodes from parent data while preserving positions
+      setNodes(currentNodes => {
+        return data.nodes.map(dataNode => {
+          const existingNode = currentNodes.find(n => n.id === dataNode.id);
+          return {
+            ...dataNode,
+            type: 'funnelNode',
+            position: existingNode?.position || dataNode.position,
+            data: {
+              ...dataNode.data,
+              nodeType: dataNode.data.nodeType || dataNode.type,
+            }
+          };
+        });
+      });
       setEdges(data.edges);
     }
-  }, [data.nodes.length]);
+  }, [data, nodes.length]);
 
   const onConnect = useCallback(
     (params: Connection) => {
@@ -132,17 +169,21 @@ export default function FunnelCanvas({ data, onDataChange, onNodeSelect }: Funne
     (event: React.DragEvent) => {
       event.preventDefault();
 
-      const reactFlowBounds = (event.target as Element).getBoundingClientRect();
       const nodeType = event.dataTransfer.getData('application/reactflow');
 
       if (typeof nodeType === 'undefined' || !nodeType) {
         return;
       }
 
-      const position = {
-        x: event.clientX - reactFlowBounds.left,
-        y: event.clientY - reactFlowBounds.top,
-      };
+      if (!reactFlowWrapper.current) {
+        return;
+      }
+
+      const reactFlowBounds = reactFlowWrapper.current.getBoundingClientRect();
+      const position = reactFlowInstance.screenToFlowPosition({
+        x: event.clientX,
+        y: event.clientY,
+      });
 
       const newNodeId = `${nodeType}_${Date.now()}`;
       const newNode = {
@@ -166,7 +207,7 @@ export default function FunnelCanvas({ data, onDataChange, onNodeSelect }: Funne
         edges,
       });
     },
-    [nodes, edges, onDataChange]
+    [nodes, edges, onDataChange, reactFlowInstance]
   );
 
   const onDragOver = useCallback((event: React.DragEvent) => {
@@ -221,7 +262,7 @@ export default function FunnelCanvas({ data, onDataChange, onNodeSelect }: Funne
   };
 
   return (
-    <div className="w-full h-full" data-testid="funnel-canvas">
+    <div ref={reactFlowWrapper} className="w-full h-full" data-testid="funnel-canvas">
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -248,5 +289,13 @@ export default function FunnelCanvas({ data, onDataChange, onNodeSelect }: Funne
         />
       </ReactFlow>
     </div>
+  );
+}
+
+export default function FunnelCanvas(props: FunnelCanvasProps) {
+  return (
+    <ReactFlowProvider>
+      <FunnelCanvasInner {...props} />
+    </ReactFlowProvider>
   );
 }
