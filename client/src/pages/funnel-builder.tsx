@@ -2,118 +2,91 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import type { CampaignsResponse } from "@shared/api-types";
+import type { Funnel } from "@shared/schema";
 import Sidebar from "@/components/sidebar";
-import FunnelCanvas from "@/components/funnel-canvas";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { 
+  Plus,
+  Trash2,
+  Edit,
+  MessageSquare
+} from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
-import { Checkbox } from "@/components/ui/checkbox";
-import { 
-  Save, 
-  Eye, 
-  MessageSquare, 
-  Image, 
-  Video, 
-  Mic, 
-  FileText, 
-  MapPin,
-  GitBranch,
-  Clock,
-  HelpCircle,
-  Tag,
-  CheckCircle
-} from "lucide-react";
-
-interface FunnelNode {
-  id: string;
-  type: string;
-  position: { x: number; y: number };
-  data: {
-    label?: string;
-    content?: string;
-    mediaUrl?: string;
-    delayMinutes?: number;
-  };
-}
-
-interface FunnelData {
-  nodes: FunnelNode[];
-  edges: Array<{
-    id: string;
-    source: string;
-    target: string;
-  }>;
-}
 
 export default function FunnelBuilder() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  
-  const [selectedNode, setSelectedNode] = useState<FunnelNode | null>(null);
-  const [funnelData, setFunnelData] = useState<FunnelData>({ nodes: [], edges: [] });
-  const [funnelName, setFunnelName] = useState("Novo Funil");
-  const [funnelStatus, setFunnelStatus] = useState("draft");
-  const [triggerPhrase, setTriggerPhrase] = useState("Estou interessado");
-  const [initialDelay, setInitialDelay] = useState(1);
-  const [isActiveForNewContacts, setIsActiveForNewContacts] = useState(true);
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [newFunnelName, setNewFunnelName] = useState("");
+  const [newFunnelTrigger, setNewFunnelTrigger] = useState("");
 
-  const { data: campaigns } = useQuery<CampaignsResponse>({
-    queryKey: ["/api/campaigns"],
+  const { data: funnels, isLoading } = useQuery<Funnel[]>({
+    queryKey: ["/api/funnels"],
     retry: false,
   });
 
-  const saveFunnelMutation = useMutation({
+  const createFunnelMutation = useMutation({
     mutationFn: async () => {
-      if (!campaigns || campaigns.length === 0) {
-        throw new Error("Nenhuma campanha encontrada");
-      }
-      
-      const campaignId = campaigns[0].id; // Use first campaign for now
-      
-      const response = await apiRequest("POST", `/api/campaigns/${campaignId}/funnels`, {
-        name: funnelName,
-        status: funnelStatus,
-        flowData: funnelData,
+      const response = await apiRequest("POST", "/api/funnels", {
+        name: newFunnelName,
+        status: "draft",
+        flowData: { nodes: [], edges: [] },
       });
       return response.json();
     },
     onSuccess: () => {
       toast({
-        title: "Funil Salvo",
-        description: "Seu funil foi salvo com sucesso!",
+        title: "Funil Criado",
+        description: "Seu funil foi criado com sucesso!",
       });
-      queryClient.invalidateQueries({ queryKey: ["/api/campaigns"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/funnels"] });
+      setIsCreateDialogOpen(false);
+      setNewFunnelName("");
+      setNewFunnelTrigger("");
     },
     onError: () => {
       toast({
         title: "Erro",
-        description: "Falha ao salvar funil. Tente novamente.",
+        description: "Falha ao criar funil. Tente novamente.",
         variant: "destructive",
       });
     },
   });
 
-  const handleNodeSelect = (node: FunnelNode | null) => {
-    setSelectedNode(node);
-  };
+  const deleteFunnelMutation = useMutation({
+    mutationFn: async (funnelId: string) => {
+      const response = await apiRequest("DELETE", `/api/funnels/${funnelId}`);
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Funil Removido",
+        description: "Funil removido com sucesso!",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/funnels"] });
+    },
+    onError: () => {
+      toast({
+        title: "Erro",
+        description: "Falha ao remover funil.",
+        variant: "destructive",
+      });
+    },
+  });
 
-  const handleFunnelDataChange = (newData: FunnelData) => {
-    setFunnelData(newData);
-  };
-
-  const handlePreviewFunnel = () => {
-    toast({
-      title: "Visualizando Funil",
-      description: "Funcionalidade de preview em desenvolvimento",
-    });
-  };
-
-  const handleSaveFunnel = () => {
-    if (!funnelName.trim()) {
+  const handleCreateFunnel = () => {
+    if (!newFunnelName.trim()) {
       toast({
         title: "Nome Obrigatório",
         description: "Digite um nome para o funil",
@@ -121,33 +94,11 @@ export default function FunnelBuilder() {
       });
       return;
     }
-    saveFunnelMutation.mutate();
+    createFunnelMutation.mutate();
   };
 
-  const updateNodeContent = (content: string) => {
-    if (!selectedNode) return;
-    
-    const updatedNodes = funnelData.nodes.map(node => 
-      node.id === selectedNode.id 
-        ? { ...node, data: { ...node.data, content } }
-        : node
-    );
-    
-    setFunnelData({ ...funnelData, nodes: updatedNodes });
-    setSelectedNode({ ...selectedNode, data: { ...selectedNode.data, content } });
-  };
-
-  const updateNodeDelay = (delayMinutes: number) => {
-    if (!selectedNode) return;
-    
-    const updatedNodes = funnelData.nodes.map(node => 
-      node.id === selectedNode.id 
-        ? { ...node, data: { ...node.data, delayMinutes } }
-        : node
-    );
-    
-    setFunnelData({ ...funnelData, nodes: updatedNodes });
-    setSelectedNode({ ...selectedNode, data: { ...selectedNode.data, delayMinutes } });
+  const getActiveFunnelsCount = (funnel: Funnel) => {
+    return 0;
   };
 
   return (
@@ -155,268 +106,165 @@ export default function FunnelBuilder() {
       <Sidebar />
       
       <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Top Header */}
-        <header className="bg-card border-b border-border px-6 py-4">
-          <div className="flex items-center justify-between">
+        <header className="bg-card border-b border-border px-6 py-6">
+          <div className="flex items-center justify-between mb-2">
             <div>
-              <h2 className="text-xl font-semibold" data-testid="text-page-title">Construtor de Funil</h2>
-              <p className="text-sm text-muted-foreground">Crie e gerencie suas sequências de mensagens automatizadas</p>
+              <h2 className="text-2xl font-bold text-foreground" data-testid="text-page-title">Funis de venda</h2>
+              <p className="text-sm text-muted-foreground mt-1">
+                Crie fluxos de mensagens desenhados automaticamente para captar clientes online em um catálogo core web
+              </p>
             </div>
-            <div className="flex items-center space-x-4">
-              <Button 
-                variant="outline"
-                onClick={handlePreviewFunnel}
-                data-testid="button-preview-funnel"
-              >
-                <Eye className="h-4 w-4 mr-2" />
-                Visualizar
-              </Button>
-              <Button 
-                onClick={handleSaveFunnel}
-                disabled={saveFunnelMutation.isPending}
-                data-testid="button-save-funnel"
-              >
-                <Save className="h-4 w-4 mr-2" />
-                {saveFunnelMutation.isPending ? "Salvando..." : "Salvar Funil"}
-              </Button>
-            </div>
+            <Button 
+              onClick={() => setIsCreateDialogOpen(true)}
+              className="bg-yellow-600 hover:bg-yellow-700 text-white font-semibold"
+              data-testid="button-create-funnel"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Novo Funil
+            </Button>
           </div>
         </header>
 
-        {/* Main Content */}
-        <div className="flex-1 flex">
-          {/* Left Toolbox */}
-          <div className="w-48 bg-card border-r border-border p-3 overflow-y-auto">
-            <div className="space-y-4">
-              {/* Message Types */}
-              <div>
-                <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
-                  Mensagens
-                </h3>
-                <div className="grid grid-cols-2 gap-1.5">
-                  <div className="p-2 bg-muted rounded cursor-pointer hover:bg-secondary transition-colors" data-testid="tool-text">
-                    <MessageSquare className="h-4 w-4 text-primary mb-1" />
-                    <p className="text-[10px] font-medium">Texto</p>
+        <main className="flex-1 overflow-y-auto p-6">
+          {isLoading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {[1, 2, 3].map((i) => (
+                <Card key={i} className="p-6 animate-pulse bg-card border border-border">
+                  <div className="h-6 bg-muted rounded mb-4"></div>
+                  <div className="h-4 bg-muted rounded mb-2"></div>
+                  <div className="h-4 bg-muted rounded mb-4"></div>
+                  <div className="flex justify-between mt-4">
+                    <div className="h-10 w-20 bg-muted rounded"></div>
+                    <div className="h-10 w-20 bg-muted rounded"></div>
                   </div>
-                  <div className="p-2 bg-muted rounded cursor-pointer hover:bg-secondary transition-colors" data-testid="tool-image">
-                    <Image className="h-4 w-4 text-primary mb-1" />
-                    <p className="text-[10px] font-medium">Imagem</p>
-                  </div>
-                  <div className="p-2 bg-muted rounded cursor-pointer hover:bg-secondary transition-colors" data-testid="tool-video">
-                    <Video className="h-4 w-4 text-primary mb-1" />
-                    <p className="text-[10px] font-medium">Vídeo</p>
-                  </div>
-                  <div className="p-2 bg-muted rounded cursor-pointer hover:bg-secondary transition-colors" data-testid="tool-audio">
-                    <Mic className="h-4 w-4 text-primary mb-1" />
-                    <p className="text-[10px] font-medium">Áudio</p>
-                  </div>
-                  <div className="p-2 bg-muted rounded cursor-pointer hover:bg-secondary transition-colors" data-testid="tool-document">
-                    <FileText className="h-4 w-4 text-primary mb-1" />
-                    <p className="text-[10px] font-medium">Documento</p>
-                  </div>
-                  <div className="p-2 bg-muted rounded cursor-pointer hover:bg-secondary transition-colors" data-testid="tool-location">
-                    <MapPin className="h-4 w-4 text-primary mb-1" />
-                    <p className="text-[10px] font-medium">Local</p>
-                  </div>
-                </div>
-              </div>
-              
-              {/* Logic Elements */}
-              <div>
-                <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
-                  Lógica
-                </h3>
-                <div className="space-y-1">
-                  <div className="p-2 bg-muted rounded cursor-pointer hover:bg-secondary transition-colors flex items-center" data-testid="tool-condition">
-                    <GitBranch className="h-4 w-4 text-primary mr-2" />
-                    <span className="text-xs font-medium">Condição</span>
-                  </div>
-                  <div className="p-2 bg-muted rounded cursor-pointer hover:bg-secondary transition-colors flex items-center" data-testid="tool-delay">
-                    <Clock className="h-4 w-4 text-primary mr-2" />
-                    <span className="text-xs font-medium">Esperar</span>
-                  </div>
-                  <div className="p-2 bg-muted rounded cursor-pointer hover:bg-secondary transition-colors flex items-center" data-testid="tool-question">
-                    <HelpCircle className="h-4 w-4 text-primary mr-2" />
-                    <span className="text-xs font-medium">Pergunta</span>
-                  </div>
-                  <div className="p-2 bg-muted rounded cursor-pointer hover:bg-secondary transition-colors flex items-center" data-testid="tool-tag">
-                    <Tag className="h-4 w-4 text-primary mr-2" />
-                    <span className="text-xs font-medium">Tag</span>
-                  </div>
-                  <div className="p-2 bg-muted rounded cursor-pointer hover:bg-secondary transition-colors flex items-center" data-testid="tool-verify">
-                    <CheckCircle className="h-4 w-4 text-primary mr-2" />
-                    <span className="text-xs font-medium">Verificar</span>
-                  </div>
-                </div>
-              </div>
-              
-              {/* Trigger Configuration */}
-              <div>
-                <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
-                  Gatilho Inicial
-                </h3>
-                <div className="space-y-2">
-                  <div>
-                    <Label className="text-[10px] font-medium text-muted-foreground mb-1">Frase Gatilho</Label>
-                    <Input 
-                      type="text" 
-                      placeholder="Ex: Estou interessado"
-                      value={triggerPhrase}
-                      onChange={(e) => setTriggerPhrase(e.target.value)}
-                      className="h-8 text-xs"
-                      data-testid="input-trigger-phrase"
-                    />
-                  </div>
-                  <div>
-                    <Label className="text-[10px] font-medium text-muted-foreground mb-1">Delay (min)</Label>
-                    <Input 
-                      type="number" 
-                      min="0"
-                      value={initialDelay}
-                      onChange={(e) => setInitialDelay(parseInt(e.target.value) || 0)}
-                      className="h-8 text-xs"
-                      data-testid="input-initial-delay"
-                    />
-                  </div>
-                </div>
-              </div>
+                </Card>
+              ))}
             </div>
-          </div>
-          
-          {/* Canvas Area */}
-          <div className="flex-1 relative">
-            <FunnelCanvas
-              data={funnelData}
-              onDataChange={handleFunnelDataChange}
-              onNodeSelect={handleNodeSelect}
-            />
-          </div>
-          
-          {/* Right Properties Panel */}
-          <div className="w-80 bg-card border-l border-border p-4 overflow-y-auto">
-            <div className="space-y-6">
-              {/* Node Properties */}
-              <div>
-                <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">
-                  Propriedades do Nó
-                </h3>
-                {selectedNode ? (
-                  <div className="space-y-4">
-                    <div>
-                      <Label className="text-xs font-medium text-muted-foreground mb-1">Tipo</Label>
-                      <div className="px-3 py-2 bg-muted rounded-md text-sm" data-testid="text-node-type">
-                        {selectedNode.type === 'message' ? 'Mensagem' : 
-                         selectedNode.type === 'delay' ? 'Esperar' :
-                         selectedNode.type === 'condition' ? 'Condição' :
-                         selectedNode.type}
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {funnels && funnels.length > 0 ? (
+                funnels.map((funnel) => (
+                  <Card 
+                    key={funnel.id} 
+                    className="p-6 bg-card border border-border hover:border-primary/50 transition-all"
+                    data-testid={`card-funnel-${funnel.id}`}
+                  >
+                    <div className="space-y-4">
+                      <div>
+                        <h3 className="text-lg font-bold text-foreground uppercase" data-testid={`text-funnel-name-${funnel.id}`}>
+                          {funnel.name}
+                        </h3>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          {getActiveFunnelsCount(funnel)} gatilho(s)
+                        </p>
+                      </div>
+
+                      <div className="space-y-2">
+                        <p className="text-sm text-muted-foreground">
+                          Ola, quem sere...
+                        </p>
+                        <div className="flex items-center space-x-2">
+                          <div className={`w-2 h-2 rounded-full ${funnel.status === 'active' ? 'bg-green-500' : 'bg-red-500'}`}></div>
+                          <span className="text-xs text-muted-foreground" data-testid={`text-funnel-status-${funnel.id}`}>
+                            {getActiveFunnelsCount(funnel)} ativo
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-between gap-2 pt-2">
+                        <Button
+                          variant="destructive"
+                          size="icon"
+                          className="rounded-full w-10 h-10 bg-red-600 hover:bg-red-700"
+                          onClick={() => deleteFunnelMutation.mutate(funnel.id)}
+                          disabled={deleteFunnelMutation.isPending}
+                          data-testid={`button-delete-funnel-${funnel.id}`}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          size="icon"
+                          className="rounded-full w-10 h-10 bg-yellow-600 hover:bg-yellow-700"
+                          data-testid={`button-edit-funnel-${funnel.id}`}
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
                       </div>
                     </div>
-                    {selectedNode.type === 'message' && (
-                      <>
-                        <div>
-                          <Label className="text-xs font-medium text-muted-foreground mb-1">Conteúdo</Label>
-                          <Textarea 
-                            placeholder="Digite sua mensagem aqui..."
-                            value={selectedNode.data.content || ''}
-                            onChange={(e) => updateNodeContent(e.target.value)}
-                            className="h-24 resize-none"
-                            data-testid="textarea-node-content"
-                          />
-                        </div>
-                        <div>
-                          <Label className="text-xs font-medium text-muted-foreground mb-1">Delay (minutos)</Label>
-                          <Input 
-                            type="number" 
-                            min="0"
-                            value={selectedNode.data.delayMinutes || 0}
-                            onChange={(e) => updateNodeDelay(parseInt(e.target.value) || 0)}
-                            data-testid="input-node-delay"
-                          />
-                        </div>
-                      </>
-                    )}
-                  </div>
-                ) : (
-                  <p className="text-sm text-muted-foreground" data-testid="text-no-node-selected">
-                    Selecione um nó para editar suas propriedades
+                  </Card>
+                ))
+              ) : (
+                <div className="col-span-full text-center py-12">
+                  <MessageSquare className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold text-foreground mb-2">Nenhum funil criado</h3>
+                  <p className="text-sm text-muted-foreground mb-6">
+                    Comece criando seu primeiro funil de vendas automatizado
                   </p>
-                )}
-              </div>
-              
-              <Separator />
-              
-              {/* Funnel Settings */}
-              <div>
-                <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">
-                  Configurações do Funil
-                </h3>
-                <div className="space-y-4">
-                  <div>
-                    <Label className="text-xs font-medium text-muted-foreground mb-1">Nome do Funil</Label>
-                    <Input 
-                      type="text"
-                      value={funnelName}
-                      onChange={(e) => setFunnelName(e.target.value)}
-                      data-testid="input-funnel-name"
-                    />
-                  </div>
-                  <div>
-                    <Label className="text-xs font-medium text-muted-foreground mb-1">Status</Label>
-                    <Select value={funnelStatus} onValueChange={setFunnelStatus}>
-                      <SelectTrigger data-testid="select-funnel-status">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="active">Ativo</SelectItem>
-                        <SelectItem value="paused">Pausado</SelectItem>
-                        <SelectItem value="inactive">Inativo</SelectItem>
-                        <SelectItem value="draft">Rascunho</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Checkbox 
-                      id="activeForNewContacts"
-                      checked={isActiveForNewContacts}
-                      onCheckedChange={(checked) => setIsActiveForNewContacts(checked === true)}
-                      data-testid="checkbox-active-for-new-contacts"
-                    />
-                    <Label htmlFor="activeForNewContacts" className="text-xs text-muted-foreground">
-                      Ativar para novos contatos
-                    </Label>
-                  </div>
+                  <Button 
+                    onClick={() => setIsCreateDialogOpen(true)}
+                    className="bg-yellow-600 hover:bg-yellow-700 text-white"
+                    data-testid="button-create-first-funnel"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Criar Primeiro Funil
+                  </Button>
                 </div>
-              </div>
-              
-              <Separator />
-              
-              {/* Analytics Preview */}
-              <div>
-                <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">
-                  Estatísticas
-                </h3>
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center">
-                    <span className="text-xs text-muted-foreground">Disparos hoje</span>
-                    <span className="text-sm font-medium text-primary" data-testid="text-today-triggers">0</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-xs text-muted-foreground">Taxa de resposta</span>
-                    <span className="text-sm font-medium text-green-500" data-testid="text-response-rate">0%</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-xs text-muted-foreground">Ativos no funil</span>
-                    <span className="text-sm font-medium" data-testid="text-active-in-funnel">0</span>
-                  </div>
-                  <div className="w-full bg-muted rounded-full h-2 mt-2">
-                    <div className="bg-primary h-2 rounded-full" style={{width: '0%'}}></div>
-                  </div>
-                </div>
-              </div>
+              )}
+            </div>
+          )}
+        </main>
+      </div>
+
+      <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+        <DialogContent className="sm:max-w-md" data-testid="dialog-create-funnel">
+          <DialogHeader>
+            <DialogTitle>Criar Novo Funil</DialogTitle>
+            <DialogDescription>
+              Configure seu novo funil de vendas automatizado
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="funnel-name">Nome do Funil</Label>
+              <Input
+                id="funnel-name"
+                placeholder="Ex: Funil Grátis Henrique"
+                value={newFunnelName}
+                onChange={(e) => setNewFunnelName(e.target.value)}
+                data-testid="input-new-funnel-name"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="funnel-trigger">Frase Gatilho (opcional)</Label>
+              <Textarea
+                id="funnel-trigger"
+                placeholder="Ex: Estou interessado"
+                value={newFunnelTrigger}
+                onChange={(e) => setNewFunnelTrigger(e.target.value)}
+                className="resize-none h-20"
+                data-testid="input-new-funnel-trigger"
+              />
             </div>
           </div>
-        </div>
-      </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setIsCreateDialogOpen(false)}
+              data-testid="button-cancel-create"
+            >
+              Cancelar
+            </Button>
+            <Button
+              onClick={handleCreateFunnel}
+              disabled={createFunnelMutation.isPending}
+              className="bg-yellow-600 hover:bg-yellow-700 text-white"
+              data-testid="button-confirm-create"
+            >
+              {createFunnelMutation.isPending ? "Criando..." : "Criar Funil"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -170,6 +170,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.delete('/api/funnels/:id', async (req, res) => {
+    try {
+      const { id } = req.params;
+      await storage.deleteFunnel(id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting funnel:", error);
+      res.status(500).json({ message: "Failed to delete funnel" });
+    }
+  });
+
   app.post('/api/funnels/:id/execute', async (req, res) => {
     try {
       const { id } = req.params;
