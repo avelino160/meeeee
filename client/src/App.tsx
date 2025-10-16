@@ -3,6 +3,7 @@ import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import StarfieldBackground from "@/components/starfield-background";
 import Dashboard from "@/pages/dashboard";
 import FunnelBuilder from "@/pages/funnel-builder";
 import FunnelEditor from "@/pages/funnel-editor";
@@ -31,8 +32,11 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <Toaster />
-        <Router />
+        <StarfieldBackground />
+        <div className="relative z-10">
+          <Toaster />
+          <Router />
+        </div>
       </TooltipProvider>
     </QueryClientProvider>
   );
