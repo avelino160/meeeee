@@ -130,7 +130,7 @@ export default function Plans() {
 
           {/* Plans Grid */}
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="flex overflow-x-auto md:justify-center gap-8 pb-4 snap-x snap-mandatory scrollbar-hide -mx-4 px-4">
               {plans.map((plan) => {
                 const price = billingPeriod === "monthly" ? plan.monthlyPrice : plan.yearlyPrice;
                 const isCurrentPlan = currentPlan === plan.id;
@@ -138,7 +138,7 @@ export default function Plans() {
                 return (
                   <Card 
                     key={plan.id}
-                    className={`relative ${plan.popular ? 'border-primary border-2 shadow-xl scale-105' : ''} ${isCurrentPlan ? 'border-primary' : ''}`}
+                    className={`relative flex-shrink-0 w-80 snap-center ${plan.popular ? 'border-primary border-2 shadow-xl md:scale-105' : ''} ${isCurrentPlan ? 'border-primary' : ''}`}
                   >
                     {plan.popular && (
                       <div className="absolute -top-4 left-0 right-0 flex justify-center">
@@ -211,8 +211,10 @@ export default function Plans() {
                 );
               })}
             </div>
+          </div>
 
-            {/* Features Comparison */}
+          {/* Features Comparison */}
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
             <div className="mt-20">
               <h2 className="text-3xl font-bold text-center mb-12">Por que escolher o RanZap?</h2>
               
@@ -311,7 +313,7 @@ export default function Plans() {
             </div>
 
             {/* CTA Section */}
-            <div className="mt-20 text-center bg-gradient-to-r from-primary/10 to-background rounded-lg p-12">
+            <div className="mt-20 text-center bg-gradient-to-r from-primary/10 to-background rounded-lg p-12 mx-4 sm:mx-6 lg:mx-8">
               <h2 className="text-3xl font-bold mb-4">Ainda tem dúvidas?</h2>
               <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
                 Nossa equipe está pronta para ajudar você a escolher o melhor plano para seu negócio
