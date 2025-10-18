@@ -1,11 +1,17 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useToast } from "@/hooks/use-toast";
 import type { DashboardAnalytics } from "@shared/api-types";
 
 type WhatsAppStatus = {
   connected: boolean;
   phoneNumber?: string;
+};
+
+type User = {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
 };
 import Sidebar from "@/components/sidebar";
 import WhatsAppConnectionModal from "@/components/whatsapp-connection-modal";
@@ -15,7 +21,6 @@ import { BarChart3, MessageSquare, Users, TrendingUp, Wifi, WifiOff } from "luci
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 
 export default function Dashboard() {
-  const { toast } = useToast();
   const [showWhatsAppModal, setShowWhatsAppModal] = useState(false);
 
   const { data: analytics, isLoading: analyticsLoading } = useQuery<DashboardAnalytics>({
@@ -25,6 +30,11 @@ export default function Dashboard() {
 
   const { data: whatsappStatus } = useQuery<WhatsAppStatus>({
     queryKey: ["/api/whatsapp/status"],
+    retry: false,
+  });
+
+  const { data: user } = useQuery<User>({
+    queryKey: ["/api/user/me"],
     retry: false,
   });
 
@@ -48,7 +58,9 @@ export default function Dashboard() {
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
             <div className="flex items-center space-x-2 sm:space-x-4 w-full sm:w-auto pl-14 sm:pl-0 lg:pl-0">
               <div className="flex-1 sm:flex-initial">
-                <h1 className="text-lg sm:text-2xl font-semibold" data-testid="text-dashboard-title">RanZap Dashboard</h1>
+                <h1 className="text-lg sm:text-2xl font-semibold" data-testid="text-dashboard-title">
+                  Olá, {user?.firstName || 'Usuário'}! 👋
+                </h1>
                 <p className="text-xs sm:text-sm text-muted-foreground hidden sm:block">Sua central de vendas automáticas no WhatsApp</p>
               </div>
               

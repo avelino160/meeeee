@@ -12,6 +12,12 @@ import {
 import { z } from "zod";
 
 const DEFAULT_USER_ID = "default-user";
+const DEMO_USER = {
+  id: DEFAULT_USER_ID,
+  firstName: "Usuário",
+  lastName: "Demo",
+  email: "demo@ranzap.com",
+};
 
 // Guard: Detectar ambientes de datacenter (Replit, etc.)
 function isDatacenterEnvironment(req: any): boolean {
@@ -33,6 +39,16 @@ function isDatacenterEnvironment(req: any): boolean {
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // User routes
+  app.get('/api/user/me', async (req, res) => {
+    try {
+      res.json(DEMO_USER);
+    } catch (error) {
+      console.error("Error getting user:", error);
+      res.status(500).json({ message: "Failed to get user" });
+    }
+  });
+
   // WhatsApp connection routes
   app.get('/api/whatsapp/status', async (req, res) => {
     try {
