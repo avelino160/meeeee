@@ -390,7 +390,7 @@ export default function FunnelEditor() {
           {/* Canvas Area */}
           <div className="flex-1 relative bg-[#1a1a1a]">
             <FunnelCanvas
-              data={funnelData}
+              data={{ ...funnelData, triggerPhrase: funnel?.triggerPhrase || undefined }}
               onDataChange={handleFunnelDataChange}
               onNodeSelect={handleNodeSelect}
             />

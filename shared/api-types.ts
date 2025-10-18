@@ -49,3 +49,17 @@ export interface Contact {
 }
 
 export type ContactsResponse = Contact[];
+
+// Campaign types for API responses
+export interface Campaign {
+  id: string;
+  name: string;
+  description?: string;
+  status: 'active' | 'paused' | 'inactive' | 'draft';
+  triggerPhrase: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type CampaignsResponse = Campaign[];

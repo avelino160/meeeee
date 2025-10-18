@@ -72,6 +72,7 @@ export const funnels = pgTable("funnels", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
   name: varchar("name").notNull(),
+  triggerPhrase: varchar("trigger_phrase"),
   status: funnelStatusEnum("status").default("draft"),
   flowData: jsonb("flow_data").notNull(), // React Flow data
   createdAt: timestamp("created_at").defaultNow(),

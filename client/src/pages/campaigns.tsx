@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import type { CampaignsResponse } from "@shared/api-types";
+import type { CampaignsResponse, Campaign } from "@shared/api-types";
 import Sidebar from "@/components/sidebar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -30,17 +30,6 @@ import {
   TrendingUp
 } from "lucide-react";
 
-interface Campaign {
-  id: string;
-  name: string;
-  description: string;
-  status: 'active' | 'paused' | 'completed' | 'draft';
-  triggerPhrase: string;
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
-}
-
 export default function Campaigns() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -54,7 +43,7 @@ export default function Campaigns() {
   const [formData, setFormData] = useState<{
     name: string;
     description: string;
-    status: 'active' | 'paused' | 'completed' | 'draft';
+    status: 'active' | 'paused' | 'inactive' | 'draft';
     triggerPhrase: string;
     isActive: boolean;
   }>({
@@ -212,7 +201,7 @@ export default function Campaigns() {
     const colors: Record<string, string> = {
       active: "bg-green-500",
       paused: "bg-yellow-500", 
-      completed: "bg-blue-500",
+      inactive: "bg-blue-500",
       draft: "bg-gray-500",
     };
     return colors[status] || "bg-gray-500";
@@ -222,7 +211,7 @@ export default function Campaigns() {
     const labels: Record<string, string> = {
       active: "Ativo",
       paused: "Pausado",
-      completed: "Concluído",
+      inactive: "Inativo",
       draft: "Rascunho",
     };
     return labels[status] || status;
@@ -334,7 +323,7 @@ export default function Campaigns() {
                 <SelectItem value="all">Todos</SelectItem>
                 <SelectItem value="active">Ativo</SelectItem>
                 <SelectItem value="paused">Pausado</SelectItem>
-                <SelectItem value="completed">Concluído</SelectItem>
+                <SelectItem value="inactive">Inativo</SelectItem>
                 <SelectItem value="draft">Rascunho</SelectItem>
               </SelectContent>
             </Select>
@@ -498,7 +487,7 @@ export default function Campaigns() {
                   <SelectItem value="draft">Rascunho</SelectItem>
                   <SelectItem value="active">Ativo</SelectItem>
                   <SelectItem value="paused">Pausado</SelectItem>
-                  <SelectItem value="completed">Concluído</SelectItem>
+                  <SelectItem value="inactive">Inativo</SelectItem>
                 </SelectContent>
               </Select>
             </div>

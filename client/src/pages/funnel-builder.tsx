@@ -43,6 +43,7 @@ export default function FunnelBuilder() {
     mutationFn: async () => {
       const response = await apiRequest("POST", "/api/funnels", {
         name: newFunnelName,
+        triggerPhrase: newFunnelTrigger,
         status: "draft",
         flowData: { nodes: [], edges: [] },
       });
