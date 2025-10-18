@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { Link } from "wouter";
 import Sidebar from "@/components/sidebar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -333,10 +334,12 @@ export default function Plans() {
                 Nossa equipe está pronta para ajudar você a escolher o melhor plano para seu negócio
               </p>
               <div className="flex justify-center">
-                <Button size="lg" data-testid="button-contact-support">
-                  <Headphones className="h-5 w-5 mr-2" />
-                  Falar com Especialista
-                </Button>
+                <Link href="/support">
+                  <Button size="lg" data-testid="button-contact-support">
+                    <Headphones className="h-5 w-5 mr-2" />
+                    Falar com Suporte
+                  </Button>
+                </Link>
               </div>
             </div>
           </div>
