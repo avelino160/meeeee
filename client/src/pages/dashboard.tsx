@@ -54,37 +54,36 @@ export default function Dashboard() {
       
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Header */}
-        <header className="bg-card border-b border-border px-4 sm:px-6 py-3 sm:py-4">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4">
-            <div className="text-center sm:text-left w-full sm:flex-1">
-              <h1 className="text-lg sm:text-2xl font-semibold" data-testid="text-dashboard-title">
+        <header className="bg-card border-b border-border px-2 sm:px-4 lg:px-6 py-2 sm:py-3 lg:py-4">
+          <div className="flex flex-col gap-2 sm:gap-3">
+            <div className="text-center sm:text-left">
+              <h1 className="text-base sm:text-lg lg:text-2xl font-semibold" data-testid="text-dashboard-title">
                 Olá, {user?.firstName || 'Usuário'}! 👋
               </h1>
-              <p className="text-xs sm:text-sm text-muted-foreground">Sua central de vendas automáticas no WhatsApp</p>
+              <p className="text-[10px] sm:text-xs lg:text-sm text-muted-foreground">Sua central de vendas automáticas no WhatsApp</p>
             </div>
             
-            <div className="flex items-center gap-2 sm:gap-3">
-              {/* 📱 STATUS WHATSAPP - Desktop */}
-              <div className={`flex items-center space-x-2 px-3 py-1 rounded-full text-sm font-medium ${
+            <div className="flex items-center justify-center sm:justify-end gap-1 sm:gap-2">
+              <div className={`flex items-center space-x-1 sm:space-x-2 px-2 sm:px-3 py-1 rounded-full text-[10px] sm:text-xs lg:text-sm font-medium ${
                 whatsappStatus?.connected 
                   ? 'bg-green-100 text-green-700 border border-green-300' 
                   : 'bg-red-100 text-red-700 border border-red-300'
               }`}>
                 {whatsappStatus?.connected ? (
                   <>
-                    <Wifi className="h-4 w-4" />
-                    <span className="hidden md:inline">WhatsApp Conectado</span>
-                    <span className="md:hidden">Conectado</span>
+                    <Wifi className="h-3 w-3 sm:h-4 sm:w-4" />
+                    <span className="hidden sm:inline">WhatsApp Conectado</span>
+                    <span className="sm:hidden">Conectado</span>
                   </>
                 ) : (
                   <>
-                    <WifiOff className="h-4 w-4" />
-                    <span className="hidden md:inline">Desconectado</span>
-                    <span className="md:hidden">Off</span>
+                    <WifiOff className="h-3 w-3 sm:h-4 sm:w-4" />
+                    <span className="hidden sm:inline">Desconectado</span>
+                    <span className="sm:hidden">Off</span>
                     <Button
                       size="sm"
                       variant="outline"
-                      className="ml-2 h-6 text-xs"
+                      className="ml-1 sm:ml-2 h-5 sm:h-6 text-[10px] sm:text-xs px-2"
                       onClick={() => setShowWhatsAppModal(true)}
                       data-testid="button-connect-whatsapp"
                     >
@@ -98,78 +97,77 @@ export default function Dashboard() {
                 <Button 
                   variant="outline"
                   size="sm"
-                  className="hidden sm:flex"
+                  className="hidden sm:flex h-6 text-xs"
                   onClick={() => setShowWhatsAppModal(true)}
                   data-testid="button-whatsapp-settings"
                 >
-                  <MessageSquare className="h-4 w-4 sm:mr-2" />
+                  <MessageSquare className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />
                   <span className="hidden sm:inline">WhatsApp</span>
                 </Button>
               )}
             </div>
           </div>
-          
         </header>
 
         {/* Main Content */}
-        <main className="flex-1 p-3 sm:p-6 overflow-auto">
+        <main className="flex-1 p-2 sm:p-4 lg:p-6 overflow-auto">
           {/* Stats Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 mb-6 sm:mb-8">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 lg:gap-6 mb-4 sm:mb-6 lg:mb-8">
             <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Funis Ativos</CardTitle>
-                <BarChart3 className="h-4 w-4 text-muted-foreground" />
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 p-3 sm:p-4 lg:p-6 pb-1 sm:pb-2">
+                <CardTitle className="text-[10px] sm:text-xs lg:text-sm font-medium">Funis Ativos</CardTitle>
+                <BarChart3 className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
               </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold" data-testid="text-active-funnels">
+              <CardContent className="p-3 sm:p-4 lg:p-6 pt-0">
+                <div className="text-lg sm:text-xl lg:text-2xl font-bold" data-testid="text-active-funnels">
                   {analyticsLoading ? "..." : analytics?.activeFunnels || 0}
                 </div>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-[9px] sm:text-[10px] lg:text-xs text-muted-foreground">
                   +{analyticsLoading ? "..." : ((analytics?.activeFunnels || 0) * 0.2).toFixed(0)} desde ontem
                 </p>
               </CardContent>
             </Card>
 
             <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Mensagens Hoje</CardTitle>
-                <MessageSquare className="h-4 w-4 text-muted-foreground" />
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 p-3 sm:p-4 lg:p-6 pb-1 sm:pb-2">
+                <CardTitle className="text-[10px] sm:text-xs lg:text-sm font-medium">Mensagens Hoje</CardTitle>
+                <MessageSquare className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
               </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold" data-testid="text-today-messages">
+              <CardContent className="p-3 sm:p-4 lg:p-6 pt-0">
+                <div className="text-lg sm:text-xl lg:text-2xl font-bold" data-testid="text-today-messages">
                   {analyticsLoading ? "..." : analytics?.todayMessages || 0}
                 </div>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-[9px] sm:text-[10px] lg:text-xs text-muted-foreground">
                   +{analyticsLoading ? "..." : ((analytics?.todayMessages || 0) * 0.15).toFixed(0)}% desde ontem
                 </p>
               </CardContent>
             </Card>
 
             <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Contatos Ativos</CardTitle>
-                <Users className="h-4 w-4 text-muted-foreground" />
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 p-3 sm:p-4 lg:p-6 pb-1 sm:pb-2">
+                <CardTitle className="text-[10px] sm:text-xs lg:text-sm font-medium">Contatos Ativos</CardTitle>
+                <Users className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
               </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold" data-testid="text-active-contacts">
+              <CardContent className="p-3 sm:p-4 lg:p-6 pt-0">
+                <div className="text-lg sm:text-xl lg:text-2xl font-bold" data-testid="text-active-contacts">
                   {analyticsLoading ? "..." : analytics?.activeContacts || 0}
                 </div>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-[9px] sm:text-[10px] lg:text-xs text-muted-foreground">
                   Total: {analyticsLoading ? "..." : analytics?.totalContacts || 0}
                 </p>
               </CardContent>
             </Card>
 
             <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Taxa de Entrega</CardTitle>
-                <TrendingUp className="h-4 w-4 text-muted-foreground" />
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 p-3 sm:p-4 lg:p-6 pb-1 sm:pb-2">
+                <CardTitle className="text-[10px] sm:text-xs lg:text-sm font-medium">Taxa de Entrega</CardTitle>
+                <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
               </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold" data-testid="text-delivery-rate">
+              <CardContent className="p-3 sm:p-4 lg:p-6 pt-0">
+                <div className="text-lg sm:text-xl lg:text-2xl font-bold" data-testid="text-delivery-rate">
                   {analyticsLoading ? "..." : `${(analytics?.deliveryRate || 0).toFixed(1)}%`}
                 </div>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-[9px] sm:text-[10px] lg:text-xs text-muted-foreground">
                   {analyticsLoading ? "..." : analytics?.sentMessages || 0} mensagens enviadas
                 </p>
               </CardContent>
@@ -178,40 +176,40 @@ export default function Dashboard() {
 
           {/* Metrics Chart */}
           <Card>
-            <CardHeader>
-              <CardTitle>Análise de Métricas</CardTitle>
-              <CardDescription>
+            <CardHeader className="p-3 sm:p-4 lg:p-6">
+              <CardTitle className="text-sm sm:text-base lg:text-lg">Análise de Métricas</CardTitle>
+              <CardDescription className="text-[10px] sm:text-xs lg:text-sm">
                 Acompanhe o desempenho das suas conversas e conversões nos últimos 7 dias
               </CardDescription>
             </CardHeader>
-            <CardContent>
-              <div className="h-[250px] w-full" data-testid="chart-metrics">
+            <CardContent className="p-3 sm:p-4 lg:p-6 pt-0">
+              <div className="h-[200px] sm:h-[250px] w-full" data-testid="chart-metrics">
                 <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={metricsData}>
+                  <LineChart data={metricsData} margin={{ top: 5, right: 5, left: -20, bottom: 5 }}>
                     <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
                     <XAxis 
                       dataKey="name" 
-                      className="text-xs"
-                      tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                      tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 10 }}
                     />
                     <YAxis 
-                      className="text-xs"
-                      tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                      tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 10 }}
                     />
                     <Tooltip 
                       contentStyle={{ 
                         backgroundColor: 'hsl(var(--card))',
                         border: '1px solid hsl(var(--border))',
-                        borderRadius: '8px'
+                        borderRadius: '8px',
+                        fontSize: '11px'
                       }}
                     />
-                    <Legend />
+                    <Legend wrapperStyle={{ fontSize: '10px' }} />
                     <Line 
                       type="monotone" 
                       dataKey="mensagens" 
                       stroke="#8b5cf6" 
                       strokeWidth={2}
                       name="Mensagens"
+                      dot={{ r: 3 }}
                     />
                     <Line 
                       type="monotone" 
@@ -219,6 +217,7 @@ export default function Dashboard() {
                       stroke="#a78bfa" 
                       strokeWidth={2}
                       name="Contatos"
+                      dot={{ r: 3 }}
                     />
                     <Line 
                       type="monotone" 
@@ -226,6 +225,7 @@ export default function Dashboard() {
                       stroke="#c084fc" 
                       strokeWidth={2}
                       name="Conversões"
+                      dot={{ r: 3 }}
                     />
                   </LineChart>
                 </ResponsiveContainer>
