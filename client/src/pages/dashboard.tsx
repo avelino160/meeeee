@@ -1,6 +1,8 @@
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useState, useRef } from "react";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import type { DashboardAnalytics } from "@shared/api-types";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 
 type WhatsAppStatus = {
   connected: boolean;
@@ -17,11 +19,13 @@ import Sidebar from "@/components/sidebar";
 import WhatsAppConnectionModal from "@/components/whatsapp-connection-modal";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { BarChart3, MessageSquare, Users, TrendingUp, Wifi, WifiOff } from "lucide-react";
+import { BarChart3, MessageSquare, Users, TrendingUp, Wifi, WifiOff, Upload } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 
 export default function Dashboard() {
   const [showWhatsAppModal, setShowWhatsAppModal] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const { toast } = useToast();
 
   const { data: analytics, isLoading: analyticsLoading } = useQuery<DashboardAnalytics>({
     queryKey: ["/api/analytics/dashboard"],
@@ -48,6 +52,56 @@ export default function Dashboard() {
     { name: 'Dom', mensagens: 15, contatos: 8, conversoes: 3 },
   ];
 
+  const importMutation = useMutation({
+    mutationFn: async (funnels: any[]) => {
+      const res = await apiRequest('POST', '/api/funnels/import', { funnels });
+      return res.json();
+    },
+    onSuccess: (data: any) => {
+      toast({
+        title: "✅ Funis importados com sucesso!",
+        description: `${data.imported} funis foram adicionados à sua conta.`,
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/funnels"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/analytics/dashboard"] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "❌ Erro ao importar funis",
+        description: error.message || "Não foi possível importar os funis. Verifique o formato do arquivo.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleFileImport = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const content = e.target?.result as string;
+        const jsonData = JSON.parse(content);
+        
+        const funnels = Array.isArray(jsonData) ? jsonData : [jsonData];
+        
+        importMutation.mutate(funnels);
+      } catch (error) {
+        toast({
+          title: "❌ Arquivo inválido",
+          description: "O arquivo não está em formato JSON válido.",
+          variant: "destructive",
+        });
+      }
+    };
+    reader.readAsText(file);
+    
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
   return (
     <div className="flex h-screen bg-background">
       <Sidebar />
@@ -63,7 +117,28 @@ export default function Dashboard() {
               <p className="text-[10px] sm:text-xs lg:text-sm text-muted-foreground">Sua central de vendas automáticas no WhatsApp</p>
             </div>
             
-            <div className="flex items-center justify-center sm:justify-end gap-1 sm:gap-2">
+            <div className="flex items-center justify-center sm:justify-end gap-1 sm:gap-2 flex-wrap">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".json"
+                onChange={handleFileImport}
+                className="hidden"
+                data-testid="input-import-file"
+              />
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-5 sm:h-6 text-[10px] sm:text-xs px-2"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={importMutation.isPending}
+                data-testid="button-import-funnels"
+              >
+                <Upload className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-1" />
+                <span className="hidden sm:inline">{importMutation.isPending ? 'Importando...' : 'Importar Funis'}</span>
+                <span className="sm:hidden">Import</span>
+              </Button>
+              
               <div className={`flex items-center space-x-1 sm:space-x-2 px-2 sm:px-3 py-1 rounded-full text-[10px] sm:text-xs lg:text-sm font-medium ${
                 whatsappStatus?.connected 
                   ? 'bg-green-100 text-green-700 border border-green-300' 

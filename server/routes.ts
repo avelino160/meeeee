@@ -189,6 +189,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.post('/api/funnels/import', async (req, res) => {
+    try {
+      const userId = DEFAULT_USER_ID;
+      const { funnels } = req.body;
+
+      if (!Array.isArray(funnels)) {
+        return res.status(400).json({ message: "Funnels must be an array" });
+      }
+
+      const importedFunnels = [];
+      for (const funnelData of funnels) {
+        try {
+          const validatedData = insertFunnelSchema.parse({ 
+            ...funnelData, 
+            userId,
+            status: funnelData.status || 'draft',
+            triggerPhrases: funnelData.triggerPhrases || [],
+            flowData: funnelData.flowData || { nodes: [], edges: [] }
+          });
+          const funnel = await storage.createFunnel(validatedData);
+          importedFunnels.push(funnel);
+        } catch (error) {
+          console.error("Error importing funnel:", error);
+        }
+      }
+
+      res.status(201).json({ 
+        success: true, 
+        imported: importedFunnels.length,
+        total: funnels.length,
+        funnels: importedFunnels 
+      });
+    } catch (error) {
+      console.error("Error importing funnels:", error);
+      res.status(500).json({ message: "Failed to import funnels" });
+    }
+  });
+
   app.put('/api/funnels/:id', async (req, res) => {
     try {
       const { id } = req.params;
