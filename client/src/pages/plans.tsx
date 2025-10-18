@@ -162,13 +162,13 @@ export default function Plans() {
                       
                       <div className="mt-6">
                         <div className="flex items-baseline justify-center">
-                          <span className="text-5xl font-bold">{price} MT</span>
-                          <span className="text-muted-foreground ml-2">
+                          <span className="text-3xl sm:text-4xl lg:text-5xl font-bold">{price} MT</span>
+                          <span className="text-muted-foreground ml-2 text-sm sm:text-base">
                             /{billingPeriod === "monthly" ? "mês" : "ano"}
                           </span>
                         </div>
                         {billingPeriod === "yearly" && plan.monthlyPrice > 0 && (
-                          <p className="text-sm text-muted-foreground mt-2">
+                          <p className="text-xs sm:text-sm text-muted-foreground mt-2">
                             {(price / 12).toFixed(2)} MT/mês economize {((plan.monthlyPrice * 12 - price) / (plan.monthlyPrice * 12) * 100).toFixed(0)}%
                           </p>
                         )}
