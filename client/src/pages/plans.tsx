@@ -51,8 +51,6 @@ export default function Plans() {
         { text: "3 funis de venda", included: true },
         { text: "500 contatos", included: true },
         { text: "Suporte via email (48h)", included: true },
-        { text: "Webhooks personalizados", included: false },
-        { text: "API dedicada", included: false },
         { text: "Múltiplas contas", included: false },
       ]
     },
@@ -69,9 +67,7 @@ export default function Plans() {
         { text: "Funis ilimitados", included: true },
         { text: "5.000 contatos", included: true },
         { text: "Suporte prioritário (24h)", included: true },
-        { text: "Webhooks personalizados", included: true },
         { text: "Relatórios avançados", included: true },
-        { text: "API dedicada", included: false },
       ]
     },
     {
@@ -87,8 +83,6 @@ export default function Plans() {
         { text: "Funis ilimitados", included: true },
         { text: "Contatos ilimitados", included: true },
         { text: "Chat ao vivo 24/7", included: true },
-        { text: "Webhooks personalizados", included: true },
-        { text: "API dedicada", included: true },
         { text: "Gerente de conta dedicado", included: true },
       ]
     }
