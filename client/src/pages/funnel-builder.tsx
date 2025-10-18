@@ -136,7 +136,7 @@ export default function FunnelBuilder() {
             </div>
             <Button 
               onClick={() => setIsCreateDialogOpen(true)}
-              className="bg-yellow-600 hover:bg-yellow-700 text-white font-semibold"
+              className="bg-purple-600 hover:bg-purple-700 text-white font-semibold"
               data-testid="button-create-funnel"
             >
               <Plus className="h-4 w-4 mr-2" />
@@ -216,7 +216,7 @@ export default function FunnelBuilder() {
                         </Button>
                         <Button
                           size="icon"
-                          className="rounded-full w-10 h-10 bg-yellow-600 hover:bg-yellow-700"
+                          className="rounded-full w-10 h-10 bg-purple-600 hover:bg-purple-700"
                           onClick={() => setLocation(`/funnel-editor/${funnel.id}`)}
                           data-testid={`button-edit-funnel-${funnel.id}`}
                         >
@@ -235,7 +235,7 @@ export default function FunnelBuilder() {
                   </p>
                   <Button 
                     onClick={() => setIsCreateDialogOpen(true)}
-                    className="bg-yellow-600 hover:bg-yellow-700 text-white"
+                    className="bg-purple-600 hover:bg-purple-700 text-white"
                     data-testid="button-create-first-funnel"
                   >
                     <Plus className="h-4 w-4 mr-2" />
@@ -282,7 +282,7 @@ export default function FunnelBuilder() {
             <Button
               onClick={handleCreateFunnel}
               disabled={createFunnelMutation.isPending}
-              className="bg-yellow-600 hover:bg-yellow-700 text-white"
+              className="bg-purple-600 hover:bg-purple-700 text-white"
               data-testid="button-confirm-create"
             >
               {createFunnelMutation.isPending ? "Criando..." : "Criar Funil"}

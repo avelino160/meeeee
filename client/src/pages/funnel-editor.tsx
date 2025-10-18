@@ -265,7 +265,7 @@ export default function FunnelEditor() {
               <Button 
                 onClick={handleSaveFunnel}
                 disabled={saveFunnelMutation.isPending}
-                className="bg-yellow-600 hover:bg-yellow-700 text-white"
+                className="bg-purple-600 hover:bg-purple-700 text-white"
                 data-testid="button-save-funnel"
               >
                 <Save className="h-4 w-4 mr-2" />
@@ -292,7 +292,7 @@ export default function FunnelEditor() {
                     draggable
                     onDragStart={(e) => onDragStart(e, 'message')}
                   >
-                    <MessageSquare className="h-5 w-5 text-yellow-500 mb-1" />
+                    <MessageSquare className="h-5 w-5 text-purple-500 mb-1" />
                     <p className="text-xs font-medium text-gray-300">Texto</p>
                   </div>
                   <div 
@@ -301,7 +301,7 @@ export default function FunnelEditor() {
                     draggable
                     onDragStart={(e) => onDragStart(e, 'image')}
                   >
-                    <Image className="h-5 w-5 text-yellow-500 mb-1" />
+                    <Image className="h-5 w-5 text-purple-500 mb-1" />
                     <p className="text-xs font-medium text-gray-300">Imagem</p>
                   </div>
                   <div 
@@ -310,7 +310,7 @@ export default function FunnelEditor() {
                     draggable
                     onDragStart={(e) => onDragStart(e, 'video')}
                   >
-                    <Video className="h-5 w-5 text-yellow-500 mb-1" />
+                    <Video className="h-5 w-5 text-purple-500 mb-1" />
                     <p className="text-xs font-medium text-gray-300">Vídeo</p>
                   </div>
                   <div 
@@ -319,7 +319,7 @@ export default function FunnelEditor() {
                     draggable
                     onDragStart={(e) => onDragStart(e, 'audio')}
                   >
-                    <Mic className="h-5 w-5 text-yellow-500 mb-1" />
+                    <Mic className="h-5 w-5 text-purple-500 mb-1" />
                     <p className="text-xs font-medium text-gray-300">Áudio</p>
                   </div>
                   <div 
@@ -328,7 +328,7 @@ export default function FunnelEditor() {
                     draggable
                     onDragStart={(e) => onDragStart(e, 'document')}
                   >
-                    <FileText className="h-5 w-5 text-yellow-500 mb-1" />
+                    <FileText className="h-5 w-5 text-purple-500 mb-1" />
                     <p className="text-xs font-medium text-gray-300">Documento</p>
                   </div>
                   <div 
@@ -337,7 +337,7 @@ export default function FunnelEditor() {
                     draggable
                     onDragStart={(e) => onDragStart(e, 'location')}
                   >
-                    <MapPin className="h-5 w-5 text-yellow-500 mb-1" />
+                    <MapPin className="h-5 w-5 text-purple-500 mb-1" />
                     <p className="text-xs font-medium text-gray-300">Local</p>
                   </div>
                 </div>
@@ -355,7 +355,7 @@ export default function FunnelEditor() {
                     draggable
                     onDragStart={(e) => onDragStart(e, 'condition')}
                   >
-                    <GitBranch className="h-4 w-4 text-yellow-500 mr-2" />
+                    <GitBranch className="h-4 w-4 text-purple-500 mr-2" />
                     <span className="text-sm font-medium text-gray-300">Condição</span>
                   </div>
                   <div 
@@ -364,7 +364,7 @@ export default function FunnelEditor() {
                     draggable
                     onDragStart={(e) => onDragStart(e, 'delay')}
                   >
-                    <Clock className="h-4 w-4 text-yellow-500 mr-2" />
+                    <Clock className="h-4 w-4 text-purple-500 mr-2" />
                     <span className="text-sm font-medium text-gray-300">Esperar</span>
                   </div>
                   <div 
@@ -373,7 +373,7 @@ export default function FunnelEditor() {
                     draggable
                     onDragStart={(e) => onDragStart(e, 'question')}
                   >
-                    <HelpCircle className="h-4 w-4 text-yellow-500 mr-2" />
+                    <HelpCircle className="h-4 w-4 text-purple-500 mr-2" />
                     <span className="text-sm font-medium text-gray-300">Pergunta</span>
                   </div>
                   <div 
@@ -382,7 +382,7 @@ export default function FunnelEditor() {
                     draggable
                     onDragStart={(e) => onDragStart(e, 'tag')}
                   >
-                    <Tag className="h-4 w-4 text-yellow-500 mr-2" />
+                    <Tag className="h-4 w-4 text-purple-500 mr-2" />
                     <span className="text-sm font-medium text-gray-300">Tag</span>
                   </div>
                   <div 
@@ -391,7 +391,7 @@ export default function FunnelEditor() {
                     draggable
                     onDragStart={(e) => onDragStart(e, 'verify')}
                   >
-                    <CheckCircle className="h-4 w-4 text-yellow-500 mr-2" />
+                    <CheckCircle className="h-4 w-4 text-purple-500 mr-2" />
                     <span className="text-sm font-medium text-gray-300">Verificar</span>
                   </div>
                 </div>
@@ -474,7 +474,7 @@ export default function FunnelEditor() {
                           '*/*'
                         }
                         onChange={handleFileUpload}
-                        className="mt-2 bg-[#1a1a1a] border-gray-700 text-white file:bg-yellow-600 file:text-white file:border-0 file:px-4 file:py-2 file:rounded file:mr-4"
+                        className="mt-2 bg-[#1a1a1a] border-gray-700 text-white file:bg-purple-600 file:text-white file:border-0 file:px-4 file:py-2 file:rounded file:mr-4"
                         data-testid="input-media-file"
                       />
                     </div>

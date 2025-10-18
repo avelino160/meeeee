@@ -305,7 +305,7 @@ function FunnelCanvasInner({ data, onDataChange, onNodeSelect }: FunnelCanvasPro
         <Controls className="bg-card border-border" />
         <MiniMap 
           className="bg-card border-border"
-          nodeColor="#FF8C00"
+          nodeColor="#a855f7"
         />
         <Background 
           variant={BackgroundVariant.Dots} 
