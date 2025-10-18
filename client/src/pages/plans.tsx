@@ -161,7 +161,7 @@ export default function Plans() {
                       
                       <div className="mt-6">
                         <div className="flex items-baseline justify-center">
-                          <span className="sm:text-4xl lg:text-5xl text-center font-extrabold text-[31px]">{price} MT</span>
+                          <span className="sm:text-4xl lg:text-5xl text-center font-extrabold text-[30px]">{price} MT</span>
                           <span className="text-muted-foreground ml-2 text-sm sm:text-base">
                             /{billingPeriod === "monthly" ? "mês" : "ano"}
                           </span>
