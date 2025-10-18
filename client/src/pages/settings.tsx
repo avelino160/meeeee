@@ -225,23 +225,31 @@ export default function Settings() {
                         </CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="flex items-start space-x-3">
+                        <a 
+                          href="mailto:suporte@ranzap.com"
+                          className="flex items-start space-x-3 p-3 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
+                          data-testid="link-email-support"
+                        >
                           <Mail className="h-5 w-5 text-primary mt-0.5" />
                           <div>
                             <p className="font-medium">Email</p>
                             <p className="text-sm text-muted-foreground">suporte@ranzap.com</p>
                             <p className="text-xs text-muted-foreground mt-1">Resposta em até 48h (Free) ou 24h (Pro+)</p>
                           </div>
-                        </div>
+                        </a>
                         <Separator />
-                        <div className="flex items-start space-x-3">
+                        <a 
+                          href="tel:+5511987654321"
+                          className="flex items-start space-x-3 p-3 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
+                          data-testid="link-phone-support"
+                        >
                           <Phone className="h-5 w-5 text-primary mt-0.5" />
                           <div>
                             <p className="font-medium">Telefone</p>
                             <p className="text-sm text-muted-foreground">+55 11 98765-4321</p>
                             <p className="text-xs text-muted-foreground mt-1">Seg-Sex, 9h às 18h (Apenas Business)</p>
                           </div>
-                        </div>
+                        </a>
                         
                       </CardContent>
                     </Card>
