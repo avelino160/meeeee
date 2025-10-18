@@ -19,6 +19,7 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={Dashboard} />
+      <Route path="/dashboard" component={Dashboard} />
       <Route path="/whatsapp-connection" component={WhatsAppConnection} />
       <Route path="/funnel-builder" component={FunnelBuilder} />
       <Route path="/funnel-editor/:id" component={FunnelEditor} />
