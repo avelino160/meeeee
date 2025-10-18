@@ -62,10 +62,6 @@ export default function Settings() {
       answer: "Acesse 'Funis de venda' no menu, clique em 'Criar Novo Funil' e siga o assistente para configurar seus gatilhos, mensagens e ações."
     },
     {
-      question: "Posso agendar campanhas?",
-      answer: "Sim! Na criação ou edição da campanha, você pode definir data e hora específicas para início automático."
-    },
-    {
       question: "Como importar meus contatos?",
       answer: "Na página de Contatos, clique em 'Importar' e faça upload de um arquivo CSV com os dados (nome, telefone, email)."
     },
