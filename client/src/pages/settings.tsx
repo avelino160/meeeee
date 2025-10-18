@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import Sidebar from "@/components/sidebar";
@@ -44,6 +44,18 @@ export default function Settings() {
     timezone: "America/Sao_Paulo",
     language: "pt-BR",
   });
+
+  useEffect(() => {
+    const savedSettings = localStorage.getItem("generalSettings");
+    if (savedSettings) {
+      try {
+        const parsed = JSON.parse(savedSettings);
+        setGeneralSettings(parsed);
+      } catch (error) {
+        console.error("Erro ao carregar configurações:", error);
+      }
+    }
+  }, []);
 
   // Support Form State
   const [supportForm, setSupportForm] = useState({
@@ -122,12 +134,13 @@ export default function Settings() {
   const handleSaveSettings = async () => {
     setIsSaving(true);
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      localStorage.setItem("generalSettings", JSON.stringify(generalSettings));
       
       toast({
         title: "Configurações salvas",
-        description: "Suas configurações foram atualizadas com sucesso.",
+        description: "Suas preferências foram atualizadas com sucesso.",
       });
     } catch (error) {
       toast({
