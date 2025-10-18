@@ -337,15 +337,12 @@ export default function Settings() {
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <p className="text-sm text-muted-foreground">
-                      Entre em contato com nosso suporte ou consulte nossa documentação completa.
+                      Entre em contato com nosso suporte.
                     </p>
                     <div className="flex gap-3">
                       <Button variant="outline" data-testid="button-go-support">
                         <HelpCircle className="h-4 w-4 mr-2" />
                         Falar com Suporte
-                      </Button>
-                      <Button variant="outline" data-testid="button-documentation">
-                        Ver Documentação
                       </Button>
                     </div>
                   </CardContent>
