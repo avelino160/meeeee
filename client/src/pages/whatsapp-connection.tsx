@@ -180,7 +180,7 @@ export default function WhatsAppConnection() {
                     {whatsappStatus?.connected ? (
                       <CheckCircle className="h-8 w-8 text-green-500" />
                     ) : (
-                      <XCircle className="h-8 w-8 text-muted-foreground" />
+                      <XCircle className="h-8 w-8 text-red-500" />
                     )}
                     <div>
                       <p className="font-medium">
