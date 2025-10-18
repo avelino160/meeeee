@@ -21,12 +21,26 @@ import {
   XCircle,
   LogOut,
   Zap,
+  Crown,
 } from "lucide-react";
+import { Link } from "wouter";
 
 export default function WhatsAppConnection() {
   const [qrImageUrl, setQrImageUrl] = useState<string>("");
+  const [currentPlan] = useState("free"); // Simula o plano atual
+  const [connectedAccounts] = useState(1); // Simula número de contas conectadas
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  // Limites baseados no plano
+  const planLimits = {
+    free: 1,
+    pro: 1,
+    business: 5,
+  };
+
+  const maxAccounts = planLimits[currentPlan as keyof typeof planLimits];
+  const canAddMore = connectedAccounts < maxAccounts;
 
   const { data: whatsappStatus, isLoading } = useQuery<WhatsAppStatus>({
     queryKey: ["/api/whatsapp/status"],
@@ -118,6 +132,41 @@ export default function WhatsAppConnection() {
 
         <main className="flex-1 p-6 overflow-auto">
           <div className="max-w-4xl mx-auto space-y-6">
+            {/* Plan Limits Card */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center justify-between">
+                  <span className="flex items-center">
+                    <Crown className="h-5 w-5 mr-2 text-primary" />
+                    Contas WhatsApp
+                  </span>
+                  <Badge variant="outline">
+                    {connectedAccounts} de {maxAccounts} conectadas
+                  </Badge>
+                </CardTitle>
+                <CardDescription>
+                  {currentPlan === "free" && "Plano Gratuito permite 1 conta"}
+                  {currentPlan === "pro" && "Plano Pro permite 1 conta"}
+                  {currentPlan === "business" && "Plano Business permite até 5 contas"}
+                </CardDescription>
+              </CardHeader>
+              {!canAddMore && currentPlan !== "business" && (
+                <CardContent>
+                  <div className="bg-primary/5 border border-primary/20 rounded-lg p-4">
+                    <p className="text-sm mb-3">
+                      <strong>Quer conectar mais contas?</strong> Faça upgrade para o plano Business e conecte até 5 contas WhatsApp.
+                    </p>
+                    <Link href="/plans">
+                      <Button variant="default" size="sm">
+                        <Crown className="h-4 w-4 mr-2" />
+                        Ver Planos
+                      </Button>
+                    </Link>
+                  </div>
+                </CardContent>
+              )}
+            </Card>
+
             {/* Status Card */}
             <Card>
               <CardHeader>
@@ -161,7 +210,7 @@ export default function WhatsAppConnection() {
             </Card>
 
             {/* Connection Methods */}
-            {!whatsappStatus?.connected && (
+            {!whatsappStatus?.connected && canAddMore && (
               <Card>
                 <CardHeader>
                   <CardTitle>Conectar WhatsApp</CardTitle>
@@ -204,6 +253,34 @@ export default function WhatsAppConnection() {
                       </CardContent>
                     </Card>
                   )}
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Limit Reached - Upgrade Required */}
+            {!whatsappStatus?.connected && !canAddMore && (
+              <Card className="border-primary/20">
+                <CardContent className="pt-6">
+                  <div className="text-center space-y-4">
+                    <div className="mx-auto w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center">
+                      <Crown className="h-8 w-8 text-primary" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold mb-2">
+                        Limite de Contas Atingido
+                      </h3>
+                      <p className="text-muted-foreground text-sm">
+                        Seu plano atual permite apenas {maxAccounts} conta{maxAccounts > 1 ? 's' : ''}. 
+                        Faça upgrade para o plano Business e conecte até 5 contas WhatsApp.
+                      </p>
+                    </div>
+                    <Link href="/plans">
+                      <Button>
+                        <Crown className="h-4 w-4 mr-2" />
+                        Fazer Upgrade
+                      </Button>
+                    </Link>
+                  </div>
                 </CardContent>
               </Card>
             )}
