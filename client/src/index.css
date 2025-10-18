@@ -10,32 +10,32 @@
   --card-foreground: hsl(0, 0%, 98%);
   --popover: hsla(240, 35%, 12%, 0.95);
   --popover-foreground: hsl(0, 0%, 98%);
-  --primary: hsl(260, 85%, 65%);
+  --primary: hsl(270, 85%, 65%);
   --primary-foreground: hsl(0, 0%, 100%);
-  --secondary: hsl(240, 30%, 20%);
-  --secondary-foreground: hsl(0, 0%, 90%);
+  --secondary: hsl(270, 60%, 55%);
+  --secondary-foreground: hsl(0, 0%, 100%);
   --muted: hsl(240, 25%, 16%);
   --muted-foreground: hsl(240, 15%, 65%);
-  --accent: hsl(280, 75%, 60%);
+  --accent: hsl(270, 75%, 60%);
   --accent-foreground: hsl(0, 0%, 100%);
   --destructive: hsl(0, 72%, 51%);
   --destructive-foreground: hsl(0, 0%, 100%);
   --border: hsla(240, 30%, 25%, 0.5);
   --input: hsla(240, 30%, 18%, 0.8);
-  --ring: hsl(260, 85%, 65%);
-  --chart-1: hsl(260, 85%, 65%);
+  --ring: hsl(270, 85%, 65%);
+  --chart-1: hsl(270, 85%, 65%);
   --chart-2: hsl(280, 75%, 60%);
-  --chart-3: hsl(200, 85%, 55%);
-  --chart-4: hsl(180, 75%, 50%);
-  --chart-5: hsl(320, 70%, 55%);
+  --chart-3: hsl(290, 85%, 55%);
+  --chart-4: hsl(260, 75%, 50%);
+  --chart-5: hsl(300, 70%, 55%);
   --sidebar: hsla(240, 35%, 10%, 0.8);
   --sidebar-foreground: hsl(0, 0%, 98%);
-  --sidebar-primary: hsl(260, 85%, 65%);
+  --sidebar-primary: hsl(270, 85%, 65%);
   --sidebar-primary-foreground: hsl(0, 0%, 100%);
-  --sidebar-accent: hsl(240, 30%, 20%);
-  --sidebar-accent-foreground: hsl(0, 0%, 90%);
-  --sidebar-border: hsla(240, 30%, 25%, 0.5);
-  --sidebar-ring: hsl(260, 85%, 65%);
+  --sidebar-accent: hsl(270, 30%, 30%);
+  --sidebar-accent-foreground: hsl(0, 0%, 100%);
+  --sidebar-border: hsla(270, 30%, 25%, 0.5);
+  --sidebar-ring: hsl(270, 85%, 65%);
   --font-sans: 'Inter', system-ui, sans-serif;
   --font-serif: Georgia, serif;
   --font-mono: 'JetBrains Mono', Menlo, monospace;
@@ -109,11 +109,11 @@
 
 .funnel-node:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(255, 140, 0, 0.3);
+  box-shadow: 0 8px 25px rgba(138, 43, 226, 0.4);
 }
 
 .connection-line {
-  stroke: #FF8C00;
+  stroke: hsl(270, 85%, 65%);
   stroke-width: 2;
   fill: none;
 }
@@ -135,8 +135,8 @@
     45deg,
     transparent,
     transparent 10px,
-    rgba(255, 140, 0, 0.1) 10px,
-    rgba(255, 140, 0, 0.1) 20px
+    rgba(138, 43, 226, 0.1) 10px,
+    rgba(138, 43, 226, 0.1) 20px
   );
 }
 
@@ -149,12 +149,12 @@
 }
 
 .react-flow__node.selected {
-  border-color: hsl(25, 95%, 53%);
-  box-shadow: 0 0 0 2px hsl(25, 95%, 53%, 0.2);
+  border-color: hsl(270, 85%, 65%);
+  box-shadow: 0 0 0 2px hsl(270, 85%, 65%, 0.4);
 }
 
 .react-flow__edge-path {
-  stroke: hsl(25, 95%, 53%);
+  stroke: hsl(270, 85%, 65%);
   stroke-width: 2;
 }
 

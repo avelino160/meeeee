@@ -61,16 +61,16 @@ export default function WhatsAppPreview({
 
     setMessages([userMessage]);
 
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise(resolve => setTimeout(resolve, 1500));
 
     const sortedNodes = getExecutionOrder(nodes, edges);
     
     for (const node of sortedNodes) {
       const delay = node.data?.delayMinutes;
       if (delay && delay > 0) {
-        await new Promise(resolve => setTimeout(resolve, Math.min(delay * 100, 2000)));
+        await new Promise(resolve => setTimeout(resolve, Math.min(delay * 200, 3000)));
       } else {
-        await new Promise(resolve => setTimeout(resolve, 800));
+        await new Promise(resolve => setTimeout(resolve, 1200));
       }
 
       const botMessage: Message = {
@@ -176,19 +176,19 @@ export default function WhatsAppPreview({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md h-[600px] p-0 bg-[#0b141a] border-none">
-        <DialogHeader className="bg-[#202c33] px-4 py-3 border-b border-[#2a3942]">
+      <DialogContent className="max-w-lg h-[700px] p-0 bg-[#0b141a] border-none overflow-hidden">
+        <DialogHeader className="bg-[#202c33] px-4 py-3 border-b border-[#2a3942] flex-shrink-0">
           <div className="flex items-center gap-3">
             <Avatar className="h-10 w-10">
-              <AvatarFallback className="bg-[#00a884] text-white">
+              <AvatarFallback className="bg-purple-600 text-white">
                 <Bot className="h-5 w-5" />
               </AvatarFallback>
             </Avatar>
             <div>
               <DialogTitle className="text-white text-base font-medium">
-                Preview do Funil
+                Automação RanZap
               </DialogTitle>
-              <p className="text-xs text-[#8696a0]">Simulação de conversa</p>
+              <p className="text-xs text-[#8696a0]">online</p>
             </div>
           </div>
         </DialogHeader>
@@ -207,36 +207,41 @@ export default function WhatsAppPreview({
               className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'} animate-in slide-in-from-bottom-2 duration-300`}
               style={{ animationDelay: `${index * 50}ms` }}
             >
-              <div className="flex items-end gap-2 max-w-[75%]">
+              <div className="flex items-end gap-2 max-w-[80%]">
                 {message.type === 'bot' && (
-                  <Avatar className="h-8 w-8 mb-1">
-                    <AvatarFallback className="bg-[#00a884] text-white text-xs">
+                  <Avatar className="h-8 w-8 mb-1 flex-shrink-0">
+                    <AvatarFallback className="bg-purple-600 text-white text-xs">
                       <Bot className="h-4 w-4" />
                     </AvatarFallback>
                   </Avatar>
                 )}
                 
                 <div
-                  className={`rounded-lg px-3 py-2 ${
+                  className={`rounded-lg px-4 py-2 shadow-md ${
                     message.type === 'user'
-                      ? 'bg-[#005c4b] text-white'
-                      : 'bg-[#202c33] text-[#e9edef]'
+                      ? 'bg-[#005c4b] text-white rounded-br-none'
+                      : 'bg-[#202c33] text-[#e9edef] rounded-bl-none'
                   }`}
                 >
                   {renderMessageContent(message)}
-                  <div className={`text-[10px] mt-1 ${
-                    message.type === 'user' ? 'text-[#8696a0]' : 'text-[#8696a0]'
+                  <div className={`text-[10px] mt-1 flex items-center gap-1 justify-end ${
+                    message.type === 'user' ? 'text-[#a5c8bb]' : 'text-[#8696a0]'
                   }`}>
                     {message.timestamp.toLocaleTimeString('pt-BR', { 
                       hour: '2-digit', 
                       minute: '2-digit' 
                     })}
+                    {message.type === 'user' && (
+                      <svg viewBox="0 0 16 15" width="16" height="15" className="fill-current">
+                        <path d="M15.01 3.316l-.478-.372a.365.365 0 0 0-.51.063L8.666 9.879a.32.32 0 0 1-.484.033l-.358-.325a.319.319 0 0 0-.484.032l-.378.483a.418.418 0 0 0 .036.541l1.32 1.266c.143.14.361.125.484-.033l6.272-8.048a.366.366 0 0 0-.064-.512zm-4.1 0l-.478-.372a.365.365 0 0 0-.51.063L4.566 9.879a.32.32 0 0 1-.484.033L1.891 7.769a.366.366 0 0 0-.515.006l-.423.433a.364.364 0 0 0 .006.514l3.258 3.185c.143.14.361.125.484-.033l6.272-8.048a.365.365 0 0 0-.063-.51z"></path>
+                      </svg>
+                    )}
                   </div>
                 </div>
 
                 {message.type === 'user' && (
-                  <Avatar className="h-8 w-8 mb-1">
-                    <AvatarFallback className="bg-[#6b7c85] text-white text-xs">
+                  <Avatar className="h-8 w-8 mb-1 flex-shrink-0">
+                    <AvatarFallback className="bg-[#667781] text-white text-xs">
                       <User className="h-4 w-4" />
                     </AvatarFallback>
                   </Avatar>
@@ -246,18 +251,18 @@ export default function WhatsAppPreview({
           ))}
 
           {isSimulating && messages.length > 0 && (
-            <div className="flex justify-start">
+            <div className="flex justify-start animate-in fade-in duration-300">
               <div className="flex items-end gap-2">
-                <Avatar className="h-8 w-8 mb-1">
-                  <AvatarFallback className="bg-[#00a884] text-white text-xs">
+                <Avatar className="h-8 w-8 mb-1 flex-shrink-0">
+                  <AvatarFallback className="bg-purple-600 text-white text-xs">
                     <Bot className="h-4 w-4" />
                   </AvatarFallback>
                 </Avatar>
-                <div className="bg-[#202c33] rounded-lg px-4 py-3">
+                <div className="bg-[#202c33] rounded-lg rounded-bl-none px-4 py-3 shadow-md">
                   <div className="flex gap-1">
-                    <div className="w-2 h-2 bg-[#8696a0] rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-                    <div className="w-2 h-2 bg-[#8696a0] rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-                    <div className="w-2 h-2 bg-[#8696a0] rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                    <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                    <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                    <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
                   </div>
                 </div>
               </div>
