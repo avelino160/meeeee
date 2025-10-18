@@ -202,7 +202,7 @@ export default function Dashboard() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="h-[400px] w-full" data-testid="chart-metrics">
+              <div className="h-[250px] w-full" data-testid="chart-metrics">
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={metricsData}>
                     <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
@@ -226,21 +226,21 @@ export default function Dashboard() {
                     <Line 
                       type="monotone" 
                       dataKey="mensagens" 
-                      stroke="hsl(var(--primary))" 
+                      stroke="#8b5cf6" 
                       strokeWidth={2}
                       name="Mensagens"
                     />
                     <Line 
                       type="monotone" 
                       dataKey="contatos" 
-                      stroke="hsl(142, 76%, 36%)" 
+                      stroke="#a78bfa" 
                       strokeWidth={2}
                       name="Contatos"
                     />
                     <Line 
                       type="monotone" 
                       dataKey="conversoes" 
-                      stroke="hsl(47, 96%, 53%)" 
+                      stroke="#c084fc" 
                       strokeWidth={2}
                       name="Conversões"
                     />
