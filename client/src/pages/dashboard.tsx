@@ -54,36 +54,36 @@ export default function Dashboard() {
       
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Header */}
-        <header className="bg-card border-b border-border px-2 sm:px-4 lg:px-6 py-2 sm:py-3 lg:py-4">
-          <div className="flex flex-col gap-2 sm:gap-3">
-            <div className="text-center sm:text-left">
-              <h1 className="text-base sm:text-lg lg:text-2xl font-semibold" data-testid="text-dashboard-title">
+        <header className="bg-card border-b border-border px-2 sm:px-4 lg:px-6 py-3 sm:py-4 lg:py-5">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
+            <div className="flex-1">
+              <h1 className="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-bold" data-testid="text-dashboard-title">
                 Olá, {user?.firstName || 'Usuário'}! 👋
               </h1>
-              <p className="text-[10px] sm:text-xs lg:text-sm text-muted-foreground">Sua central de vendas automáticas no WhatsApp</p>
+              <p className="text-sm sm:text-base lg:text-lg text-muted-foreground mt-1">
+                Sua central de vendas automáticas no WhatsApp
+              </p>
             </div>
             
-            <div className="flex items-center justify-center sm:justify-end gap-1 sm:gap-2 flex-wrap">
-              <div className={`flex items-center space-x-1 sm:space-x-2 px-2 sm:px-3 py-1 rounded-full text-[10px] sm:text-xs lg:text-sm font-medium ${
+            <div className="flex items-center gap-2 flex-wrap">
+              <div className={`flex items-center space-x-2 px-3 sm:px-4 py-2 rounded-full text-xs sm:text-sm font-medium ${
                 whatsappStatus?.connected 
                   ? 'bg-green-100 text-green-700 border border-green-300' 
                   : 'bg-red-100 text-red-700 border border-red-300'
               }`}>
                 {whatsappStatus?.connected ? (
                   <>
-                    <Wifi className="h-3 w-3 sm:h-4 sm:w-4" />
-                    <span className="hidden sm:inline">WhatsApp Conectado</span>
-                    <span className="sm:hidden">Conectado</span>
+                    <Wifi className="h-4 w-4" />
+                    <span>WhatsApp Conectado</span>
                   </>
                 ) : (
                   <>
-                    <WifiOff className="h-3 w-3 sm:h-4 sm:w-4" />
-                    <span className="hidden sm:inline">Desconectado</span>
-                    <span className="sm:hidden">Off</span>
+                    <WifiOff className="h-4 w-4" />
+                    <span>Desconectado</span>
                     <Button
                       size="sm"
                       variant="outline"
-                      className="ml-1 sm:ml-2 h-5 sm:h-6 text-[10px] sm:text-xs px-2"
+                      className="ml-2 h-7 text-xs px-3"
                       onClick={() => setShowWhatsAppModal(true)}
                       data-testid="button-connect-whatsapp"
                     >
@@ -97,12 +97,12 @@ export default function Dashboard() {
                 <Button 
                   variant="outline"
                   size="sm"
-                  className="hidden sm:flex h-6 text-xs"
+                  className="h-8 text-sm"
                   onClick={() => setShowWhatsAppModal(true)}
                   data-testid="button-whatsapp-settings"
                 >
-                  <MessageSquare className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />
-                  <span className="hidden sm:inline">WhatsApp</span>
+                  <MessageSquare className="h-4 w-4 mr-2" />
+                  WhatsApp
                 </Button>
               )}
             </div>
