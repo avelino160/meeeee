@@ -269,15 +269,7 @@ export default function Settings() {
                             <p className="text-xs text-muted-foreground mt-1">Seg-Sex, 9h às 18h (Apenas Business)</p>
                           </div>
                         </div>
-                        <Separator />
-                        <div className="flex items-start space-x-3">
-                          <MessageSquare className="h-5 w-5 text-primary mt-0.5" />
-                          <div>
-                            <p className="font-medium">Chat ao Vivo</p>
-                            <p className="text-sm text-muted-foreground">Disponível no canto inferior direito</p>
-                            <p className="text-xs text-muted-foreground mt-1">24/7 (Apenas Business)</p>
-                          </div>
-                        </div>
+                        
                       </CardContent>
                     </Card>
                 </div>
