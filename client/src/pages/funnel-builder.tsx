@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
@@ -12,7 +12,9 @@ import {
   Plus,
   Trash2,
   Edit,
-  MessageSquare
+  MessageSquare,
+  Upload,
+  Download
 } from "lucide-react";
 import {
   Dialog,
@@ -32,6 +34,7 @@ export default function FunnelBuilder() {
   const [, setLocation] = useLocation();
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [newFunnelName, setNewFunnelName] = useState("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { data: funnels, isLoading } = useQuery<Funnel[]>({
     queryKey: ["/api/funnels"],
@@ -105,6 +108,89 @@ export default function FunnelBuilder() {
     },
   });
 
+  const importMutation = useMutation({
+    mutationFn: async (funnels: any[]) => {
+      const res = await apiRequest('POST', '/api/funnels/import', { funnels });
+      return res.json();
+    },
+    onSuccess: (data: any) => {
+      toast({
+        title: "Funis importados!",
+        description: `${data.imported} funis foram adicionados com sucesso.`,
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/funnels"] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Erro ao importar",
+        description: error.message || "Não foi possível importar os funis. Verifique o formato do arquivo.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleFileImport = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const content = e.target?.result as string;
+        const jsonData = JSON.parse(content);
+        
+        const funnels = Array.isArray(jsonData) ? jsonData : [jsonData];
+        
+        importMutation.mutate(funnels);
+      } catch (error) {
+        toast({
+          title: "Arquivo inválido",
+          description: "O arquivo não está em formato JSON válido.",
+          variant: "destructive",
+        });
+      }
+    };
+    reader.readAsText(file);
+    
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  const handleExportFunnels = () => {
+    if (!funnels || funnels.length === 0) {
+      toast({
+        title: "Nenhum funil",
+        description: "Não há funis para exportar.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const exportData = funnels.map(funnel => ({
+      name: funnel.name,
+      triggerPhrases: funnel.triggerPhrases,
+      status: funnel.status,
+      flowData: funnel.flowData,
+    }));
+
+    const dataStr = JSON.stringify(exportData, null, 2);
+    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(dataBlob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `funis-ranzap-${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
+    toast({
+      title: "Funis exportados!",
+      description: `${funnels.length} funis foram exportados com sucesso.`,
+    });
+  };
+
   const handleCreateFunnel = () => {
     if (!newFunnelName.trim()) {
       toast({
@@ -134,14 +220,42 @@ export default function FunnelBuilder() {
                 Crie fluxos de mensagens desenhados automaticamente para captar clientes online em um catálogo core web
               </p>
             </div>
-            <Button 
-              onClick={() => setIsCreateDialogOpen(true)}
-              className="bg-purple-600 hover:bg-purple-700 text-white font-semibold"
-              data-testid="button-create-funnel"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Novo Funil
-            </Button>
+            <div className="flex items-center gap-2">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".json"
+                onChange={handleFileImport}
+                className="hidden"
+                data-testid="input-import-file"
+              />
+              <Button 
+                variant="outline"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={importMutation.isPending}
+                data-testid="button-import-funnels"
+              >
+                <Upload className="h-4 w-4 mr-2" />
+                {importMutation.isPending ? 'Importando...' : 'Importar'}
+              </Button>
+              <Button 
+                variant="outline"
+                onClick={handleExportFunnels}
+                disabled={!funnels || funnels.length === 0}
+                data-testid="button-export-funnels"
+              >
+                <Download className="h-4 w-4 mr-2" />
+                Exportar
+              </Button>
+              <Button 
+                onClick={() => setIsCreateDialogOpen(true)}
+                className="bg-purple-600 hover:bg-purple-700 text-white font-semibold"
+                data-testid="button-create-funnel"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Novo Funil
+              </Button>
+            </div>
           </div>
         </header>
 
