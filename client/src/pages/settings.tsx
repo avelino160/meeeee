@@ -79,6 +79,8 @@ export default function Settings() {
     }
   ];
 
+  const hasChanges = JSON.stringify(generalSettings) !== JSON.stringify(settings);
+
   const handleSaveSettings = async () => {
     setIsSaving(true);
     try {
@@ -122,24 +124,26 @@ export default function Settings() {
                     Gerencie as configurações do sistema e preferências
                   </p>
                 </div>
-                <Button
-                  onClick={handleSaveSettings}
-                  disabled={isSaving}
-                  className="bg-primary hover:bg-primary/90"
-                  data-testid="button-save-settings"
-                >
-                  {isSaving ? (
-                    <>
-                      <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                      Salvando...
-                    </>
-                  ) : (
-                    <>
-                      <Save className="h-4 w-4 mr-2" />
-                      Salvar Alterações
-                    </>
-                  )}
-                </Button>
+                {hasChanges && (
+                  <Button
+                    onClick={handleSaveSettings}
+                    disabled={isSaving}
+                    className="bg-primary hover:bg-primary/90"
+                    data-testid="button-save-settings"
+                  >
+                    {isSaving ? (
+                      <>
+                        <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                        Salvando...
+                      </>
+                    ) : (
+                      <>
+                        <Save className="h-4 w-4 mr-2" />
+                        Salvar Alterações
+                      </>
+                    )}
+                  </Button>
+                )}
               </div>
             </div>
           </div>
