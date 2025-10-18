@@ -1,11 +1,8 @@
 import { Link, useLocation } from "wouter";
-import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import WhatsAppConnectionModal from "@/components/whatsapp-connection-modal";
 import { useSettings } from "@/contexts/SettingsContext";
-import { useState, useEffect } from "react";
-import type { WhatsAppStatus } from "@shared/api-types";
+import { useState } from "react";
 import {
   MessageSquare,
   BarChart3,
@@ -16,13 +13,11 @@ import {
   ChevronLeft,
   ChevronRight,
   Menu,
-  X,
   CreditCard,
 } from "lucide-react";
 
 export default function Sidebar() {
   const [location] = useLocation();
-  const [showWhatsAppModal, setShowWhatsAppModal] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { t } = useSettings();
@@ -31,12 +26,9 @@ export default function Sidebar() {
     return null;
   }
 
-  const { data: whatsappStatus } = useQuery<WhatsAppStatus>({
-    queryKey: ["/api/whatsapp/status"],
-  });
-
   const menuItems = [
     { href: "/", icon: Home, label: t('dashboard'), key: 'dashboard' },
+    { href: "/whatsapp-connection", icon: MessageSquare, label: 'Conexão WhatsApp', key: 'whatsapp_connection' },
     { href: "/funnel-builder", icon: BarChart3, label: t('sales_funnels'), key: 'sales_funnels' },
     { href: "/contacts", icon: Users, label: t('contacts'), key: 'contacts' },
     { href: "/analytics", icon: TrendingUp, label: t('reports'), key: 'reports' },
@@ -67,35 +59,6 @@ export default function Sidebar() {
           </Button>
         </div>
         
-        {!showMinimized && (
-          <div className="p-4 border-b border-border">
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-medium">WhatsApp</span>
-              <div className="flex items-center space-x-2">
-                <div 
-                  className={`w-3 h-3 rounded-full ${
-                    whatsappStatus?.connected ? 'status-connected' : 'status-disconnected'
-                  }`}
-                  data-testid="indicator-whatsapp-status"
-                />
-                <span className="text-xs text-muted-foreground" data-testid="text-whatsapp-status">
-                  {whatsappStatus?.connected ? t('connected') : t('disconnected')}
-                </span>
-              </div>
-            </div>
-            <Button 
-              className="w-full mt-2 px-3 py-2 bg-primary text-primary-foreground rounded-md text-sm font-medium hover:bg-primary/90 transition-colors"
-              onClick={() => {
-                setShowWhatsAppModal(true);
-                setIsMobileMenuOpen(false);
-              }}
-              data-testid="button-manage-whatsapp"
-            >
-              <MessageSquare className="h-4 w-4 mr-2" />
-              {t('manage_connection')}
-            </Button>
-          </div>
-        )}
         
         <nav className="flex-1 p-4 space-y-1">
           {menuItems.map((item) => {
@@ -145,11 +108,6 @@ export default function Sidebar() {
       <div className={`hidden lg:flex bg-card border-r border-border flex-col transition-all duration-300 ${isMinimized ? 'w-16' : 'w-64'}`}>
         <SidebarContent isMobile={false} />
       </div>
-
-      <WhatsAppConnectionModal 
-        open={showWhatsAppModal} 
-        onOpenChange={setShowWhatsAppModal}
-      />
     </>
   );
 }

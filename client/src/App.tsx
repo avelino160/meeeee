@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { SettingsProvider } from "@/contexts/SettingsContext";
 import StarfieldBackground from "@/components/starfield-background";
 import Dashboard from "@/pages/dashboard";
+import WhatsAppConnection from "@/pages/whatsapp-connection";
 import FunnelBuilder from "@/pages/funnel-builder";
 import FunnelEditor from "@/pages/funnel-editor";
 import Contacts from "@/pages/contacts";
@@ -18,6 +19,7 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={Dashboard} />
+      <Route path="/whatsapp-connection" component={WhatsAppConnection} />
       <Route path="/funnel-builder" component={FunnelBuilder} />
       <Route path="/funnel-editor/:id" component={FunnelEditor} />
       <Route path="/contacts" component={Contacts} />
