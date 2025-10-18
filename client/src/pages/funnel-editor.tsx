@@ -6,6 +6,7 @@ import { useRoute, useLocation } from "wouter";
 import type { Funnel } from "@shared/schema";
 import Sidebar from "@/components/sidebar";
 import FunnelCanvas from "@/components/funnel-canvas";
+import WhatsAppPreview from "@/components/whatsapp-preview";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -64,6 +65,7 @@ export default function FunnelEditor() {
   const [funnelName, setFunnelName] = useState("Novo Funil");
   const [funnelStatus, setFunnelStatus] = useState("draft");
   const [triggerPhrases, setTriggerPhrases] = useState<string[]>([]);
+  const [showPreview, setShowPreview] = useState(false);
 
   const { data: funnel, isLoading } = useQuery<Funnel>({
     queryKey: [`/api/funnels/${funnelId}`],
@@ -121,10 +123,15 @@ export default function FunnelEditor() {
   };
 
   const handlePreviewFunnel = () => {
-    toast({
-      title: "👁️ Visualizando Funil",
-      description: "Funcionalidade de preview em desenvolvimento",
-    });
+    if (funnelData.nodes.length === 0) {
+      toast({
+        title: "Funil Vazio",
+        description: "Adicione alguns elementos ao funil antes de visualizar",
+        variant: "destructive",
+      });
+      return;
+    }
+    setShowPreview(true);
   };
 
   const handleSaveFunnel = () => {
@@ -689,6 +696,14 @@ export default function FunnelEditor() {
           )}
         </div>
       </div>
+
+      <WhatsAppPreview
+        open={showPreview}
+        onOpenChange={setShowPreview}
+        nodes={funnelData.nodes}
+        edges={funnelData.edges}
+        triggerPhrase={triggerPhrases[0] || "Oi"}
+      />
     </div>
   );
 }
