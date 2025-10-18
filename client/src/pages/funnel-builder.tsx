@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
@@ -6,7 +6,7 @@ import { useLocation } from "wouter";
 import type { Funnel } from "@shared/schema";
 import Sidebar from "@/components/sidebar";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { 
   Plus,
@@ -14,20 +14,8 @@ import {
   Edit,
   MessageSquare,
   Upload,
-  Download,
-  ChefHat,
-  FileText,
-  Sparkles
+  Download
 } from "lucide-react";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Dialog,
   DialogContent,
@@ -40,24 +28,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
-interface Question {
-  id: string;
-  question: string;
-  answer: string;
-}
-
-interface FunnelData {
-  id: string;
-  name: string;
-  description: string;
-  instructions: string;
-  questions: Question[];
-  temperature: number;
-  published: boolean;
-  createdAt: string;
-  updatedAt: string;
-}
-
 export default function FunnelBuilder() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -65,26 +35,11 @@ export default function FunnelBuilder() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [newFunnelName, setNewFunnelName] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [importedFunnelData, setImportedFunnelData] = useState<FunnelData | null>(null);
 
   const { data: funnels, isLoading } = useQuery<Funnel[]>({
     queryKey: ["/api/funnels"],
     retry: false,
   });
-
-  useEffect(() => {
-    const loadFunnelData = async () => {
-      try {
-        const response = await fetch('/api/funnel-json');
-        const data = await response.json();
-        setImportedFunnelData(data);
-      } catch (error) {
-        console.error('Erro ao carregar o funil JSON:', error);
-      }
-    };
-
-    loadFunnelData();
-  }, []);
 
   const createFunnelMutation = useMutation({
     mutationFn: async () => {
@@ -262,7 +217,7 @@ export default function FunnelBuilder() {
             <div>
               <h2 className="text-2xl font-bold text-foreground" data-testid="text-page-title">Funis de venda</h2>
               <p className="text-sm text-muted-foreground mt-1">
-                {importedFunnelData ? importedFunnelData.name : 'Crie fluxos de mensagens desenhados automaticamente para captar clientes online em um catálogo core web'}
+                Crie fluxos de mensagens desenhados automaticamente para captar clientes online em um catálogo core web
               </p>
             </div>
             <div className="flex items-center gap-2">
@@ -305,86 +260,6 @@ export default function FunnelBuilder() {
         </header>
 
         <main className="flex-1 overflow-y-auto p-6">
-          {importedFunnelData && (
-            <Card className="mb-6 bg-gradient-to-br from-purple-900/20 to-pink-900/20 border-purple-500/30">
-              <CardHeader>
-                <div className="flex items-center gap-3">
-                  <div className="p-3 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg">
-                    <ChefHat className="w-6 h-6 text-white" />
-                  </div>
-                  <div>
-                    <CardTitle className="text-white" data-testid="text-imported-funnel-name">
-                      {importedFunnelData.name}
-                    </CardTitle>
-                    <CardDescription className="text-gray-300" data-testid="text-imported-funnel-description">
-                      {importedFunnelData.description}
-                    </CardDescription>
-                  </div>
-                </div>
-                <div className="flex gap-2 flex-wrap mt-3">
-                  <Badge variant="secondary" className="bg-green-500/20 text-green-400 border-green-500/30">
-                    <Sparkles className="w-3 h-3 mr-1" />
-                    {importedFunnelData.published ? 'Publicado' : 'Rascunho'}
-                  </Badge>
-                  <Badge variant="secondary" className="bg-blue-500/20 text-blue-400 border-blue-500/30">
-                    <MessageSquare className="w-3 h-3 mr-1" />
-                    {importedFunnelData.questions.length} Perguntas
-                  </Badge>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <Tabs defaultValue="questions" className="w-full">
-                  <TabsList className="grid w-full grid-cols-2 bg-gray-900/50">
-                    <TabsTrigger value="questions" data-testid="tab-questions">Perguntas Frequentes</TabsTrigger>
-                    <TabsTrigger value="instructions" data-testid="tab-instructions">Instruções</TabsTrigger>
-                  </TabsList>
-                  <TabsContent value="questions" className="mt-4">
-                    <Accordion type="single" collapsible className="space-y-3">
-                      {importedFunnelData.questions.map((q, index) => (
-                        <AccordionItem 
-                          key={q.id} 
-                          value={q.id}
-                          className="bg-gray-950/50 border border-gray-800 rounded-lg px-4 data-[state=open]:border-purple-500/50"
-                          data-testid={`accordion-question-${index}`}
-                        >
-                          <AccordionTrigger 
-                            className="text-left hover:no-underline text-white hover:text-purple-400 transition-colors"
-                            data-testid={`trigger-question-${index}`}
-                          >
-                            <div className="flex items-start gap-3">
-                              <span className="text-purple-400 font-bold mt-1">Q{index + 1}:</span>
-                              <span>{q.question}</span>
-                            </div>
-                          </AccordionTrigger>
-                          <AccordionContent 
-                            className="text-gray-300 pt-2 pb-4"
-                            data-testid={`content-answer-${index}`}
-                          >
-                            <div className="flex gap-3 pl-8">
-                              <span className="text-pink-400 font-bold">R:</span>
-                              <p className="flex-1">{q.answer}</p>
-                            </div>
-                          </AccordionContent>
-                        </AccordionItem>
-                      ))}
-                    </Accordion>
-                  </TabsContent>
-                  <TabsContent value="instructions" className="mt-4">
-                    <div 
-                      className="text-gray-300 whitespace-pre-wrap max-h-96 overflow-y-auto bg-gray-950/50 p-4 rounded-lg border border-gray-800 text-sm"
-                      data-testid="text-instructions"
-                    >
-                      {importedFunnelData.instructions}
-                    </div>
-                  </TabsContent>
-                </Tabs>
-              </CardContent>
-            </Card>
-          )}
-
-          <Separator className="my-6" />
-
-          <h3 className="text-xl font-bold text-foreground mb-4">Seus Funis Criados</h3>
           {isLoading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {[1, 2, 3].map((i) => (
