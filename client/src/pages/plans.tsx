@@ -161,8 +161,8 @@ export default function Plans() {
                       </CardDescription>
                       
                       <div className="mt-6">
-                        <div className="flex items-baseline justify-center">
-                          <span className="text-[30px] text-center font-extrabold">{price} MT</span>
+                        <div className="flex items-baseline justify-center whitespace-nowrap">
+                          <span className="text-[30px] font-extrabold">{price} MT</span>
                           <span className="text-muted-foreground ml-2 text-sm sm:text-base">
                             /{billingPeriod === "monthly" ? "mês" : "ano"}
                           </span>
