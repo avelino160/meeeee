@@ -29,6 +29,10 @@ export default function Sidebar() {
     setIsMinimized(location === "/funnel-builder");
   }, [location]);
 
+  if (location.startsWith("/funnel-editor/")) {
+    return null;
+  }
+
   const { data: whatsappStatus } = useQuery<WhatsAppStatus>({
     queryKey: ["/api/whatsapp/status"],
     refetchInterval: 30000,
