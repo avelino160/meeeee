@@ -185,6 +185,7 @@ export default function Settings() {
                           <SelectItem value="America/Sao_Paulo">Brasília (GMT-3)</SelectItem>
                           <SelectItem value="America/New_York">Nova York (GMT-5)</SelectItem>
                           <SelectItem value="Europe/London">Londres (GMT+0)</SelectItem>
+                          <SelectItem value="Africa/Maputo">Maputo (GMT+2)</SelectItem>
                           <SelectItem value="Asia/Tokyo">Tóquio (GMT+9)</SelectItem>
                         </SelectContent>
                       </Select>
