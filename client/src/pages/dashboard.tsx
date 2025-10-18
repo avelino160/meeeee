@@ -39,13 +39,13 @@ export default function Dashboard() {
   });
 
   const metricsData = [
-    { name: 'Seg', mensagens: 12, contatos: 8, conversoes: 3 },
-    { name: 'Ter', mensagens: 19, contatos: 12, conversoes: 5 },
-    { name: 'Qua', mensagens: 25, contatos: 18, conversoes: 8 },
-    { name: 'Qui', mensagens: 22, contatos: 15, conversoes: 6 },
-    { name: 'Sex', mensagens: 30, contatos: 22, conversoes: 10 },
-    { name: 'Sáb', mensagens: 18, contatos: 10, conversoes: 4 },
-    { name: 'Dom', mensagens: 15, contatos: 8, conversoes: 3 },
+    { name: 'Seg', mensagens: 0, contatos: 0, conversoes: 0 },
+    { name: 'Ter', mensagens: 0, contatos: 0, conversoes: 0 },
+    { name: 'Qua', mensagens: 0, contatos: 0, conversoes: 0 },
+    { name: 'Qui', mensagens: 0, contatos: 0, conversoes: 0 },
+    { name: 'Sex', mensagens: 0, contatos: 0, conversoes: 0 },
+    { name: 'Sáb', mensagens: 0, contatos: 0, conversoes: 0 },
+    { name: 'Dom', mensagens: 0, contatos: 0, conversoes: 0 },
   ];
 
   return (
@@ -123,7 +123,7 @@ export default function Dashboard() {
                   {analyticsLoading ? "..." : analytics?.activeFunnels || 0}
                 </div>
                 <p className="text-[9px] sm:text-[10px] lg:text-xs text-muted-foreground">
-                  +{analyticsLoading ? "..." : ((analytics?.activeFunnels || 0) * 0.2).toFixed(0)} desde ontem
+                  +0 desde ontem
                 </p>
               </CardContent>
             </Card>
@@ -138,7 +138,7 @@ export default function Dashboard() {
                   {analyticsLoading ? "..." : analytics?.todayMessages || 0}
                 </div>
                 <p className="text-[9px] sm:text-[10px] lg:text-xs text-muted-foreground">
-                  +{analyticsLoading ? "..." : ((analytics?.todayMessages || 0) * 0.15).toFixed(0)}% desde ontem
+                  +0% desde ontem
                 </p>
               </CardContent>
             </Card>
