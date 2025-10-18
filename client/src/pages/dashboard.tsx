@@ -95,29 +95,18 @@ export default function Dashboard() {
               </div>
             </div>
             
-            <div className="flex space-x-2 sm:space-x-3 w-full sm:w-auto">
-              {whatsappStatus?.connected && (
-                <Button 
-                  variant="outline"
-                  size="sm"
-                  className="hidden sm:flex"
-                  onClick={() => setShowWhatsAppModal(true)}
-                  data-testid="button-whatsapp-settings"
-                >
-                  <MessageSquare className="h-4 w-4 sm:mr-2" />
-                  <span className="hidden sm:inline">WhatsApp</span>
-                </Button>
-              )}
+            {whatsappStatus?.connected && (
               <Button 
-                size="sm" 
-                className="flex-1 sm:flex-initial text-xs sm:text-sm"
-                data-testid="button-new-funnel"
+                variant="outline"
+                size="sm"
+                className="hidden sm:flex"
+                onClick={() => setShowWhatsAppModal(true)}
+                data-testid="button-whatsapp-settings"
               >
-                <BarChart3 className="h-4 w-4 sm:mr-2" />
-                <span className="hidden sm:inline">Novo Funil</span>
-                <span className="sm:hidden">Novo</span>
+                <MessageSquare className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">WhatsApp</span>
               </Button>
-            </div>
+            )}
           </div>
           
           {/* 📱 STATUS WHATSAPP - Mobile */}
