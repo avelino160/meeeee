@@ -174,12 +174,7 @@ export class FunnelService {
       }
 
       // Send message via WhatsApp
-      const response = await whatsappService.sendMessage({
-        to: contact.phoneNumber,
-        message: messageContent,
-        type: messageType,
-        mediaUrl,
-      });
+      const success = await whatsappService.sendMessage(contact.phoneNumber, messageContent);
 
       // Store message record
       await storage.createMessage({
@@ -188,9 +183,8 @@ export class FunnelService {
         type: messageType,
         content: messageContent,
         mediaUrl,
-        status: 'sent',
+        status: success ? 'sent' : 'failed',
         sentAt: new Date(),
-        externalId: response.data?.id,
       });
 
       console.log(`Message sent to ${contact.phoneNumber}: ${messageContent}`);

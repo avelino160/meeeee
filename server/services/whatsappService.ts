@@ -157,17 +157,45 @@ export class WhatsAppService {
 
       console.log(`📨 Mensagem de ${phoneNumber}: ${messageText}`);
 
-      // 💾 SALVAR CONTATO E MENSAGEM
-      const contact = await storage.getContactByPhone(phoneNumber, this.currentUserId);
+      // 🎯 VERIFICAR SE MENSAGEM CONTÉM GATILHO DE FUNIL ATIVO
+      const funnels = await storage.getAllFunnels(this.currentUserId);
+      const activeFunnels = funnels.filter(f => f.status === 'active');
+      
+      let matchedFunnel = null;
+      const lowerMsg = messageText.toLowerCase().trim();
+      
+      for (const funnel of activeFunnels) {
+        const triggerPhrases = funnel.triggerPhrases || [];
+        const hasMatch = triggerPhrases.some(phrase => 
+          lowerMsg.includes(phrase.toLowerCase().trim())
+        );
+        
+        if (hasMatch) {
+          matchedFunnel = funnel;
+          console.log(`🎯 Gatilho detectado! Funil: ${funnel.name}, Mensagem: ${messageText}`);
+          break;
+        }
+      }
+
+      // 💾 SALVAR CONTATO APENAS SE HOUVER GATILHO DETECTADO
+      if (!matchedFunnel) {
+        console.log(`⚠️ Nenhum gatilho detectado para: "${messageText}"`);
+        return;
+      }
+
+      let contact = await storage.getContactByPhone(phoneNumber, this.currentUserId);
       let contactId = contact?.id;
 
       if (!contact) {
         const newContact = await storage.createContact({
           name: `Cliente ${phoneNumber}`,
           phoneNumber: phoneNumber,
-          userId: this.currentUserId
+          userId: this.currentUserId,
+          isActive: true
         });
         contactId = newContact.id;
+        contact = newContact;
+        console.log(`✅ Novo contato criado: ${phoneNumber}`);
       }
 
       await storage.createMessage({
@@ -178,96 +206,17 @@ export class WhatsAppService {
         userId: this.currentUserId
       });
 
-      // 🎯 FUNIL AUTOMATIZADO DE VENDAS
-      let response = '';
-      const lowerMsg = messageText.toLowerCase();
-
-      if (lowerMsg.includes('oi') || lowerMsg.includes('olá') || lowerMsg.includes('bom dia') || 
-          lowerMsg.includes('boa tarde') || lowerMsg.includes('boa noite') || lowerMsg.includes('hey')) {
-        // 1️⃣ BOAS-VINDAS
-        response = `🎉 Olá! Bem-vindo ao *RanZap*! 
-
-Sou seu assistente automatizado de vendas 24/7! 🤖
-
-Estou aqui para te ajudar a descobrir como nossa solução pode *transformar seus resultados*! 
-
-Digite *"quero saber mais"* para descobrir como podemos aumentar suas vendas em até 300%! 🚀`;
-
-      } else if (lowerMsg.includes('quero saber mais') || lowerMsg.includes('interessado') || lowerMsg.includes('contar mais')) {
-        // 2️⃣ DESPERTAR CURIOSIDADE
-        response = `🔥 Que incrível! Você está a um passo de descobrir o segredo que *milhares de empresas* já estão usando!
-
-Nossa plataforma *RanZap* já ajudou mais de 10.000 empreendedores a:
-
-✅ *Automatizar 100% das conversas*  
-✅ *Responder clientes 24/7 sem parar*  
-✅ *Aumentar vendas em até 300%*  
-✅ *Economizar 15+ horas por semana*  
-
-😱 Imagina ter um *vendedor que nunca dorme*, nunca tira férias e converte *3x mais*?
-
-Digite *"quero essa solução"* para conhecer nossa oferta especial! 💰`;
-
-      } else if (lowerMsg.includes('quero essa solução') || lowerMsg.includes('oferta') || lowerMsg.includes('preço') || lowerMsg.includes('valor')) {
-        // 3️⃣ OFERTA IRRESISTÍVEL
-        response = `🎯 *OFERTA EXCLUSIVA* - Apenas hoje!
-
-Por apenas *R$ 97/mês* (menos de R$ 3 por dia ☕), você terá acesso COMPLETO ao RanZap:
-
-🎁 *BÔNUS INCLUSOS:*  
-✅ Setup completo gratuito (valor R$ 500)  
-✅ 30 dias de suporte premium  
-✅ Templates de funil prontos  
-✅ Treinamento completo em vídeo  
-
-⏰ *OFERTA LIMITADA:* Só até meia-noite!  
-💥 *GARANTIA:* 7 dias para testar, risco ZERO!  
-
-Digite *"quero comprar agora"* para garantir com *50% DE DESCONTO*! 🔥`;
-
-      } else if (lowerMsg.includes('quero comprar') || lowerMsg.includes('fechar') || lowerMsg.includes('contratar')) {
-        // 4️⃣ CALL-TO-ACTION
-        response = `🎉 *PERFEITO!* Decisão inteligente!
-
-Para finalizar seu acesso ao RanZap com *50% OFF*, clique no link abaixo:
-
-🔗 *https://RanZap.com/checkout*
-
-Ou fale diretamente com nosso especialista:
-📞 *WhatsApp:* (11) 99999-9999
-
-✅ *Pagamento 100% seguro*  
-✅ *Acesso liberado em 5 minutos*  
-✅ *Suporte premium incluído*  
-
-*Parabéns!* Você está prestes a revolucionar suas vendas! 🚀
-
-Alguma dúvida antes de finalizar?`;
-
-      } else {
-        // 🤝 RESPOSTA PADRÃO AMIGÁVEL
-        response = `🤖 Olá! Sou o assistente automático do *RanZap*!
-
-Para te ajudar melhor, digite uma das opções:
-
-🔹 *"quero saber mais"* - Conhecer nossa solução  
-🔹 *"oferta"* - Ver promoções especiais  
-🔹 *"suporte"* - Falar com especialista  
-
-Estou aqui 24/7 para te ajudar! 🚀`;
+      // 🎯 EXECUTAR FUNIL DETECTADO
+      if (matchedFunnel && contactId) {
+        try {
+          // Importar funnelService dinamicamente para evitar dependência circular
+          const { funnelService } = await import('./funnelService');
+          await funnelService.executeFunnel(matchedFunnel.id, contactId, messageText);
+          console.log(`✅ Funil "${matchedFunnel.name}" iniciado para contato ${phoneNumber}`);
+        } catch (error) {
+          console.error('❌ Erro ao executar funil:', error);
+        }
       }
-
-      // 📤 ENVIAR RESPOSTA AUTOMATIZADA
-      await this.sendMessage(phoneNumber, response);
-
-      // 💾 SALVAR RESPOSTA ENVIADA
-      await storage.createMessage({
-        contactId: contactId!,
-        content: response,
-        type: 'text',
-        status: 'sent',
-        userId: this.currentUserId
-      });
 
     } catch (error) {
       console.error('❌ Erro ao processar mensagem:', error);
