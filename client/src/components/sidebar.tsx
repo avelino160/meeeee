@@ -28,7 +28,7 @@ export default function Sidebar() {
 
   const menuItems = [
     { href: "/", icon: Home, label: t('dashboard'), key: 'dashboard' },
-    { href: "/whatsapp-connection", icon: MessageSquare, label: 'Conexão WhatsApp', key: 'whatsapp_connection' },
+    { href: "/whatsapp-connection", icon: MessageSquare, label: t('whatsapp_connection'), key: 'whatsapp_connection' },
     { href: "/funnel-builder", icon: BarChart3, label: t('sales_funnels'), key: 'sales_funnels' },
     { href: "/contacts", icon: Users, label: t('contacts'), key: 'contacts' },
     { href: "/analytics", icon: TrendingUp, label: t('reports'), key: 'reports' },
