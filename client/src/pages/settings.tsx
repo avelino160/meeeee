@@ -47,6 +47,7 @@ export default function Settings() {
 
   // FAQ State
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
+  const [activeTab, setActiveTab] = useState("general");
 
   const faqItems = [
     {
@@ -150,7 +151,7 @@ export default function Settings() {
 
           {/* Settings Content */}
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <Tabs defaultValue="general" className="space-y-6">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
               <TabsList className="grid w-full grid-cols-3" data-testid="tabs-settings">
                 <TabsTrigger value="general" data-testid="tab-general">
                   <Globe className="h-4 w-4 mr-2" />
@@ -297,7 +298,11 @@ export default function Settings() {
                       Entre em contato com nosso suporte.
                     </p>
                     <div className="flex gap-3">
-                      <Button variant="outline" data-testid="button-go-support">
+                      <Button 
+                        variant="outline" 
+                        onClick={() => setActiveTab("support")}
+                        data-testid="button-go-support"
+                      >
                         <HelpCircle className="h-4 w-4 mr-2" />
                         Falar com Suporte
                       </Button>
