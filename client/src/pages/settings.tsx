@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
+import { useSettings } from "@/contexts/SettingsContext";
 import Sidebar from "@/components/sidebar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -36,26 +37,13 @@ import {
 export default function Settings() {
   const { toast } = useToast();
   const [isSaving, setIsSaving] = useState(false);
-
-  // General Settings State
-  const [generalSettings, setGeneralSettings] = useState({
-    companyName: "RanZap",
-    companyEmail: "contato@ranzap.com",
-    timezone: "America/Sao_Paulo",
-    language: "pt-BR",
-  });
+  const { settings, updateSettings } = useSettings();
+  
+  const [generalSettings, setGeneralSettings] = useState(settings);
 
   useEffect(() => {
-    const savedSettings = localStorage.getItem("generalSettings");
-    if (savedSettings) {
-      try {
-        const parsed = JSON.parse(savedSettings);
-        setGeneralSettings(parsed);
-      } catch (error) {
-        console.error("Erro ao carregar configurações:", error);
-      }
-    }
-  }, []);
+    setGeneralSettings(settings);
+  }, [settings]);
 
   // Support Form State
   const [supportForm, setSupportForm] = useState({
@@ -136,19 +124,22 @@ export default function Settings() {
     try {
       await new Promise(resolve => setTimeout(resolve, 500));
       
-      localStorage.setItem("generalSettings", JSON.stringify(generalSettings));
+      updateSettings(generalSettings);
       
       toast({
         title: "Configurações salvas",
-        description: "Suas preferências foram atualizadas com sucesso.",
+        description: "A página será recarregada para aplicar as alterações.",
       });
+
+      setTimeout(() => {
+        window.location.reload();
+      }, 1500);
     } catch (error) {
       toast({
         title: "Erro ao salvar",
         description: "Não foi possível salvar as configurações. Tente novamente.",
         variant: "destructive",
       });
-    } finally {
       setIsSaving(false);
     }
   };

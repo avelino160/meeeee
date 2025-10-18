@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import WhatsAppConnectionModal from "@/components/whatsapp-connection-modal";
+import { useSettings } from "@/contexts/SettingsContext";
 import { useState, useEffect } from "react";
 import type { WhatsAppStatus } from "@shared/api-types";
 import {
@@ -24,6 +25,7 @@ export default function Sidebar() {
   const [showWhatsAppModal, setShowWhatsAppModal] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { t } = useSettings();
 
   if (location.startsWith("/funnel-editor/")) {
     return null;
@@ -34,12 +36,12 @@ export default function Sidebar() {
   });
 
   const menuItems = [
-    { href: "/", icon: Home, label: "Dashboard" },
-    { href: "/funnel-builder", icon: BarChart3, label: "Funis de venda" },
-    { href: "/contacts", icon: Users, label: "Contatos" },
-    { href: "/analytics", icon: TrendingUp, label: "Relatórios" },
-    { href: "/plans", icon: CreditCard, label: "Planos" },
-    { href: "/settings", icon: Settings, label: "Configurações" },
+    { href: "/", icon: Home, label: t('dashboard'), key: 'dashboard' },
+    { href: "/funnel-builder", icon: BarChart3, label: t('sales_funnels'), key: 'sales_funnels' },
+    { href: "/contacts", icon: Users, label: t('contacts'), key: 'contacts' },
+    { href: "/analytics", icon: TrendingUp, label: t('reports'), key: 'reports' },
+    { href: "/plans", icon: CreditCard, label: t('plans'), key: 'plans' },
+    { href: "/settings", icon: Settings, label: t('settings'), key: 'settings' },
   ];
 
   const SidebarContent = ({ isMobile = false }: { isMobile?: boolean }) => {
@@ -51,7 +53,7 @@ export default function Sidebar() {
           {!showMinimized && (
             <div>
               <h1 className="text-xl sm:text-2xl font-bold text-primary" data-testid="text-brand">RanZap</h1>
-              <p className="text-xs sm:text-sm text-muted-foreground">Automação WhatsApp</p>
+              <p className="text-xs sm:text-sm text-muted-foreground">{t('whatsapp_automation')}</p>
             </div>
           )}
           <Button
@@ -77,7 +79,7 @@ export default function Sidebar() {
                   data-testid="indicator-whatsapp-status"
                 />
                 <span className="text-xs text-muted-foreground" data-testid="text-whatsapp-status">
-                  {whatsappStatus?.connected ? 'Conectado' : 'Desconectado'}
+                  {whatsappStatus?.connected ? t('connected') : t('disconnected')}
                 </span>
               </div>
             </div>
@@ -90,7 +92,7 @@ export default function Sidebar() {
               data-testid="button-manage-whatsapp"
             >
               <MessageSquare className="h-4 w-4 mr-2" />
-              Gerenciar Conexão
+              {t('manage_connection')}
             </Button>
           </div>
         )}
