@@ -280,18 +280,6 @@ export default function Settings() {
                         </div>
                       </CardContent>
                     </Card>
-
-                    <Card className="border-blue-500/50 bg-blue-500/10">
-                      <CardHeader>
-                        <CardTitle className="text-blue-700 dark:text-blue-500">Dica</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <p className="text-sm text-muted-foreground">
-                          Para um atendimento mais rápido, inclua prints de tela, mensagens de erro e 
-                          informações sobre quando o problema começou.
-                        </p>
-                      </CardContent>
-                    </Card>
                 </div>
               </TabsContent>
 
