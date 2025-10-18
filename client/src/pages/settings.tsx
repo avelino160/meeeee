@@ -316,7 +316,7 @@ export default function Settings() {
                           className="w-full p-4 text-left flex items-center justify-between hover:bg-muted/50 transition-colors"
                           data-testid={`button-faq-${index}`}
                         >
-                          <span className="font-medium">{faq.question}</span>
+                          {faq.question}
                           <ChevronDown 
                             className={`h-5 w-5 transition-transform ${openFaqIndex === index ? 'rotate-180' : ''}`}
                           />
