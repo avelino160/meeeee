@@ -153,8 +153,8 @@ export default function WhatsAppConnection() {
                   </Badge>
                 </CardTitle>
                 <CardDescription>
-                  {currentPlan === "free" && "Plano Gratuito permite 1 conta"}
-                  {currentPlan === "pro" && "Plano Pro permite 3 contas"}
+                  {currentPlan === "free" && "Plano Pro permite 1 conta"}
+                  {currentPlan === "pro" && "Plano Plus permite 3 contas"}
                   {currentPlan === "business" && "Plano Business permite até 5 contas"}
                 </CardDescription>
               </CardHeader>

@@ -40,10 +40,10 @@ export default function Plans() {
   const plans = [
     {
       id: "free",
-      name: "Gratuito",
+      name: "Pro",
       description: "Perfeito para começar",
-      monthlyPrice: 0,
-      yearlyPrice: 0,
+      monthlyPrice: 250,
+      yearlyPrice: 2400,
       popular: false,
       features: [
         { text: "1 conta WhatsApp", included: true },
@@ -58,10 +58,10 @@ export default function Plans() {
     },
     {
       id: "pro",
-      name: "Pro",
+      name: "Plus",
       description: "Para profissionais e pequenas empresas",
-      monthlyPrice: 400,
-      yearlyPrice: 3840,
+      monthlyPrice: 500,
+      yearlyPrice: 4800,
       popular: true,
       features: [
         { text: "3 contas WhatsApp", included: true },
@@ -78,8 +78,8 @@ export default function Plans() {
       id: "business",
       name: "Business",
       description: "Para empresas em crescimento",
-      monthlyPrice: 1200,
-      yearlyPrice: 11520,
+      monthlyPrice: 1500,
+      yearlyPrice: 14400,
       popular: false,
       features: [
         { text: "5 contas WhatsApp", included: true },
