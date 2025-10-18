@@ -148,7 +148,6 @@ export default function Plans() {
                         </Badge>
                       </div>
                     )}
-
                     <CardHeader className="text-center pb-8 pt-6">
                       <CardTitle className="text-2xl mb-2">
                         {plan.name}
@@ -162,7 +161,7 @@ export default function Plans() {
                       
                       <div className="mt-6">
                         <div className="flex items-baseline justify-center">
-                          <span className="text-3xl sm:text-4xl lg:text-5xl font-bold">{price} MT</span>
+                          <span className="sm:text-4xl lg:text-5xl text-center text-[31px] font-extrabold">{price} MT</span>
                           <span className="text-muted-foreground ml-2 text-sm sm:text-base">
                             /{billingPeriod === "monthly" ? "mês" : "ano"}
                           </span>
@@ -174,7 +173,6 @@ export default function Plans() {
                         )}
                       </div>
                     </CardHeader>
-
                     <CardContent className="space-y-6">
                       <Button
                         onClick={() => handleUpgrade(plan.name)}
