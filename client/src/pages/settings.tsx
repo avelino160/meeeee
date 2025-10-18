@@ -45,13 +45,6 @@ export default function Settings() {
     setGeneralSettings(settings);
   }, [settings]);
 
-  // Support Form State
-  const [supportForm, setSupportForm] = useState({
-    subject: "",
-    message: "",
-    priority: "medium",
-  });
-
   // FAQ State
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
 
@@ -89,35 +82,6 @@ export default function Settings() {
       answer: "Plano Free: suporte via email em 48h. Plano Pro: suporte prioritário em 24h. Plano Business: suporte via chat em tempo real."
     }
   ];
-
-  const handleSendSupport = async () => {
-    if (!supportForm.subject || !supportForm.message) {
-      toast({
-        title: "Campos obrigatórios",
-        description: "Por favor, preencha assunto e mensagem.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      toast({
-        title: "Mensagem enviada",
-        description: "Nossa equipe responderá em breve.",
-      });
-      
-      setSupportForm({ subject: "", message: "", priority: "medium" });
-    } catch (error) {
-      toast({
-        title: "Erro ao enviar",
-        description: "Tente novamente mais tarde.",
-        variant: "destructive",
-      });
-    }
-  };
 
   const handleSaveSettings = async () => {
     setIsSaving(true);
@@ -283,65 +247,7 @@ export default function Settings() {
 
               {/* Support */}
               <TabsContent value="support" className="space-y-6">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Enviar Solicitação de Suporte</CardTitle>
-                      <CardDescription>
-                        Nossa equipe responderá em breve
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="support-subject">Assunto</Label>
-                        <Input
-                          id="support-subject"
-                          value={supportForm.subject}
-                          onChange={(e) => setSupportForm({ ...supportForm, subject: e.target.value })}
-                          placeholder="Descreva brevemente o problema"
-                          data-testid="input-support-subject"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="support-priority">Prioridade</Label>
-                        <Select
-                          value={supportForm.priority}
-                          onValueChange={(value) => setSupportForm({ ...supportForm, priority: value })}
-                        >
-                          <SelectTrigger id="support-priority" data-testid="select-support-priority">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="low">Baixa</SelectItem>
-                            <SelectItem value="medium">Média</SelectItem>
-                            <SelectItem value="high">Alta</SelectItem>
-                            <SelectItem value="urgent">Urgente</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="support-message">Mensagem</Label>
-                        <Textarea
-                          id="support-message"
-                          value={supportForm.message}
-                          onChange={(e) => setSupportForm({ ...supportForm, message: e.target.value })}
-                          placeholder="Descreva detalhadamente o problema ou dúvida"
-                          rows={6}
-                          data-testid="textarea-support-message"
-                        />
-                      </div>
-                      <Button 
-                        onClick={handleSendSupport} 
-                        className="w-full"
-                        data-testid="button-send-support"
-                      >
-                        <Send className="h-4 w-4 mr-2" />
-                        Enviar Solicitação
-                      </Button>
-                    </CardContent>
-                  </Card>
-
-                  <div className="space-y-6">
+                <div className="space-y-6">
                     <Card>
                       <CardHeader>
                         <CardTitle>Canais de Suporte</CardTitle>
@@ -390,7 +296,6 @@ export default function Settings() {
                         </p>
                       </CardContent>
                     </Card>
-                  </div>
                 </div>
               </TabsContent>
 
