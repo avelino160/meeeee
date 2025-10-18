@@ -10,6 +10,12 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import type { WhatsAppStatus } from "@shared/api-types";
 import { apiRequest } from "@/lib/queryClient";
 import {
@@ -336,16 +342,35 @@ export default function WhatsAppConnection() {
               <CardHeader>
                 <CardTitle className="text-lg">Precisa de ajuda?</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-2 text-sm text-muted-foreground">
-                <p>
-                  <strong>Problemas de conexão?</strong> Certifique-se de que seu número de telefone está correto e inclui o código do país.
-                </p>
-                <p>
-                  <strong>QR Code não aparece?</strong> Verifique se você está executando o projeto localmente, pois WhatsApp bloqueia conexões de servidores cloud.
-                </p>
-                <p>
-                  <strong>Ainda com dúvidas?</strong> Entre em contato com o suporte através da página de configurações.
-                </p>
+              <CardContent>
+                <Accordion type="single" collapsible className="w-full">
+                  <AccordionItem value="item-1">
+                    <AccordionTrigger className="text-left">
+                      Problemas de conexão?
+                    </AccordionTrigger>
+                    <AccordionContent className="text-muted-foreground">
+                      Certifique-se de que seu número de telefone está correto e inclui o código do país.
+                    </AccordionContent>
+                  </AccordionItem>
+                  
+                  <AccordionItem value="item-2">
+                    <AccordionTrigger className="text-left">
+                      QR Code não aparece?
+                    </AccordionTrigger>
+                    <AccordionContent className="text-muted-foreground">
+                      Verifique se você está executando o projeto localmente, pois WhatsApp bloqueia conexões de servidores cloud.
+                    </AccordionContent>
+                  </AccordionItem>
+                  
+                  <AccordionItem value="item-3">
+                    <AccordionTrigger className="text-left">
+                      Ainda com dúvidas?
+                    </AccordionTrigger>
+                    <AccordionContent className="text-muted-foreground">
+                      Entre em contato com o suporte através da página de configurações.
+                    </AccordionContent>
+                  </AccordionItem>
+                </Accordion>
               </CardContent>
             </Card>
           </div>
