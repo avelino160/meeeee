@@ -25,10 +25,6 @@ export default function Sidebar() {
   const [isMinimized, setIsMinimized] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  useEffect(() => {
-    setIsMinimized(location === "/funnel-builder");
-  }, [location]);
-
   if (location.startsWith("/funnel-editor/")) {
     return null;
   }
