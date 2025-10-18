@@ -166,38 +166,6 @@ export default function Settings() {
               <TabsContent value="general" className="space-y-6">
                 <Card>
                   <CardHeader>
-                    <CardTitle>Informações da Empresa</CardTitle>
-                    <CardDescription>
-                      Configure as informações básicas da sua empresa
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="company-name">Nome da Empresa</Label>
-                      <Input
-                        id="company-name"
-                        value={generalSettings.companyName}
-                        onChange={(e) => setGeneralSettings({ ...generalSettings, companyName: e.target.value })}
-                        placeholder="Nome da sua empresa"
-                        data-testid="input-company-name"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="company-email">Email de Contato</Label>
-                      <Input
-                        id="company-email"
-                        type="email"
-                        value={generalSettings.companyEmail}
-                        onChange={(e) => setGeneralSettings({ ...generalSettings, companyEmail: e.target.value })}
-                        placeholder="email@empresa.com"
-                        data-testid="input-company-email"
-                      />
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader>
                     <CardTitle>Preferências Regionais</CardTitle>
                     <CardDescription>
                       Configure idioma e fuso horário
