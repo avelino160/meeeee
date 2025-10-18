@@ -283,28 +283,28 @@ export default function Plans() {
                 <div>
                   <h3 className="font-semibold mb-2">Posso cancelar a qualquer momento?</h3>
                   <p className="text-sm text-muted-foreground">
-                    Sim! Não há fidelidade. Você pode cancelar seu plano quando quiser sem custos adicionais.
+                    Sim! Sem fidelidade e sem custos adicionais.
                   </p>
                 </div>
                 
                 <div>
                   <h3 className="font-semibold mb-2">Como funciona o período de teste?</h3>
                   <p className="text-sm text-muted-foreground">
-                    O plano gratuito não tem limite de tempo. Teste todas as funcionalidades antes de fazer upgrade.
+                    O plano gratuito não tem limite de tempo.
                   </p>
                 </div>
                 
                 <div>
                   <h3 className="font-semibold mb-2">Posso mudar de plano depois?</h3>
                   <p className="text-sm text-muted-foreground">
-                    Claro! Você pode fazer upgrade ou downgrade a qualquer momento, com ajuste proporcional.
+                    Sim! Upgrade ou downgrade a qualquer momento.
                   </p>
                 </div>
                 
                 <div>
                   <h3 className="font-semibold mb-2">Quais formas de pagamento aceitas?</h3>
                   <p className="text-sm text-muted-foreground">
-                    Aceitamos cartão de crédito, M-Pesa e transferência bancária. Pagamento 100% seguro.
+                    Cartão de crédito, M-Pesa e transferência bancária.
                   </p>
                 </div>
               </div>
