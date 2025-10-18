@@ -40,7 +40,6 @@ export default function Sidebar() {
   const menuItems = [
     { href: "/", icon: Home, label: "Dashboard" },
     { href: "/funnel-builder", icon: BarChart3, label: "Funis de venda" },
-    { href: "/funnel-viewer", icon: MessageSquare, label: "Ver Funil JSON" },
     { href: "/contacts", icon: Users, label: "Contatos" },
     { href: "/analytics", icon: TrendingUp, label: "Relatórios" },
     { href: "/plans", icon: CreditCard, label: "Planos" },

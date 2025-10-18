@@ -10,6 +10,8 @@ import {
   insertMessageSchema,
 } from "@shared/schema";
 import { z } from "zod";
+import { readFileSync } from "fs";
+import { join } from "path";
 
 const DEFAULT_USER_ID = "default-user";
 const DEMO_USER = {
@@ -39,6 +41,19 @@ function isDatacenterEnvironment(req: any): boolean {
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Funnel JSON route
+  app.get('/api/funnel-json', async (req, res) => {
+    try {
+      const filePath = join(process.cwd(), 'attached_assets', '[P.O] - Receitas sem Glúten_1760773130289.json');
+      const fileContent = readFileSync(filePath, 'utf-8');
+      const jsonData = JSON.parse(fileContent);
+      res.json(jsonData);
+    } catch (error) {
+      console.error("Error reading funnel JSON:", error);
+      res.status(500).json({ message: "Failed to read funnel JSON" });
+    }
+  });
+
   // User routes
   app.get('/api/user/me', async (req, res) => {
     try {

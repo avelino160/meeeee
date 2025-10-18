@@ -7,7 +7,6 @@ import StarfieldBackground from "@/components/starfield-background";
 import Dashboard from "@/pages/dashboard";
 import FunnelBuilder from "@/pages/funnel-builder";
 import FunnelEditor from "@/pages/funnel-editor";
-import FunnelViewer from "@/pages/funnel-viewer";
 import Contacts from "@/pages/contacts";
 import Analytics from "@/pages/analytics";
 import Plans from "@/pages/plans";
@@ -20,7 +19,6 @@ function Router() {
       <Route path="/" component={Dashboard} />
       <Route path="/funnel-builder" component={FunnelBuilder} />
       <Route path="/funnel-editor/:id" component={FunnelEditor} />
-      <Route path="/funnel-viewer" component={FunnelViewer} />
       <Route path="/contacts" component={Contacts} />
       <Route path="/analytics" component={Analytics} />
       <Route path="/plans" component={Plans} />
