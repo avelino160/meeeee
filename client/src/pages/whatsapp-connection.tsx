@@ -6,7 +6,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   Accordion,
   AccordionContent,
@@ -20,7 +19,6 @@ import {
   QrCode,
   CheckCircle,
   XCircle,
-  AlertCircle,
   LogOut,
   Zap,
 } from "lucide-react";
@@ -29,10 +27,6 @@ export default function WhatsAppConnection() {
   const [qrImageUrl, setQrImageUrl] = useState<string>("");
   const { toast } = useToast();
   const queryClient = useQueryClient();
-
-  const isReplitEnvironment = window.location.hostname.includes('.replit.') || 
-                               window.location.hostname.includes('replit.dev') ||
-                               window.location.hostname.includes('repl.co');
 
   const { data: whatsappStatus, isLoading } = useQuery<WhatsAppStatus>({
     queryKey: ["/api/whatsapp/status"],
@@ -176,16 +170,6 @@ export default function WhatsAppConnection() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {isReplitEnvironment && (
-                    <Alert className="mb-6">
-                      <AlertCircle className="h-4 w-4" />
-                      <AlertDescription>
-                        <strong>Atenção:</strong> WhatsApp bloqueia conexões de servidores cloud (como Replit). 
-                        Para testar, execute o projeto localmente no seu computador.
-                      </AlertDescription>
-                    </Alert>
-                  )}
-
                   <Button
                     onClick={() => generateQRMutation.mutate()}
                     disabled={generateQRMutation.isPending}
