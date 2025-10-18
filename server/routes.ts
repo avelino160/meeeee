@@ -12,6 +12,8 @@ import {
 import { z } from "zod";
 import { readFileSync } from "fs";
 import { join } from "path";
+import { validateFunnelJSON, funnelJSONSchema } from "@shared/funnel-json-types";
+import { convertFunnelJSONToFlowData } from "./services/funnelJsonConverter";
 
 const DEFAULT_USER_ID = "default-user";
 const DEMO_USER = {
@@ -214,19 +216,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const importedFunnels = [];
+      const errors: string[] = [];
+
       for (const funnelData of funnels) {
         try {
+          let flowData;
+          let funnelName;
+          let triggerPhrases: string[] = [];
+
+          const isFunnelJSON = funnelData.funnel_name && funnelData.settings && funnelData.nodes;
+
+          if (isFunnelJSON) {
+            const validation = validateFunnelJSON(funnelData);
+            
+            if (!validation.valid) {
+              errors.push(`Erro na validação do funil "${funnelData.funnel_name}": ${validation.errors.join(', ')}`);
+              continue;
+            }
+
+            const parsedJSON = funnelJSONSchema.parse(funnelData);
+            flowData = convertFunnelJSONToFlowData(parsedJSON);
+            funnelName = parsedJSON.funnel_name;
+            
+            if (parsedJSON.meta?.tags) {
+              triggerPhrases = parsedJSON.meta.tags;
+            }
+          } else {
+            funnelName = funnelData.name || 'Funil Importado';
+            triggerPhrases = funnelData.triggerPhrases || [];
+            flowData = funnelData.flowData || { nodes: [], edges: [] };
+          }
+
           const validatedData = insertFunnelSchema.parse({ 
-            ...funnelData, 
+            name: funnelName,
             userId,
             status: funnelData.status || 'draft',
-            triggerPhrases: funnelData.triggerPhrases || [],
-            flowData: funnelData.flowData || { nodes: [], edges: [] }
+            triggerPhrases,
+            flowData
           });
+
           const funnel = await storage.createFunnel(validatedData);
           importedFunnels.push(funnel);
-        } catch (error) {
+        } catch (error: any) {
           console.error("Error importing funnel:", error);
+          errors.push(`Erro ao importar funil: ${error.message}`);
         }
       }
 
@@ -234,7 +267,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         success: true, 
         imported: importedFunnels.length,
         total: funnels.length,
-        funnels: importedFunnels 
+        funnels: importedFunnels,
+        errors: errors.length > 0 ? errors : undefined
       });
     } catch (error) {
       console.error("Error importing funnels:", error);
