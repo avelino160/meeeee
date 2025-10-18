@@ -217,7 +217,7 @@ export default function FunnelBuilder() {
             <div>
               <h2 className="text-2xl font-bold text-foreground" data-testid="text-page-title">Funis de venda</h2>
               <p className="text-sm text-muted-foreground mt-1">
-                Crie fluxos de mensagens desenhados automaticamente para captar clientes online em um catálogo core web
+                Crie fluxos de mensagens automatizados para aumentar suas conversões
               </p>
             </div>
             <div className="flex items-center gap-2">
