@@ -316,14 +316,10 @@ export default function Plans() {
               <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
                 Nossa equipe está pronta para ajudar você a escolher o melhor plano para seu negócio
               </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <div className="flex justify-center">
                 <Button size="lg" data-testid="button-contact-support">
                   <Headphones className="h-5 w-5 mr-2" />
                   Falar com Especialista
-                </Button>
-                <Button size="lg" variant="outline" data-testid="button-schedule-demo">
-                  <Users className="h-5 w-5 mr-2" />
-                  Agendar Demo
                 </Button>
               </div>
             </div>
