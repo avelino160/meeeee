@@ -26,7 +26,9 @@ import {
   HelpCircle,
   Tag,
   CheckCircle,
-  ArrowLeft
+  ArrowLeft,
+  Plus,
+  X
 } from "lucide-react";
 
 interface FunnelNode {
@@ -61,7 +63,7 @@ export default function FunnelEditor() {
   const [funnelData, setFunnelData] = useState<FunnelData>({ nodes: [], edges: [] });
   const [funnelName, setFunnelName] = useState("Novo Funil");
   const [funnelStatus, setFunnelStatus] = useState("draft");
-  const [triggerPhrase, setTriggerPhrase] = useState("");
+  const [triggerPhrases, setTriggerPhrases] = useState<string[]>([]);
 
   const { data: funnel, isLoading } = useQuery<Funnel>({
     queryKey: [`/api/funnels/${funnelId}`],
@@ -72,7 +74,7 @@ export default function FunnelEditor() {
     if (funnel) {
       setFunnelName(funnel.name);
       setFunnelStatus(funnel.status || 'draft');
-      setTriggerPhrase(funnel.triggerPhrase || '');
+      setTriggerPhrases(funnel.triggerPhrases || []);
       if (funnel.flowData && typeof funnel.flowData === 'object') {
         setFunnelData(funnel.flowData as FunnelData);
       }
@@ -88,7 +90,7 @@ export default function FunnelEditor() {
       const response = await apiRequest("PUT", `/api/funnels/${funnelId}`, {
         name: funnelName,
         status: funnelStatus,
-        triggerPhrase: triggerPhrase,
+        triggerPhrases: triggerPhrases,
         flowData: funnelData,
       });
       return response.json();
@@ -271,25 +273,6 @@ export default function FunnelEditor() {
           {/* Left Toolbox */}
           <div className="w-64 bg-[#252525] border-r border-[#333] p-4 overflow-y-auto">
             <div className="space-y-6">
-              {/* Trigger Phrase */}
-              <div>
-                <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
-                  Frase Gatilho
-                </h3>
-                <div className="space-y-2">
-                  <Input
-                    value={triggerPhrase}
-                    onChange={(e) => setTriggerPhrase(e.target.value)}
-                    placeholder="Ex: Estou interessado"
-                    className="bg-[#1a1a1a] border-gray-700 text-white text-sm"
-                    data-testid="input-trigger-phrase"
-                  />
-                  <p className="text-xs text-gray-500">
-                    Palavra ou frase que inicia o funil
-                  </p>
-                </div>
-              </div>
-              
               {/* Message Types */}
               <div>
                 <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
@@ -412,7 +395,7 @@ export default function FunnelEditor() {
           {/* Canvas Area */}
           <div className="flex-1 relative bg-[#1a1a1a]">
             <FunnelCanvas
-              data={{ ...funnelData, triggerPhrase: funnel?.triggerPhrase || undefined }}
+              data={{ ...funnelData, triggerPhrases: triggerPhrases }}
               onDataChange={handleFunnelDataChange}
               onNodeSelect={handleNodeSelect}
             />
@@ -613,6 +596,60 @@ export default function FunnelEditor() {
                         className="mt-2 bg-[#1a1a1a] border-gray-700 text-white"
                         data-testid="input-tag-content"
                       />
+                    </div>
+                  </div>
+                )}
+
+                {/* Trigger Node - Multiple Phrases */}
+                {selectedNode.type === 'trigger' && (
+                  <div className="space-y-3">
+                    <div>
+                      <Label className="text-gray-300">
+                        Frases Gatilho (até 10)
+                      </Label>
+                      <p className="text-xs text-gray-500 mt-1 mb-3">
+                        Palavras ou frases que iniciam o funil
+                      </p>
+                      <div className="space-y-2">
+                        {triggerPhrases.map((phrase, index) => (
+                          <div key={index} className="flex gap-2">
+                            <Input
+                              value={phrase}
+                              onChange={(e) => {
+                                const newPhrases = [...triggerPhrases];
+                                newPhrases[index] = e.target.value;
+                                setTriggerPhrases(newPhrases);
+                              }}
+                              placeholder={`Frase ${index + 1}`}
+                              className="bg-[#1a1a1a] border-gray-700 text-white flex-1"
+                              data-testid={`input-trigger-phrase-${index}`}
+                            />
+                            <Button
+                              variant="outline"
+                              size="icon"
+                              onClick={() => {
+                                const newPhrases = triggerPhrases.filter((_, i) => i !== index);
+                                setTriggerPhrases(newPhrases);
+                              }}
+                              className="border-gray-600 text-gray-300 hover:bg-red-900"
+                              data-testid={`button-remove-phrase-${index}`}
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        ))}
+                        {triggerPhrases.length < 10 && (
+                          <Button
+                            variant="outline"
+                            onClick={() => setTriggerPhrases([...triggerPhrases, ''])}
+                            className="w-full border-gray-600 text-gray-300 hover:bg-gray-800"
+                            data-testid="button-add-trigger-phrase"
+                          >
+                            <Plus className="h-4 w-4 mr-2" />
+                            Adicionar Frase
+                          </Button>
+                        )}
+                      </div>
                     </div>
                   </div>
                 )}

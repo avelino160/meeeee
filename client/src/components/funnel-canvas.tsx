@@ -30,7 +30,7 @@ interface FunnelCanvasProps {
       source: string;
       target: string;
     }>;
-    triggerPhrase?: string;
+    triggerPhrases?: string[];
   };
   onDataChange: (data: any) => void;
   onNodeSelect: (node: any) => void;
@@ -78,6 +78,10 @@ function FunnelCanvasInner({ data, onDataChange, onNodeSelect }: FunnelCanvasPro
   // Initialize with sample nodes if empty, or sync from parent data
   React.useEffect(() => {
     if (data.nodes.length === 0 && nodes.length === 0) {
+      const phrasesText = data.triggerPhrases && data.triggerPhrases.length > 0
+        ? data.triggerPhrases.filter(p => p.trim()).map(p => `"${p}"`).join(', ')
+        : null;
+      
       const initialNodes = [
         {
           id: 'start',
@@ -86,7 +90,7 @@ function FunnelCanvasInner({ data, onDataChange, onNodeSelect }: FunnelCanvasPro
           data: { 
             label: 'Início',
             nodeType: 'trigger',
-            content: data.triggerPhrase ? `Gatilho: "${data.triggerPhrase}"` : 'Configure a frase gatilho à esquerda',
+            content: phrasesText ? `Gatilho: ${phrasesText}` : 'Clique para configurar frases de gatilho',
             icon: 'play'
           },
         },
@@ -140,8 +144,12 @@ function FunnelCanvasInner({ data, onDataChange, onNodeSelect }: FunnelCanvasPro
     }
   }, [data, nodes.length]);
 
-  // Update trigger node when triggerPhrase changes
+  // Update trigger node when triggerPhrases changes
   React.useEffect(() => {
+    const phrasesText = data.triggerPhrases && data.triggerPhrases.length > 0
+      ? data.triggerPhrases.filter(p => p.trim()).map(p => `"${p}"`).join(', ')
+      : null;
+    
     setNodes(currentNodes => {
       return currentNodes.map(node => {
         if (node.id === 'start' || node.data.nodeType === 'trigger') {
@@ -149,14 +157,14 @@ function FunnelCanvasInner({ data, onDataChange, onNodeSelect }: FunnelCanvasPro
             ...node,
             data: {
               ...node.data,
-              content: data.triggerPhrase ? `Gatilho: "${data.triggerPhrase}"` : 'Configure a frase gatilho à esquerda',
+              content: phrasesText ? `Gatilho: ${phrasesText}` : 'Clique para configurar frases de gatilho',
             }
           };
         }
         return node;
       });
     });
-  }, [data.triggerPhrase]);
+  }, [data.triggerPhrases]);
 
   const onConnect = useCallback(
     (params: Connection) => {
