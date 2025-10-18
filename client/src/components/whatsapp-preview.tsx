@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { MessageSquare, Image, Video, Mic, FileText, User, Bot } from "lucide-react";
+import { Image, Video, Mic, FileText } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 interface FunnelNode {
@@ -176,27 +176,59 @@ export default function WhatsAppPreview({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg h-[700px] p-0 bg-[#0b141a] border-none overflow-hidden">
-        <DialogHeader className="bg-[#202c33] px-4 py-3 border-b border-[#2a3942] flex-shrink-0">
+      <DialogContent className="max-w-[400px] h-[850px] p-0 bg-black border-none overflow-hidden rounded-[50px]">
+        {/* iPhone Notch and Status Bar */}
+        <div className="absolute top-0 left-0 right-0 h-12 bg-[#111b21] z-50">
+          <div className="w-full h-full flex items-center justify-center">
+            <div className="w-28 h-7 bg-black rounded-b-3xl"></div>
+          </div>
+          <div className="absolute top-0 right-6 flex items-center gap-1 pt-2">
+            <svg width="18" height="12" viewBox="0 0 18 12" fill="white">
+              <rect x="0" y="3" width="5" height="6" rx="1"/>
+              <rect x="6" y="1.5" width="5" height="9" rx="1"/>
+              <rect x="12" y="0" width="5" height="12" rx="1"/>
+            </svg>
+            <svg width="16" height="12" viewBox="0 0 16 12" className="ml-1">
+              <path d="M8 0C3.6 0 0 2.7 0 6s3.6 6 8 6 8-2.7 8-6-3.6-6-8-6zm0 10c-3.3 0-6-1.8-6-4s2.7-4 6-4 6 1.8 6 4-2.7 4-6 4z" fill="white"/>
+            </svg>
+            <span className="text-white text-xs ml-1">100%</span>
+          </div>
+          <div className="absolute top-0 left-6 pt-2">
+            <span className="text-white text-xs font-medium">9:41</span>
+          </div>
+        </div>
+
+        {/* WhatsApp Header */}
+        <div className="mt-12 bg-[#202c33] px-4 py-2 border-b border-[#2a3942] flex-shrink-0">
           <div className="flex items-center gap-3">
             <Avatar className="h-10 w-10">
-              <AvatarFallback className="bg-purple-600 text-white">
-                <Bot className="h-5 w-5" />
+              <AvatarFallback className="bg-purple-600 text-white text-lg font-bold">
+                R
               </AvatarFallback>
             </Avatar>
-            <div>
+            <div className="flex-1">
               <DialogTitle className="text-white text-base font-medium">
-                Automação RanZap
+                RanZap
               </DialogTitle>
               <p className="text-xs text-[#8696a0]">online</p>
             </div>
+            <div className="flex gap-4">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#8696a0" strokeWidth="2">
+                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+              </svg>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#8696a0" strokeWidth="2">
+                <circle cx="12" cy="12" r="1"></circle>
+                <circle cx="12" cy="5" r="1"></circle>
+                <circle cx="12" cy="19" r="1"></circle>
+              </svg>
+            </div>
           </div>
-        </DialogHeader>
+        </div>
 
         <div 
-          className="flex-1 overflow-y-auto p-4 space-y-3"
+          className="flex-1 overflow-y-auto p-3 space-y-2"
           style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23182229' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23182229' fill-opacity='0.3'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
             backgroundColor: '#0b141a'
           }}
           data-testid="whatsapp-preview-messages"
@@ -207,22 +239,21 @@ export default function WhatsAppPreview({
               className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'} animate-in slide-in-from-bottom-2 duration-300`}
               style={{ animationDelay: `${index * 50}ms` }}
             >
-              <div className="flex items-end gap-2 max-w-[80%]">
-                {message.type === 'bot' && (
-                  <Avatar className="h-8 w-8 mb-1 flex-shrink-0">
-                    <AvatarFallback className="bg-purple-600 text-white text-xs">
-                      <Bot className="h-4 w-4" />
-                    </AvatarFallback>
-                  </Avatar>
-                )}
-                
+              <div className="flex items-end gap-1.5 max-w-[85%]">
                 <div
-                  className={`rounded-lg px-4 py-2 shadow-md ${
+                  className={`rounded-lg px-3 py-1.5 shadow-lg relative ${
                     message.type === 'user'
-                      ? 'bg-[#005c4b] text-white rounded-br-none'
-                      : 'bg-[#202c33] text-[#e9edef] rounded-bl-none'
+                      ? 'bg-[#005c4b] text-white rounded-br-sm'
+                      : 'bg-[#202c33] text-[#e9edef] rounded-bl-sm'
                   }`}
                 >
+                  {/* Tail do balão */}
+                  <div className={`absolute bottom-0 ${
+                    message.type === 'user' 
+                      ? 'right-[-8px] border-l-8 border-l-[#005c4b]' 
+                      : 'left-[-8px] border-r-8 border-r-[#202c33]'
+                  } border-b-8 border-b-transparent w-0 h-0`}></div>
+                  
                   {renderMessageContent(message)}
                   <div className={`text-[10px] mt-1 flex items-center gap-1 justify-end ${
                     message.type === 'user' ? 'text-[#a5c8bb]' : 'text-[#8696a0]'
@@ -232,50 +263,54 @@ export default function WhatsAppPreview({
                       minute: '2-digit' 
                     })}
                     {message.type === 'user' && (
-                      <svg viewBox="0 0 16 15" width="16" height="15" className="fill-current">
+                      <svg viewBox="0 0 16 15" width="14" height="14" className="fill-current">
                         <path d="M15.01 3.316l-.478-.372a.365.365 0 0 0-.51.063L8.666 9.879a.32.32 0 0 1-.484.033l-.358-.325a.319.319 0 0 0-.484.032l-.378.483a.418.418 0 0 0 .036.541l1.32 1.266c.143.14.361.125.484-.033l6.272-8.048a.366.366 0 0 0-.064-.512zm-4.1 0l-.478-.372a.365.365 0 0 0-.51.063L4.566 9.879a.32.32 0 0 1-.484.033L1.891 7.769a.366.366 0 0 0-.515.006l-.423.433a.364.364 0 0 0 .006.514l3.258 3.185c.143.14.361.125.484-.033l6.272-8.048a.365.365 0 0 0-.063-.51z"></path>
                       </svg>
                     )}
                   </div>
                 </div>
-
-                {message.type === 'user' && (
-                  <Avatar className="h-8 w-8 mb-1 flex-shrink-0">
-                    <AvatarFallback className="bg-[#667781] text-white text-xs">
-                      <User className="h-4 w-4" />
-                    </AvatarFallback>
-                  </Avatar>
-                )}
               </div>
             </div>
           ))}
 
           {isSimulating && messages.length > 0 && (
             <div className="flex justify-start animate-in fade-in duration-300">
-              <div className="flex items-end gap-2">
-                <Avatar className="h-8 w-8 mb-1 flex-shrink-0">
-                  <AvatarFallback className="bg-purple-600 text-white text-xs">
-                    <Bot className="h-4 w-4" />
-                  </AvatarFallback>
-                </Avatar>
-                <div className="bg-[#202c33] rounded-lg rounded-bl-none px-4 py-3 shadow-md">
-                  <div className="flex gap-1">
-                    <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-                    <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-                    <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
-                  </div>
+              <div className="bg-[#202c33] rounded-lg rounded-bl-sm px-4 py-3 shadow-lg relative">
+                <div className="absolute bottom-0 left-[-8px] border-r-8 border-r-[#202c33] border-b-8 border-b-transparent w-0 h-0"></div>
+                <div className="flex gap-1.5">
+                  <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                  <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                  <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
                 </div>
               </div>
             </div>
           )}
         </div>
 
-        <div className="bg-[#202c33] px-4 py-3 border-t border-[#2a3942]">
-          <div className="flex items-center gap-2 bg-[#2a3942] rounded-lg px-4 py-2">
-            <MessageSquare className="h-5 w-5 text-[#8696a0]" />
-            <span className="text-sm text-[#8696a0]">Digite uma mensagem...</span>
+        <div className="bg-[#202c33] px-3 py-2 border-t border-[#2a3942] flex-shrink-0">
+          <div className="flex items-center gap-2">
+            <div className="flex-1 flex items-center gap-2 bg-[#2a3942] rounded-3xl px-4 py-2.5">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#8696a0" strokeWidth="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <path d="M8 14s1.5 2 4 2 4-2 4-2"></path>
+                <line x1="9" y1="9" x2="9.01" y2="9"></line>
+                <line x1="15" y1="9" x2="15.01" y2="9"></line>
+              </svg>
+              <span className="text-sm text-[#8696a0] flex-1">Mensagem</span>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#8696a0" strokeWidth="2">
+                <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path>
+              </svg>
+            </div>
+            <div className="w-10 h-10 rounded-full bg-[#00a884] flex items-center justify-center">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"></path>
+              </svg>
+            </div>
           </div>
         </div>
+
+        {/* iPhone Home Indicator */}
+        <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 w-32 h-1 bg-white/30 rounded-full"></div>
       </DialogContent>
     </Dialog>
   );
