@@ -125,15 +125,6 @@ export class WhatsAppService {
           this.connectionStatus.connected = false;
           this.connectionStatus.status = 'disconnected';
           
-          const shouldReconnect = (lastDisconnect?.error as Boom)?.output?.statusCode !== DisconnectReason.loggedOut;
-          
-          console.log('🔄 Conexão fechada. Reconectar?', shouldReconnect, 'Gerando QR?', this.isGeneratingQR);
-          
-          if (shouldReconnect && !this.isGeneratingQR) {
-            // Auto-reconectar se não foi logout manual E não estamos gerando QR
-            setTimeout(() => this.initializeSocket(), 5000);
-          }
-          
           console.log('❌ WhatsApp desconectado - status atualizado internamente');
         }
       });

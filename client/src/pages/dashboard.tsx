@@ -23,28 +23,10 @@ export default function Dashboard() {
     retry: false,
   });
 
-  // 🚀 VERIFICAR STATUS DO WHATSAPP AUTOMATICAMENTE
   const { data: whatsappStatus } = useQuery<WhatsAppStatus>({
     queryKey: ["/api/whatsapp/status"],
-    refetchInterval: 5000, // Verificar a cada 5 segundos
     retry: false,
   });
-
-  // 💥 ABRIR MODAL AUTOMATICAMENTE SE NÃO CONECTADO
-  useEffect(() => {
-    if (whatsappStatus && !whatsappStatus.connected && !showWhatsAppModal) {
-      // Aguardar 2 segundos para dar tempo do dashboard carregar
-      const timer = setTimeout(() => {
-        setShowWhatsAppModal(true);
-        toast({
-          title: "🚀 RanZap - Conecte seu WhatsApp!",
-          description: "📱 Escaneie o QR Code para começar a vender automaticamente!",
-          duration: 5000,
-        });
-      }, 2000);
-      return () => clearTimeout(timer);
-    }
-  }, [whatsappStatus, showWhatsAppModal, toast]);
 
   return (
     <div className="flex h-screen bg-background">

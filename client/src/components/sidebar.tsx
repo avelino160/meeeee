@@ -35,7 +35,6 @@ export default function Sidebar() {
 
   const { data: whatsappStatus } = useQuery<WhatsAppStatus>({
     queryKey: ["/api/whatsapp/status"],
-    refetchInterval: 30000,
   });
 
   const menuItems = [
