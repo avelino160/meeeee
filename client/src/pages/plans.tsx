@@ -6,6 +6,12 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import {
   CreditCard,
   Check,
   Star,
@@ -279,34 +285,44 @@ export default function Plans() {
             <div className="mt-20 bg-card rounded-lg border border-border p-8">
               <h2 className="text-2xl font-bold text-center mb-8">Perguntas Frequentes sobre Planos</h2>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl mx-auto">
-                <div>
-                  <h3 className="font-semibold mb-2">Posso cancelar a qualquer momento?</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Sim! Sem fidelidade e sem custos adicionais.
-                  </p>
-                </div>
-                
-                <div>
-                  <h3 className="font-semibold mb-2">Como funciona o período de teste?</h3>
-                  <p className="text-sm text-muted-foreground">
-                    O plano gratuito não tem limite de tempo.
-                  </p>
-                </div>
-                
-                <div>
-                  <h3 className="font-semibold mb-2">Posso mudar de plano depois?</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Sim! Upgrade ou downgrade a qualquer momento.
-                  </p>
-                </div>
-                
-                <div>
-                  <h3 className="font-semibold mb-2">Quais formas de pagamento aceitas?</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Cartão de crédito, M-Pesa e transferência bancária.
-                  </p>
-                </div>
+              <div className="max-w-3xl mx-auto">
+                <Accordion type="single" collapsible className="w-full">
+                  <AccordionItem value="item-1">
+                    <AccordionTrigger className="text-left">
+                      Posso cancelar a qualquer momento?
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      Sim! Não há fidelidade. Você pode cancelar seu plano quando quiser sem custos adicionais.
+                    </AccordionContent>
+                  </AccordionItem>
+                  
+                  <AccordionItem value="item-2">
+                    <AccordionTrigger className="text-left">
+                      Como funciona o período de teste?
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      O plano gratuito não tem limite de tempo. Teste todas as funcionalidades antes de fazer upgrade.
+                    </AccordionContent>
+                  </AccordionItem>
+                  
+                  <AccordionItem value="item-3">
+                    <AccordionTrigger className="text-left">
+                      Posso mudar de plano depois?
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      Claro! Você pode fazer upgrade ou downgrade a qualquer momento, com ajuste proporcional.
+                    </AccordionContent>
+                  </AccordionItem>
+                  
+                  <AccordionItem value="item-4">
+                    <AccordionTrigger className="text-left">
+                      Quais formas de pagamento aceitas?
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      Aceitamos cartão de crédito, M-Pesa e transferência bancária. Pagamento 100% seguro.
+                    </AccordionContent>
+                  </AccordionItem>
+                </Accordion>
               </div>
             </div>
 
