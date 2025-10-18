@@ -28,24 +28,30 @@ import { Link } from "wouter";
 export default function WhatsAppConnection() {
   const [qrImageUrl, setQrImageUrl] = useState<string>("");
   const [currentPlan] = useState("free"); // Simula o plano atual
-  const [connectedAccounts] = useState(1); // Simula número de contas conectadas
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   // Limites baseados no plano
   const planLimits = {
     free: 1,
-    pro: 1,
+    pro: 3,
     business: 5,
   };
 
   const maxAccounts = planLimits[currentPlan as keyof typeof planLimits];
-  const canAddMore = connectedAccounts < maxAccounts;
 
   const { data: whatsappStatus, isLoading } = useQuery<WhatsAppStatus>({
     queryKey: ["/api/whatsapp/status"],
     refetchInterval: 5000,
   });
+
+  const { data: connectedAccountsData } = useQuery<{ count: number }>({
+    queryKey: ["/api/whatsapp/connected-count"],
+    refetchInterval: 5000,
+  });
+
+  const connectedAccounts = connectedAccountsData?.count ?? 0;
+  const canAddMore = connectedAccounts < maxAccounts;
 
   const generateQRMutation = useMutation({
     mutationFn: async () => {
@@ -67,6 +73,7 @@ export default function WhatsAppConnection() {
         });
       }
       queryClient.invalidateQueries({ queryKey: ["/api/whatsapp/status"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/whatsapp/connected-count"] });
     },
     onError: (error: any) => {
       const isDatacenterBlock = error.message?.includes('bloqueou') || error.message?.includes('datacenter');
@@ -87,6 +94,7 @@ export default function WhatsAppConnection() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/whatsapp/status"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/whatsapp/connected-count"] });
       setQrImageUrl("");
       toast({
         title: "Desconectado",
@@ -146,7 +154,7 @@ export default function WhatsAppConnection() {
                 </CardTitle>
                 <CardDescription>
                   {currentPlan === "free" && "Plano Gratuito permite 1 conta"}
-                  {currentPlan === "pro" && "Plano Pro permite 1 conta"}
+                  {currentPlan === "pro" && "Plano Pro permite 3 contas"}
                   {currentPlan === "business" && "Plano Business permite até 5 contas"}
                 </CardDescription>
               </CardHeader>

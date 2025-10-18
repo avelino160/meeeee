@@ -78,6 +78,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get('/api/whatsapp/connected-count', async (req, res) => {
+    try {
+      const userId = DEFAULT_USER_ID;
+      const count = await storage.getConnectedAccountsCount(userId);
+      res.json({ count });
+    } catch (error) {
+      console.error("Error getting connected accounts count:", error);
+      res.status(500).json({ message: "Failed to get connected accounts count" });
+    }
+  });
+
   app.post('/api/whatsapp/qr', async (req, res) => {
     // 🛡️ GUARD: Bloquear tentativas em ambientes de datacenter
     if (isDatacenterEnvironment(req)) {

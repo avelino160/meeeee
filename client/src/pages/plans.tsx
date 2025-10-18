@@ -64,7 +64,7 @@ export default function Plans() {
       yearlyPrice: 3840,
       popular: true,
       features: [
-        { text: "1 conta WhatsApp", included: true },
+        { text: "3 contas WhatsApp", included: true },
         { text: "200 mensagens/hora", included: true },
         { text: "Funis ilimitados", included: true },
         { text: "5.000 contatos", included: true },
