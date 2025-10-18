@@ -217,15 +217,6 @@ export default function WhatsAppConnection() {
                 <Accordion type="single" collapsible className="w-full">
                   <AccordionItem value="item-1">
                     <AccordionTrigger className="text-left">
-                      Problemas de conexão?
-                    </AccordionTrigger>
-                    <AccordionContent className="text-muted-foreground">
-                      Certifique-se de que seu número de telefone está correto e inclui o código do país.
-                    </AccordionContent>
-                  </AccordionItem>
-                  
-                  <AccordionItem value="item-2">
-                    <AccordionTrigger className="text-left">
                       QR Code não aparece?
                     </AccordionTrigger>
                     <AccordionContent className="text-muted-foreground">
@@ -233,7 +224,7 @@ export default function WhatsAppConnection() {
                     </AccordionContent>
                   </AccordionItem>
                   
-                  <AccordionItem value="item-3">
+                  <AccordionItem value="item-2">
                     <AccordionTrigger className="text-left">
                       Ainda com dúvidas?
                     </AccordionTrigger>
