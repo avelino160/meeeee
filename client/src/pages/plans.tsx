@@ -53,8 +53,8 @@ export default function Plans() {
       id: "pro",
       name: "Pro",
       description: "Para profissionais e pequenas empresas",
-      monthlyPrice: 49,
-      yearlyPrice: 470,
+      monthlyPrice: 400,
+      yearlyPrice: 3840,
       popular: true,
       features: [
         { text: "1 conta WhatsApp", included: true },
@@ -71,8 +71,8 @@ export default function Plans() {
       id: "business",
       name: "Business",
       description: "Para empresas em crescimento",
-      monthlyPrice: 149,
-      yearlyPrice: 1430,
+      monthlyPrice: 1200,
+      yearlyPrice: 11520,
       popular: false,
       features: [
         { text: "5 contas WhatsApp", included: true },
@@ -162,14 +162,14 @@ export default function Plans() {
                       
                       <div className="mt-6">
                         <div className="flex items-baseline justify-center">
-                          <span className="text-5xl font-bold">R${price}</span>
+                          <span className="text-5xl font-bold">{price} MT</span>
                           <span className="text-muted-foreground ml-2">
                             /{billingPeriod === "monthly" ? "mês" : "ano"}
                           </span>
                         </div>
                         {billingPeriod === "yearly" && plan.monthlyPrice > 0 && (
                           <p className="text-sm text-muted-foreground mt-2">
-                            R${(price / 12).toFixed(2)}/mês economize {((plan.monthlyPrice * 12 - price) / (plan.monthlyPrice * 12) * 100).toFixed(0)}%
+                            {(price / 12).toFixed(2)} MT/mês economize {((plan.monthlyPrice * 12 - price) / (plan.monthlyPrice * 12) * 100).toFixed(0)}%
                           </p>
                         )}
                       </div>
@@ -304,7 +304,7 @@ export default function Plans() {
                 <div>
                   <h3 className="font-semibold mb-2">Quais formas de pagamento aceitas?</h3>
                   <p className="text-sm text-muted-foreground">
-                    Aceitamos cartão de crédito, PIX e boleto bancário. Pagamento 100% seguro.
+                    Aceitamos cartão de crédito, M-Pesa e transferência bancária. Pagamento 100% seguro.
                   </p>
                 </div>
               </div>
