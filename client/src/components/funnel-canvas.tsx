@@ -86,7 +86,7 @@ function FunnelCanvasInner({ data, onDataChange, onNodeSelect }: FunnelCanvasPro
           data: { 
             label: 'Início',
             nodeType: 'trigger',
-            content: `Gatilho: "${data.triggerPhrase || 'Estou interessado'}"`,
+            content: data.triggerPhrase ? `Gatilho: "${data.triggerPhrase}"` : 'Configure a frase gatilho à esquerda',
             icon: 'play'
           },
         },
@@ -139,6 +139,24 @@ function FunnelCanvasInner({ data, onDataChange, onNodeSelect }: FunnelCanvasPro
       setEdges(data.edges);
     }
   }, [data, nodes.length]);
+
+  // Update trigger node when triggerPhrase changes
+  React.useEffect(() => {
+    setNodes(currentNodes => {
+      return currentNodes.map(node => {
+        if (node.id === 'start' || node.data.nodeType === 'trigger') {
+          return {
+            ...node,
+            data: {
+              ...node.data,
+              content: data.triggerPhrase ? `Gatilho: "${data.triggerPhrase}"` : 'Configure a frase gatilho à esquerda',
+            }
+          };
+        }
+        return node;
+      });
+    });
+  }, [data.triggerPhrase]);
 
   const onConnect = useCallback(
     (params: Connection) => {

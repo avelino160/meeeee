@@ -32,7 +32,6 @@ export default function FunnelBuilder() {
   const [, setLocation] = useLocation();
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [newFunnelName, setNewFunnelName] = useState("");
-  const [newFunnelTrigger, setNewFunnelTrigger] = useState("");
 
   const { data: funnels, isLoading } = useQuery<Funnel[]>({
     queryKey: ["/api/funnels"],
@@ -43,7 +42,6 @@ export default function FunnelBuilder() {
     mutationFn: async () => {
       const response = await apiRequest("POST", "/api/funnels", {
         name: newFunnelName,
-        triggerPhrase: newFunnelTrigger,
         status: "draft",
         flowData: { nodes: [], edges: [] },
       });
@@ -57,7 +55,6 @@ export default function FunnelBuilder() {
       queryClient.invalidateQueries({ queryKey: ["/api/funnels"] });
       setIsCreateDialogOpen(false);
       setNewFunnelName("");
-      setNewFunnelTrigger("");
     },
     onError: () => {
       toast({
@@ -269,17 +266,9 @@ export default function FunnelBuilder() {
                 onChange={(e) => setNewFunnelName(e.target.value)}
                 data-testid="input-new-funnel-name"
               />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="funnel-trigger">Frase Gatilho (opcional)</Label>
-              <Textarea
-                id="funnel-trigger"
-                placeholder="Ex: Estou interessado"
-                value={newFunnelTrigger}
-                onChange={(e) => setNewFunnelTrigger(e.target.value)}
-                className="resize-none h-20"
-                data-testid="input-new-funnel-trigger"
-              />
+              <p className="text-xs text-muted-foreground">
+                Configure a frase gatilho dentro do editor do funil
+              </p>
             </div>
           </div>
           <DialogFooter>

@@ -61,6 +61,7 @@ export default function FunnelEditor() {
   const [funnelData, setFunnelData] = useState<FunnelData>({ nodes: [], edges: [] });
   const [funnelName, setFunnelName] = useState("Novo Funil");
   const [funnelStatus, setFunnelStatus] = useState("draft");
+  const [triggerPhrase, setTriggerPhrase] = useState("");
 
   const { data: funnel, isLoading } = useQuery<Funnel>({
     queryKey: [`/api/funnels/${funnelId}`],
@@ -71,6 +72,7 @@ export default function FunnelEditor() {
     if (funnel) {
       setFunnelName(funnel.name);
       setFunnelStatus(funnel.status || 'draft');
+      setTriggerPhrase(funnel.triggerPhrase || '');
       if (funnel.flowData && typeof funnel.flowData === 'object') {
         setFunnelData(funnel.flowData as FunnelData);
       }
@@ -86,6 +88,7 @@ export default function FunnelEditor() {
       const response = await apiRequest("PUT", `/api/funnels/${funnelId}`, {
         name: funnelName,
         status: funnelStatus,
+        triggerPhrase: triggerPhrase,
         flowData: funnelData,
       });
       return response.json();
@@ -268,6 +271,25 @@ export default function FunnelEditor() {
           {/* Left Toolbox */}
           <div className="w-64 bg-[#252525] border-r border-[#333] p-4 overflow-y-auto">
             <div className="space-y-6">
+              {/* Trigger Phrase */}
+              <div>
+                <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
+                  Frase Gatilho
+                </h3>
+                <div className="space-y-2">
+                  <Input
+                    value={triggerPhrase}
+                    onChange={(e) => setTriggerPhrase(e.target.value)}
+                    placeholder="Ex: Estou interessado"
+                    className="bg-[#1a1a1a] border-gray-700 text-white text-sm"
+                    data-testid="input-trigger-phrase"
+                  />
+                  <p className="text-xs text-gray-500">
+                    Palavra ou frase que inicia o funil
+                  </p>
+                </div>
+              </div>
+              
               {/* Message Types */}
               <div>
                 <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
