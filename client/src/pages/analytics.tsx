@@ -288,148 +288,37 @@ export default function Analytics() {
                 </Card>
               </div>
 
-              {/* Activity Feed and System Status */}
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <Card className="lg:col-span-2">
-                  <CardHeader>
-                    <CardTitle>Atividade Recente</CardTitle>
-                    <CardDescription>
-                      Últimas atividades do sistema em tempo real
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      {metrics.recentActivity.map((activity) => (
-                        <div key={activity.id} className="flex items-center space-x-4">
-                          <div className={`w-2 h-2 rounded-full ${
-                            activity.status === 'success' ? 'bg-green-500' :
-                            activity.status === 'warning' ? 'bg-yellow-500' :
-                            activity.status === 'error' ? 'bg-red-500' : 'bg-blue-500'
-                          }`}></div>
-                          <div className="flex-1">
-                            <p className="text-sm font-medium" data-testid={`text-activity-${activity.id}`}>
-                              {activity.title}
-                            </p>
-                            <p className="text-xs text-muted-foreground">{activity.time}</p>
-                          </div>
-                          <div className="flex items-center space-x-1">
-                            {activity.status === 'success' && <CheckCircle className="h-4 w-4 text-green-500" />}
-                            {activity.status === 'warning' && <Clock className="h-4 w-4 text-yellow-500" />}
-                            {activity.status === 'error' && <XCircle className="h-4 w-4 text-red-500" />}
-                            {activity.status === 'info' && <Eye className="h-4 w-4 text-blue-500" />}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Sistema</CardTitle>
-                    <CardDescription>
-                      Status dos serviços em tempo real
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-2">
-                          <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                          <span className="text-sm">WhatsApp API</span>
-                        </div>
-                        <Badge variant="outline" className="text-green-600 border-green-600">
-                          Online
-                        </Badge>
-                      </div>
-
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-2">
-                          <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                          <span className="text-sm">Scheduler</span>
-                        </div>
-                        <Badge variant="outline" className="text-green-600 border-green-600">
-                          {analytics?.schedulerTasks || 0} tarefas
-                        </Badge>
-                      </div>
-
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-2">
-                          <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                          <span className="text-sm">Database</span>
-                        </div>
-                        <Badge variant="outline" className="text-green-600 border-green-600">
-                          Conectado
-                        </Badge>
-                      </div>
-
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-2">
-                          <div className="w-2 h-2 bg-primary rounded-full"></div>
-                          <span className="text-sm">Funis Ativos</span>
-                        </div>
-                        <Badge variant="outline" className="text-primary border-primary">
-                          {analytics?.activeCampaigns || 0}
-                        </Badge>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-
-              {/* Key Metrics Summary */}
+              {/* Activity Feed */}
               <Card>
                 <CardHeader>
-                  <CardTitle>Resumo de Performance</CardTitle>
+                  <CardTitle>Atividade Recente</CardTitle>
                   <CardDescription>
-                    Métricas principais do período atual
+                    Últimas atividades do sistema em tempo real
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                    <div className="text-center">
-                      <div className="flex items-center justify-center mb-2">
-                        <Target className="h-5 w-5 text-primary mr-2" />
-                        <span className="text-sm font-medium">Taxa de Conversão</span>
+                  <div className="space-y-4">
+                    {metrics.recentActivity.map((activity) => (
+                      <div key={activity.id} className="flex items-center space-x-4">
+                        <div className={`w-2 h-2 rounded-full ${
+                          activity.status === 'success' ? 'bg-green-500' :
+                          activity.status === 'warning' ? 'bg-yellow-500' :
+                          activity.status === 'error' ? 'bg-red-500' : 'bg-blue-500'
+                        }`}></div>
+                        <div className="flex-1">
+                          <p className="text-sm font-medium" data-testid={`text-activity-${activity.id}`}>
+                            {activity.title}
+                          </p>
+                          <p className="text-xs text-muted-foreground">{activity.time}</p>
+                        </div>
+                        <div className="flex items-center space-x-1">
+                          {activity.status === 'success' && <CheckCircle className="h-4 w-4 text-green-500" />}
+                          {activity.status === 'warning' && <Clock className="h-4 w-4 text-yellow-500" />}
+                          {activity.status === 'error' && <XCircle className="h-4 w-4 text-red-500" />}
+                          {activity.status === 'info' && <Eye className="h-4 w-4 text-blue-500" />}
+                        </div>
                       </div>
-                      <p className="text-2xl font-bold text-primary" data-testid="text-conversion-rate">
-                        {metrics.campaignSuccessRate.toFixed(1)}%
-                      </p>
-                      <p className="text-xs text-muted-foreground">Campanhas ativas/total</p>
-                    </div>
-
-                    <div className="text-center">
-                      <div className="flex items-center justify-center mb-2">
-                        <Send className="h-5 w-5 text-green-600 mr-2" />
-                        <span className="text-sm font-medium">Eficiência de Envio</span>
-                      </div>
-                      <p className="text-2xl font-bold text-green-600" data-testid="text-send-efficiency">
-                        {analytics?.deliveryRate ? analytics.deliveryRate.toFixed(1) : '0.0'}%
-                      </p>
-                      <p className="text-xs text-muted-foreground">Mensagens entregues</p>
-                    </div>
-
-                    <div className="text-center">
-                      <div className="flex items-center justify-center mb-2">
-                        <Users className="h-5 w-5 text-blue-600 mr-2" />
-                        <span className="text-sm font-medium">Engajamento</span>
-                      </div>
-                      <p className="text-2xl font-bold text-blue-600" data-testid="text-engagement-rate">
-                        {metrics.contactEngagementRate.toFixed(1)}%
-                      </p>
-                      <p className="text-xs text-muted-foreground">Contatos ativos</p>
-                    </div>
-
-                    <div className="text-center">
-                      <div className="flex items-center justify-center mb-2">
-                        <BarChart3 className="h-5 w-5 text-purple-600 mr-2" />
-                        <span className="text-sm font-medium">Produtividade</span>
-                      </div>
-                      <p className="text-2xl font-bold text-purple-600" data-testid="text-productivity-score">
-                        {metrics.avgMessagesPerCampaign.toFixed(1)}
-                      </p>
-                      <p className="text-xs text-muted-foreground">Msgs por campanha</p>
-                    </div>
+                    ))}
                   </div>
                 </CardContent>
               </Card>
