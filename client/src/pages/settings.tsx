@@ -47,7 +47,10 @@ export default function Settings() {
 
   // FAQ State
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
-  const [activeTab, setActiveTab] = useState("general");
+  const [activeTab, setActiveTab] = useState(() => {
+    const hash = window.location.hash.replace('#', '');
+    return hash && ['general', 'support', 'faq'].includes(hash) ? hash : 'general';
+  });
 
   const faqItems = [
     {

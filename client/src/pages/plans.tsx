@@ -334,7 +334,7 @@ export default function Plans() {
                 Nossa equipe está pronta para ajudar você a escolher o melhor plano para seu negócio
               </p>
               <div className="flex justify-center">
-                <Link href="/support">
+                <Link href="/settings#support">
                   <Button size="lg" data-testid="button-contact-support">
                     <Headphones className="h-5 w-5 mr-2" />
                     Falar com Suporte
