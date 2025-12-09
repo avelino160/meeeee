@@ -13,6 +13,7 @@ import ReactFlow, {
   NodeTypes,
   useReactFlow,
   ReactFlowProvider,
+  ConnectionMode,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 import FunnelNode from './funnel-node';
@@ -301,6 +302,7 @@ function FunnelCanvasInner({ data, onDataChange, onNodeSelect }: FunnelCanvasPro
         nodeTypes={nodeTypes}
         fitView
         className="bg-background"
+        connectionMode={ConnectionMode.Loose}
       >
         <Controls className="bg-card border-border" />
         <MiniMap 
