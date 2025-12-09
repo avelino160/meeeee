@@ -13,6 +13,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Menu,
+  CreditCard,
 } from "lucide-react";
 
 export default function Sidebar() {
@@ -31,6 +32,7 @@ export default function Sidebar() {
     { href: "/funnel-builder", icon: BarChart3, label: t('sales_funnels'), key: 'sales_funnels' },
     { href: "/contacts", icon: Users, label: t('contacts'), key: 'contacts' },
     { href: "/analytics", icon: TrendingUp, label: t('reports'), key: 'reports' },
+    { href: "/plans", icon: CreditCard, label: t('plans'), key: 'plans' },
     { href: "/settings", icon: Settings, label: t('settings'), key: 'settings' },
   ];
 
