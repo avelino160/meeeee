@@ -54,7 +54,7 @@ export default function Dashboard() {
       
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Header */}
-        <header className="bg-card border-b border-border px-2 sm:px-4 lg:px-6 py-3 sm:py-4 lg:py-5">
+        <header className="bg-card border-b border-border pl-14 pr-2 sm:px-4 lg:px-6 py-3 sm:py-4 lg:py-5">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
             <div className="flex-1">
               <h1 className="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-bold" data-testid="text-dashboard-title">
