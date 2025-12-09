@@ -59,7 +59,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // User routes
   app.get('/api/user/me', async (req, res) => {
     try {
-      res.json(DEMO_USER);
+      const user = await storage.getUser(DEFAULT_USER_ID);
+      
+      if (!user) {
+        res.json(DEMO_USER);
+        return;
+      }
+
+      await storage.checkPlanExpiration(DEFAULT_USER_ID);
+      const updatedUser = await storage.getUser(DEFAULT_USER_ID);
+
+      res.json({
+        id: updatedUser?.id || DEMO_USER.id,
+        firstName: updatedUser?.firstName || DEMO_USER.firstName,
+        lastName: updatedUser?.lastName || DEMO_USER.lastName,
+        email: updatedUser?.email || DEMO_USER.email,
+        planType: updatedUser?.planType || 'free',
+        planExpiresAt: updatedUser?.planExpiresAt || null,
+        isBlocked: updatedUser?.isBlocked || false
+      });
     } catch (error) {
       console.error("Error getting user:", error);
       res.status(500).json({ message: "Failed to get user" });
@@ -449,6 +467,126 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error sending message:", error);
       res.status(500).json({ message: "Failed to send message" });
+    }
+  });
+
+  // Plan management routes
+  app.get('/api/user/plan-status', async (req, res) => {
+    try {
+      const userId = DEFAULT_USER_ID;
+      
+      const isExpired = await storage.checkPlanExpiration(userId);
+      const user = await storage.getUser(userId);
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      res.json({
+        planType: user.planType,
+        planExpiresAt: user.planExpiresAt,
+        isBlocked: user.isBlocked,
+        isExpired
+      });
+    } catch (error) {
+      console.error("Error checking plan status:", error);
+      res.status(500).json({ message: "Failed to check plan status" });
+    }
+  });
+
+  const ADMIN_SECRET = process.env.ADMIN_SECRET || 'ranzap-admin-2024';
+  
+  const verifyAdminAuth = (req: any, res: any): boolean => {
+    const authHeader = req.headers['x-admin-secret'];
+    if (authHeader !== ADMIN_SECRET) {
+      res.status(403).json({ message: "Unauthorized: Invalid admin credentials" });
+      return false;
+    }
+    return true;
+  };
+
+  app.post('/api/admin/activate-plan', async (req, res) => {
+    if (!verifyAdminAuth(req, res)) return;
+    
+    try {
+      const { userId, planType, durationDays } = req.body;
+      
+      if (!userId || !planType || !durationDays) {
+        return res.status(400).json({ message: "userId, planType, and durationDays are required" });
+      }
+
+      const validPlans = ['free', 'basic', 'pro', 'enterprise'];
+      if (!validPlans.includes(planType)) {
+        return res.status(400).json({ message: "Invalid plan type" });
+      }
+
+      const expiresAt = new Date();
+      expiresAt.setDate(expiresAt.getDate() + parseInt(durationDays));
+
+      const user = await storage.updateUserPlan(userId, planType, expiresAt);
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      res.json({
+        success: true,
+        user: {
+          id: user.id,
+          planType: user.planType,
+          planExpiresAt: user.planExpiresAt,
+          isBlocked: user.isBlocked
+        }
+      });
+    } catch (error) {
+      console.error("Error activating plan:", error);
+      res.status(500).json({ message: "Failed to activate plan" });
+    }
+  });
+
+  app.post('/api/admin/block-user', async (req, res) => {
+    if (!verifyAdminAuth(req, res)) return;
+    
+    try {
+      const { userId } = req.body;
+      
+      if (!userId) {
+        return res.status(400).json({ message: "userId is required" });
+      }
+
+      const user = await storage.blockUser(userId);
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      res.json({ success: true, isBlocked: user.isBlocked });
+    } catch (error) {
+      console.error("Error blocking user:", error);
+      res.status(500).json({ message: "Failed to block user" });
+    }
+  });
+
+  app.post('/api/admin/unblock-user', async (req, res) => {
+    if (!verifyAdminAuth(req, res)) return;
+    
+    try {
+      const { userId } = req.body;
+      
+      if (!userId) {
+        return res.status(400).json({ message: "userId is required" });
+      }
+
+      const user = await storage.unblockUser(userId);
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      res.json({ success: true, isBlocked: user.isBlocked });
+    } catch (error) {
+      console.error("Error unblocking user:", error);
+      res.status(500).json({ message: "Failed to unblock user" });
     }
   });
 

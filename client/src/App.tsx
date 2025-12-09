@@ -1,6 +1,6 @@
-import { Switch, Route } from "wouter";
+import { Switch, Route, useLocation } from "wouter";
 import { queryClient } from "./lib/queryClient";
-import { QueryClientProvider } from "@tanstack/react-query";
+import { QueryClientProvider, useQuery } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { SettingsProvider } from "@/contexts/SettingsContext";
@@ -13,22 +13,54 @@ import Contacts from "@/pages/contacts";
 import Analytics from "@/pages/analytics";
 import Plans from "@/pages/plans";
 import Settings from "@/pages/settings";
+import BlockedPage from "@/pages/blocked";
 import NotFound from "@/pages/not-found";
+import { useEffect } from "react";
+
+type User = {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  planType: string;
+  planExpiresAt: string | null;
+  isBlocked: boolean;
+};
+
+function BlockedUserCheck({ children }: { children: React.ReactNode }) {
+  const [location, setLocation] = useLocation();
+  
+  const { data: user } = useQuery<User>({
+    queryKey: ["/api/user/me"],
+    retry: false,
+  });
+
+  useEffect(() => {
+    if (user?.isBlocked && location !== '/blocked' && location !== '/plans') {
+      setLocation('/blocked');
+    }
+  }, [user, location, setLocation]);
+
+  return <>{children}</>;
+}
 
 function Router() {
   return (
-    <Switch>
-      <Route path="/" component={Dashboard} />
-      <Route path="/dashboard" component={Dashboard} />
-      <Route path="/whatsapp-connection" component={WhatsAppConnection} />
-      <Route path="/funnel-builder" component={FunnelBuilder} />
-      <Route path="/funnel-editor/:id" component={FunnelEditor} />
-      <Route path="/contacts" component={Contacts} />
-      <Route path="/analytics" component={Analytics} />
-      <Route path="/plans" component={Plans} />
-      <Route path="/settings" component={Settings} />
-      <Route component={NotFound} />
-    </Switch>
+    <BlockedUserCheck>
+      <Switch>
+        <Route path="/" component={Dashboard} />
+        <Route path="/dashboard" component={Dashboard} />
+        <Route path="/whatsapp-connection" component={WhatsAppConnection} />
+        <Route path="/funnel-builder" component={FunnelBuilder} />
+        <Route path="/funnel-editor/:id" component={FunnelEditor} />
+        <Route path="/contacts" component={Contacts} />
+        <Route path="/analytics" component={Analytics} />
+        <Route path="/plans" component={Plans} />
+        <Route path="/settings" component={Settings} />
+        <Route path="/blocked" component={BlockedPage} />
+        <Route component={NotFound} />
+      </Switch>
+    </BlockedUserCheck>
   );
 }
 

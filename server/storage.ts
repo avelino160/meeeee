@@ -19,6 +19,10 @@ export interface IStorage {
   // User operations
   getUser(id: string): Promise<User | undefined>;
   upsertUser(user: UpsertUser): Promise<User>;
+  updateUserPlan(userId: string, planType: string, expiresAt: Date): Promise<User | undefined>;
+  blockUser(userId: string): Promise<User | undefined>;
+  unblockUser(userId: string): Promise<User | undefined>;
+  checkPlanExpiration(userId: string): Promise<boolean>;
   
   // WhatsApp connection operations
   getWhatsappConnection(userId: string): Promise<WhatsappConnection | undefined>;
@@ -80,6 +84,9 @@ export class MemStorage implements IStorage {
       firstName: "Demo",
       lastName: "User",
       profileImageUrl: null,
+      planType: "free",
+      planExpiresAt: null,
+      isBlocked: false,
       createdAt: new Date(),
       updatedAt: new Date(),
     });
@@ -308,6 +315,52 @@ export class MemStorage implements IStorage {
 
   async getActiveFunnelExecutions(): Promise<FunnelExecution[]> {
     return Array.from(this.funnelExecutions.values()).filter(e => e.status === "active");
+  }
+
+  async updateUserPlan(userId: string, planType: string, expiresAt: Date): Promise<User | undefined> {
+    const user = this.users.get(userId);
+    if (!user) return undefined;
+    const updated = { 
+      ...user, 
+      planType: planType as "free" | "basic" | "pro" | "enterprise",
+      planExpiresAt: expiresAt,
+      isBlocked: false,
+      updatedAt: new Date() 
+    };
+    this.users.set(userId, updated);
+    return updated;
+  }
+
+  async blockUser(userId: string): Promise<User | undefined> {
+    const user = this.users.get(userId);
+    if (!user) return undefined;
+    const updated = { ...user, isBlocked: true, updatedAt: new Date() };
+    this.users.set(userId, updated);
+    return updated;
+  }
+
+  async unblockUser(userId: string): Promise<User | undefined> {
+    const user = this.users.get(userId);
+    if (!user) return undefined;
+    const updated = { ...user, isBlocked: false, updatedAt: new Date() };
+    this.users.set(userId, updated);
+    return updated;
+  }
+
+  async checkPlanExpiration(userId: string): Promise<boolean> {
+    const user = this.users.get(userId);
+    if (!user) return false;
+    
+    if (!user.planExpiresAt) return false;
+    
+    const now = new Date();
+    const isExpired = user.planExpiresAt < now;
+    
+    if (isExpired && !user.isBlocked) {
+      await this.blockUser(userId);
+    }
+    
+    return isExpired;
   }
 }
 

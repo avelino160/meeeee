@@ -47,6 +47,20 @@ Preferred communication style: Simple, everyday language.
 - **Contact Management**: Import/export capabilities with contact segmentation and tagging
 - **Template System**: Reusable message templates with variable substitution
 - **Analytics Dashboard**: Campaign performance metrics and delivery statistics
+- **Subscription Plans**: User plan management with expiration dates and account blocking
+
+### Subscription Plan System
+- **Plan Types**: free, basic, pro, enterprise
+- **Plan Expiration**: Plans have an expiration date (planExpiresAt)
+- **Account Blocking**: When a plan expires, the user's account is automatically blocked (isBlocked = true)
+- **Blocked User Flow**: Blocked users are redirected to /blocked page and can only access /plans to renew
+- **Admin API Endpoints** (require X-Admin-Secret header):
+  - `GET /api/user/plan-status` - Check current plan status (no auth required)
+  - `POST /api/admin/activate-plan` - Activate a plan for a user (params: userId, planType, durationDays)
+  - `POST /api/admin/block-user` - Manually block a user
+  - `POST /api/admin/unblock-user` - Manually unblock a user
+- **Admin Authentication**: Admin endpoints require `X-Admin-Secret` header. Default secret is 'ranzap-admin-2024'. Configure ADMIN_SECRET environment variable in production.
+- **Note**: Payment integration (Stripe) was not configured. Plans must be activated manually via the admin API endpoints when users pay externally.
 
 ### Authentication & Security
 - **Authentication Provider**: Replit OIDC integration
