@@ -118,8 +118,7 @@ export default function WhatsAppConnection() {
         <header className="bg-card border-b border-border pl-14 pr-4 lg:px-6 py-4">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-semibold flex items-center" data-testid="text-page-title">
-                <MessageSquare className="h-6 w-6 mr-2 text-primary" />
+              <h1 className="text-2xl font-semibold" data-testid="text-page-title">
                 Conexão WhatsApp
               </h1>
               <p className="text-sm text-muted-foreground">Gerencie a conexão da sua conta WhatsApp</p>
