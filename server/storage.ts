@@ -100,7 +100,7 @@ export class MemStorage implements IStorage {
       firstName: "Demo",
       lastName: "User",
       profileImageUrl: null,
-      planType: "free",
+      planType: "basic",
       planExpiresAt: null,
       isBlocked: false,
       createdAt: new Date(),
@@ -395,7 +395,7 @@ export class MemStorage implements IStorage {
 
   async getUserUsage(userId: string): Promise<UsageInfo> {
     const user = this.users.get(userId);
-    const planType = (user?.planType || "free") as PlanType;
+    const planType = (user?.planType || "basic") as PlanType;
     const limits = getPlanLimits(planType);
     
     const funnelCount = Array.from(this.funnels.values())
@@ -433,7 +433,7 @@ export class MemStorage implements IStorage {
 
   async checkFunnelLimit(userId: string): Promise<LimitCheckResult> {
     const user = this.users.get(userId);
-    const planType = (user?.planType || "free") as PlanType;
+    const planType = (user?.planType || "basic") as PlanType;
     const limits = getPlanLimits(planType);
     
     const funnelCount = Array.from(this.funnels.values())
@@ -444,7 +444,7 @@ export class MemStorage implements IStorage {
 
   async checkContactLimit(userId: string): Promise<LimitCheckResult> {
     const user = this.users.get(userId);
-    const planType = (user?.planType || "free") as PlanType;
+    const planType = (user?.planType || "basic") as PlanType;
     const limits = getPlanLimits(planType);
     
     const contactCount = Array.from(this.contacts.values())
@@ -455,7 +455,7 @@ export class MemStorage implements IStorage {
 
   async checkWhatsappLimit(userId: string): Promise<LimitCheckResult> {
     const user = this.users.get(userId);
-    const planType = (user?.planType || "free") as PlanType;
+    const planType = (user?.planType || "basic") as PlanType;
     const limits = getPlanLimits(planType);
     
     const whatsappCount = await this.getConnectedAccountsCount(userId);
@@ -465,7 +465,7 @@ export class MemStorage implements IStorage {
 
   async checkMessageLimit(userId: string): Promise<LimitCheckResult> {
     const user = this.users.get(userId);
-    const planType = (user?.planType || "free") as PlanType;
+    const planType = (user?.planType || "basic") as PlanType;
     const limits = getPlanLimits(planType);
     
     const messagesThisHour = await this.getMessagesThisHour(userId);

@@ -35,7 +35,7 @@ export const users = pgTable("users", {
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),
   profileImageUrl: varchar("profile_image_url"),
-  planType: planTypeEnum("plan_type").default("free"),
+  planType: planTypeEnum("plan_type").default("basic"),
   planExpiresAt: timestamp("plan_expires_at"),
   isBlocked: boolean("is_blocked").default(false),
   createdAt: timestamp("created_at").defaultNow(),

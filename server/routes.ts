@@ -74,7 +74,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         firstName: updatedUser?.firstName || DEMO_USER.firstName,
         lastName: updatedUser?.lastName || DEMO_USER.lastName,
         email: updatedUser?.email || DEMO_USER.email,
-        planType: updatedUser?.planType || 'free',
+        planType: updatedUser?.planType || 'basic',
         planExpiresAt: updatedUser?.planExpiresAt || null,
         isBlocked: updatedUser?.isBlocked || false
       });
@@ -266,7 +266,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const user = await storage.getUser(userId);
-      const planType = user?.planType || 'free';
+      const planType = user?.planType || 'basic';
       const { getPlanLimits } = await import('@shared/plan-limits');
       const limits = getPlanLimits(planType as any);
       const currentFunnels = await storage.getAllFunnels(userId);
@@ -547,7 +547,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const user = await storage.getUser(userId);
       
       res.json({
-        planType: user?.planType || 'free',
+        planType: user?.planType || 'basic',
         usage
       });
     } catch (error) {
@@ -601,7 +601,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "userId, planType, and durationDays are required" });
       }
 
-      const validPlans = ['free', 'basic', 'pro', 'enterprise'];
+      const validPlans = ['basic', 'pro', 'enterprise'];
       if (!validPlans.includes(planType)) {
         return res.status(400).json({ message: "Invalid plan type" });
       }

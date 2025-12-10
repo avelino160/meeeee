@@ -42,7 +42,6 @@ function getProgressColor(percentage: number): string {
 
 function getPlanDisplayName(planType: string): string {
   const names: Record<string, string> = {
-    free: "Gratuito",
     basic: "Básico",
     pro: "Plus",
     enterprise: "Business",

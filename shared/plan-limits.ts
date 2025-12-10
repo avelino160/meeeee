@@ -50,7 +50,7 @@ export const PLAN_LIMITS: Record<PlanType, PlanLimits> = {
 };
 
 export function getPlanLimits(planType: PlanType): PlanLimits {
-  return PLAN_LIMITS[planType] || PLAN_LIMITS.free;
+  return PLAN_LIMITS[planType] || PLAN_LIMITS.basic;
 }
 
 export function isWithinLimit(current: number, limit: number): boolean {
