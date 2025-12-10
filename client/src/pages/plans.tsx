@@ -48,7 +48,7 @@ export default function Plans() {
       features: [
         { text: "1 conta WhatsApp", included: true },
         { text: "50 mensagens/hora", included: true },
-        { text: "3 funis de venda", included: true },
+        { text: "3 funil de venda", included: true },
         { text: "500 contatos", included: true },
         { text: "Suporte via email (48h)", included: true },
         { text: "Múltiplas contas", included: false },
@@ -64,7 +64,7 @@ export default function Plans() {
       features: [
         { text: "3 contas WhatsApp", included: true },
         { text: "200 mensagens/hora", included: true },
-        { text: "Funis ilimitados", included: true },
+        { text: "Funil ilimitado", included: true },
         { text: "5.000 contatos", included: true },
         { text: "Suporte prioritário (24h)", included: true },
         { text: "Relatórios avançados", included: true },
@@ -80,7 +80,7 @@ export default function Plans() {
       features: [
         { text: "5 contas WhatsApp", included: true },
         { text: "1.000 mensagens/hora", included: true },
-        { text: "Funis ilimitados", included: true },
+        { text: "Funil ilimitado", included: true },
         { text: "Contatos ilimitados", included: true },
         { text: "Chat ao vivo 24/7", included: true },
         { text: "Gerente de conta dedicado", included: true },

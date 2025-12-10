@@ -28,7 +28,7 @@ const translations: Record<string, Record<string, string>> = {
   'pt-BR': {
     // Menu
     'dashboard': 'Dashboard',
-    'sales_funnels': 'Funis de venda',
+    'sales_funnels': 'Funil de venda',
     'contacts': 'Contatos',
     'reports': 'Relatórios',
     'plans': 'Planos',
@@ -60,7 +60,7 @@ const translations: Record<string, Record<string, string>> = {
     'most_popular': 'Mais Popular',
     'whatsapp_accounts': 'contas WhatsApp',
     'messages_per_hour': 'mensagens/hora',
-    'unlimited_funnels': 'Funis ilimitados',
+    'unlimited_funnels': 'Funil ilimitado',
     'unlimited_contacts': 'Contatos ilimitados',
     'email_support': 'Suporte via email',
     'priority_support': 'Suporte prioritário',
@@ -72,7 +72,7 @@ const translations: Record<string, Record<string, string>> = {
     // Dashboard
     'hello': 'Olá',
     'your_sales_center': 'Sua central de vendas automáticas no WhatsApp',
-    'active_funnels': 'Funis Ativos',
+    'active_funnels': 'Funil Ativo',
     'messages_today': 'Mensagens Hoje',
     'active_contacts': 'Contatos Ativos',
     'delivery_rate': 'Taxa de Entrega',
@@ -92,7 +92,7 @@ const translations: Record<string, Record<string, string>> = {
     'perfect_to_start': 'Perfeito para começar',
     'for_professionals': 'Para profissionais e pequenas empresas',
     'for_growing_companies': 'Para empresas em crescimento',
-    'sales_funnels_limit': 'funis de venda',
+    'sales_funnels_limit': 'funil de venda',
     'contacts_limit': 'contatos',
     'whats_included': 'O que está incluso:',
     'save': 'economize',

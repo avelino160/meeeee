@@ -115,7 +115,7 @@ export default function Dashboard() {
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 lg:gap-6 mb-4 sm:mb-6 lg:mb-8">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 p-3 sm:p-4 lg:p-6 pb-1 sm:pb-2">
-                <CardTitle className="text-[10px] sm:text-xs lg:text-sm font-medium">Funis Ativos</CardTitle>
+                <CardTitle className="text-[10px] sm:text-xs lg:text-sm font-medium">Funil Ativo</CardTitle>
                 <BarChart3 className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent className="p-3 sm:p-4 lg:p-6 pt-0">

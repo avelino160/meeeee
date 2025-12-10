@@ -63,7 +63,7 @@ export default function Settings() {
     },
     {
       question: "Como criar um funil de vendas?",
-      answer: "Acesse 'Funis de venda' no menu, clique em 'Criar Novo Funil' e siga o assistente para configurar seus gatilhos, mensagens e ações."
+      answer: "Acesse 'Funil de venda' no menu, clique em 'Criar Novo Funil' e siga o assistente para configurar seus gatilhos, mensagens e ações."
     },
     {
       question: "Como importar meus contatos?",

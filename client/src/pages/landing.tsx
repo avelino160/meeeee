@@ -26,7 +26,7 @@ export default function Landing() {
             <span className="block text-primary">Profissional</span>
           </h2>
           <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-            Crie campanhas automatizadas, funis inteligentes e gerencie seus contatos 
+            Crie campanhas automatizadas, funil inteligente e gerencie seus contatos 
             com a plataforma mais completa de marketing no WhatsApp.
           </p>
           <Button size="lg" asChild className="text-lg px-8 py-3" data-testid="button-start">
@@ -43,7 +43,7 @@ export default function Landing() {
             <Card>
               <CardHeader>
                 <Zap className="h-10 w-10 text-primary mb-2" />
-                <CardTitle>Funis Automatizados</CardTitle>
+                <CardTitle>Funil Automatizado</CardTitle>
                 <CardDescription>
                   Crie sequências de mensagens inteligentes com delays configuráveis
                 </CardDescription>

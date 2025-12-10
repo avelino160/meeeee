@@ -115,15 +115,15 @@ export default function FunnelBuilder() {
     },
     onSuccess: (data: any) => {
       toast({
-        title: "Funis importados!",
-        description: `${data.imported} funis foram adicionados com sucesso.`,
+        title: "Funil importado!",
+        description: `${data.imported} funil foi adicionado com sucesso.`,
       });
       queryClient.invalidateQueries({ queryKey: ["/api/funnels"] });
     },
     onError: (error: any) => {
       toast({
         title: "Erro ao importar",
-        description: error.message || "Não foi possível importar os funis. Verifique o formato do arquivo.",
+        description: error.message || "Não foi possível importar o funil. Verifique o formato do arquivo.",
         variant: "destructive",
       });
     },
@@ -161,7 +161,7 @@ export default function FunnelBuilder() {
     if (!funnels || funnels.length === 0) {
       toast({
         title: "Nenhum funil",
-        description: "Não há funis para exportar.",
+        description: "Não há funil para exportar.",
         variant: "destructive",
       });
       return;
@@ -179,15 +179,15 @@ export default function FunnelBuilder() {
     const url = URL.createObjectURL(dataBlob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `funis-ranzap-${new Date().toISOString().split('T')[0]}.json`;
+    link.download = `funil-ranzap-${new Date().toISOString().split('T')[0]}.json`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
 
     toast({
-      title: "Funis exportados!",
-      description: `${funnels.length} funis foram exportados com sucesso.`,
+      title: "Funil exportado!",
+      description: `${funnels.length} funil foi exportado com sucesso.`,
     });
   };
 
@@ -215,7 +215,7 @@ export default function FunnelBuilder() {
         <header className="bg-card border-b border-border pl-14 pr-4 lg:px-6 py-4 sm:py-6">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 mb-2">
             <div>
-              <h2 className="text-xl sm:text-2xl font-bold text-foreground" data-testid="text-page-title">Funis de venda</h2>
+              <h2 className="text-xl sm:text-2xl font-bold text-foreground" data-testid="text-page-title">Funil de venda</h2>
               <p className="text-xs sm:text-sm text-muted-foreground mt-1 hidden sm:block">
                 Crie fluxos de mensagens automatizados para aumentar suas conversões
               </p>
