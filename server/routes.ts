@@ -107,6 +107,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // 🛡️ Anti-ban stats endpoint
+  app.get('/api/whatsapp/anti-ban-stats', async (req, res) => {
+    try {
+      const stats = whatsappService.getAntiBanStats();
+      res.json(stats);
+    } catch (error) {
+      console.error("Error getting anti-ban stats:", error);
+      res.status(500).json({ message: "Failed to get anti-ban stats" });
+    }
+  });
+
   app.post('/api/whatsapp/qr', async (req, res) => {
     // 🛡️ GUARD: Bloquear tentativas em ambientes de datacenter
     if (isDatacenterEnvironment(req)) {

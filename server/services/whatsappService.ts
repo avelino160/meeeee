@@ -369,22 +369,119 @@ export class WhatsAppService {
     return this.isReady;
   }
 
-  // 📤 ENVIAR MENSAGEM
+  // 🛡️ ANTI-BAN: Configurações de segurança
+  private messageQueue: Array<{ phoneNumber: string; message: string; resolve: (value: boolean) => void }> = [];
+  private isProcessingQueue = false;
+  private messagesThisHour = 0;
+  private hourlyResetTime = Date.now();
+  private readonly MAX_MESSAGES_PER_HOUR = 50; // Limite seguro
+  private readonly MIN_DELAY_MS = 3000; // Mínimo 3 segundos entre mensagens
+  private readonly MAX_DELAY_MS = 8000; // Máximo 8 segundos entre mensagens
+  private readonly TYPING_DELAY_PER_CHAR = 50; // 50ms por caractere (simulando digitação)
+
+  // 🎲 Gerar delay aleatório humanizado
+  private getRandomDelay(): number {
+    return Math.floor(Math.random() * (this.MAX_DELAY_MS - this.MIN_DELAY_MS + 1)) + this.MIN_DELAY_MS;
+  }
+
+  // ⌨️ Calcular tempo de digitação baseado no tamanho da mensagem
+  private getTypingDelay(message: string): number {
+    const baseTypingTime = message.length * this.TYPING_DELAY_PER_CHAR;
+    const randomVariation = Math.random() * 1000; // Variação aleatória de até 1 segundo
+    return Math.min(baseTypingTime + randomVariation, 5000); // Máximo 5 segundos de digitação
+  }
+
+  // 🔄 Resetar contador horário se necessário
+  private checkHourlyReset(): void {
+    const now = Date.now();
+    if (now - this.hourlyResetTime >= 3600000) { // 1 hora
+      this.messagesThisHour = 0;
+      this.hourlyResetTime = now;
+      console.log('🔄 Contador de mensagens por hora resetado');
+    }
+  }
+
+  // 📤 ENVIAR MENSAGEM (com Anti-Ban)
   async sendMessage(phoneNumber: string, message: string): Promise<boolean> {
-    try {
-      if (!this.sock || !this.isReady) {
-        throw new Error('WhatsApp não está conectado');
+    return new Promise((resolve) => {
+      this.messageQueue.push({ phoneNumber, message, resolve });
+      this.processQueue();
+    });
+  }
+
+  // 🔄 Processar fila de mensagens com delays
+  private async processQueue(): Promise<void> {
+    if (this.isProcessingQueue || this.messageQueue.length === 0) {
+      return;
+    }
+
+    this.isProcessingQueue = true;
+
+    while (this.messageQueue.length > 0) {
+      this.checkHourlyReset();
+
+      // Verificar limite por hora
+      if (this.messagesThisHour >= this.MAX_MESSAGES_PER_HOUR) {
+        console.log('⚠️ Limite de mensagens por hora atingido. Aguardando...');
+        const waitTime = 3600000 - (Date.now() - this.hourlyResetTime);
+        await new Promise(r => setTimeout(r, Math.min(waitTime, 60000))); // Esperar até 1 minuto
+        continue;
       }
 
-      const jid = `${phoneNumber}@s.whatsapp.net`;
-      await this.sock.sendMessage(jid, { text: message });
-      
-      console.log(`✅ Mensagem enviada para ${phoneNumber}: ${message.substring(0, 50)}...`);
-      return true;
-    } catch (error) {
-      console.error(`❌ Erro ao enviar mensagem para ${phoneNumber}:`, error);
-      return false;
+      const item = this.messageQueue.shift();
+      if (!item) continue;
+
+      try {
+        if (!this.sock || !this.isReady) {
+          console.error('❌ WhatsApp não está conectado');
+          item.resolve(false);
+          continue;
+        }
+
+        const jid = `${item.phoneNumber}@s.whatsapp.net`;
+
+        // 🔵 Simular "digitando..." antes de enviar
+        const typingDelay = this.getTypingDelay(item.message);
+        console.log(`⌨️ Simulando digitação por ${typingDelay}ms para ${item.phoneNumber}...`);
+        
+        await this.sock.sendPresenceUpdate('composing', jid);
+        await new Promise(r => setTimeout(r, typingDelay));
+        await this.sock.sendPresenceUpdate('paused', jid);
+
+        // 📤 Enviar mensagem
+        await this.sock.sendMessage(jid, { text: item.message });
+        this.messagesThisHour++;
+
+        console.log(`✅ [Anti-Ban] Mensagem ${this.messagesThisHour}/${this.MAX_MESSAGES_PER_HOUR}/h enviada para ${item.phoneNumber}`);
+        item.resolve(true);
+
+        // ⏳ Delay aleatório antes da próxima mensagem
+        if (this.messageQueue.length > 0) {
+          const delay = this.getRandomDelay();
+          console.log(`⏳ Aguardando ${delay}ms antes da próxima mensagem...`);
+          await new Promise(r => setTimeout(r, delay));
+        }
+
+      } catch (error) {
+        console.error(`❌ Erro ao enviar mensagem para ${item.phoneNumber}:`, error);
+        item.resolve(false);
+        
+        // Delay extra em caso de erro (pode ser rate limit do WhatsApp)
+        await new Promise(r => setTimeout(r, 10000)); // 10 segundos
+      }
     }
+
+    this.isProcessingQueue = false;
+  }
+
+  // 📊 Obter estatísticas anti-ban
+  getAntiBanStats(): { messagesThisHour: number; maxPerHour: number; queueSize: number } {
+    this.checkHourlyReset();
+    return {
+      messagesThisHour: this.messagesThisHour,
+      maxPerHour: this.MAX_MESSAGES_PER_HOUR,
+      queueSize: this.messageQueue.length,
+    };
   }
 
   // 🔄 INICIAR TIMER DE RENOVAÇÃO DO QR CODE (a cada 2 minutos)
