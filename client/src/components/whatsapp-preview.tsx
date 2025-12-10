@@ -181,9 +181,9 @@ export default function WhatsAppPreview({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent 
-        className="max-w-[320px] h-[580px] p-0 bg-black border-none overflow-hidden rounded-[35px] flex flex-col"
+        className="w-[280px] h-[500px] max-h-[85vh] p-0 bg-black border-none overflow-hidden rounded-[30px] flex flex-col"
         style={{ 
-          boxShadow: '0 0 0 8px #1a1a1a, 0 20px 40px -10px rgba(0, 0, 0, 0.6)' 
+          boxShadow: '0 0 0 6px #1a1a1a, 0 15px 30px -8px rgba(0, 0, 0, 0.5)' 
         }}
       >
         {/* Top bezel - iPhone frame */}
