@@ -212,9 +212,9 @@ export default function FunnelBuilder() {
       <Sidebar />
       
       <div className="flex-1 flex flex-col overflow-hidden">
-        <header className="bg-card border-b border-border px-4 sm:px-6 py-4 sm:py-6">
+        <header className="bg-card border-b border-border pl-14 pr-4 lg:px-6 py-4 sm:py-6">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 mb-2">
-            <div className="pl-12 sm:pl-0">
+            <div>
               <h2 className="text-xl sm:text-2xl font-bold text-foreground" data-testid="text-page-title">Funis de venda</h2>
               <p className="text-xs sm:text-sm text-muted-foreground mt-1 hidden sm:block">
                 Crie fluxos de mensagens automatizados para aumentar suas conversões

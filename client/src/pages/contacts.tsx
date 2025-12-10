@@ -240,9 +240,9 @@ export default function Contacts() {
       
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Header */}
-        <header className="bg-card border-b border-border px-4 sm:px-6 py-3 sm:py-4">
+        <header className="bg-card border-b border-border pl-14 pr-4 lg:px-6 py-3 sm:py-4">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
-            <div className="w-full sm:w-auto pl-12 sm:pl-0 lg:pl-0">
+            <div className="w-full sm:w-auto">
               <h1 className="text-lg sm:text-2xl font-semibold" data-testid="text-page-title">Contatos</h1>
               <p className="text-xs sm:text-sm text-muted-foreground hidden sm:block">Gerencie sua lista de contatos</p>
             </div>

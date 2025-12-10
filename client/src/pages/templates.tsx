@@ -277,7 +277,7 @@ export default function Templates() {
       
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Header */}
-        <header className="bg-card border-b border-border px-6 py-4">
+        <header className="bg-card border-b border-border pl-14 pr-4 lg:px-6 py-4">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-2xl font-semibold" data-testid="text-page-title">Templates</h1>
