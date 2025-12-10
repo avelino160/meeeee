@@ -90,8 +90,11 @@ export default function WhatsAppPreview({
   };
 
   const getExecutionOrder = (nodes: FunnelNode[], edges: Array<{ id: string; source: string; target: string }>): FunnelNode[] => {
-    const startNode = nodes.find(n => n.type === 'trigger');
-    if (!startNode) return nodes.filter(n => n.type !== 'trigger');
+    // Check both node.type and node.data.nodeType for trigger nodes
+    const isTriggerNode = (n: FunnelNode) => n.type === 'trigger' || (n.data as any)?.nodeType === 'trigger';
+    
+    const startNode = nodes.find(n => isTriggerNode(n));
+    if (!startNode) return nodes.filter(n => !isTriggerNode(n));
 
     const ordered: FunnelNode[] = [];
     const visited = new Set<string>();
@@ -101,7 +104,7 @@ export default function WhatsAppPreview({
       visited.add(nodeId);
       
       const node = nodes.find(n => n.id === nodeId);
-      if (!node || node.type === 'trigger') return;
+      if (!node || isTriggerNode(node)) return;
       
       ordered.push(node);
       

@@ -65,12 +65,16 @@ export class FunnelService {
 
       const flowData = funnel.flowData as { nodes: FunnelNodeData[], edges: any[] };
       
+      // Helper to check if a node is a trigger node (check both type and data.nodeType)
+      const isTriggerNode = (node: FunnelNodeData) => 
+        node.type === 'trigger' || (node.data as any)?.nodeType === 'trigger';
+      
       // If no current node, start with the first node (trigger)
       let currentNode: FunnelNodeData | undefined;
       
       if (!execution.currentNodeId) {
         // Find the start/trigger node
-        currentNode = flowData.nodes.find(node => node.type === 'trigger');
+        currentNode = flowData.nodes.find(node => isTriggerNode(node));
       } else {
         // Find the current node
         currentNode = flowData.nodes.find(node => node.id === execution.currentNodeId);
@@ -129,9 +133,12 @@ export class FunnelService {
       throw new Error('Contact not found for execution');
     }
 
-    switch (node.type) {
+    // Get the actual node type (check both type and data.nodeType)
+    const nodeType = (node.data as any)?.nodeType || node.type;
+
+    switch (nodeType) {
       case 'trigger':
-        // Trigger node - just log the start
+        // Trigger node - just log the start, DO NOT send any message
         console.log(`Funnel started for contact ${contact.phoneNumber}`);
         break;
 
@@ -150,7 +157,7 @@ export class FunnelService {
         break;
 
       default:
-        console.log(`Unknown node type: ${node.type}`);
+        console.log(`Unknown node type: ${nodeType}`);
     }
   }
 
