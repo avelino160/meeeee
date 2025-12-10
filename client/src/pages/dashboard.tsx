@@ -51,7 +51,6 @@ export default function Dashboard() {
   return (
     <div className="flex h-screen bg-background">
       <Sidebar />
-      
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Header */}
         <header className="bg-card border-b border-border pl-14 pr-4 lg:pl-6 lg:pr-6 py-3 sm:py-4 lg:py-5">
@@ -66,11 +65,7 @@ export default function Dashboard() {
             </div>
             
             <div className="flex items-center gap-2 flex-wrap">
-              <div className={`flex items-center space-x-2 px-3 sm:px-4 py-2 rounded-full text-xs sm:text-sm font-medium ${
-                whatsappStatus?.connected 
-                  ? 'bg-green-100 text-green-700 border border-green-300' 
-                  : 'bg-red-100 text-red-700 border border-red-300'
-              }`}>
+              <div className="flex items-center space-x-2 px-3 sm:px-4 py-2 rounded-full sm:text-sm font-medium bg-red-100 text-red-700 border border-red-300 text-justify text-[12px] pl-[8px] pr-[8px] pt-[4px] pb-[4px]">
                 {whatsappStatus?.connected ? (
                   <>
                     <Wifi className="h-4 w-4" />
@@ -234,7 +229,6 @@ export default function Dashboard() {
           </Card>
         </main>
       </div>
-      
       {/* 🚀 MODAL ZAPRÁPIDO WHATSAPP - ABRIR AUTOMATICAMENTE */}
       <WhatsAppConnectionModal 
         open={showWhatsAppModal}
