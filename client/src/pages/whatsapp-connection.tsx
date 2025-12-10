@@ -16,7 +16,7 @@ import { QrCode, Crown } from "lucide-react";
 import { Link } from "wouter";
 
 export default function WhatsAppConnection() {
-  const [currentPlan] = useState("free"); // Simula o plano atual
+  const [currentPlan] = useState("pro"); // Simula o plano atual (Plus)
   const [showConnectionModal, setShowConnectionModal] = useState(false);
 
   // Limites baseados no plano
