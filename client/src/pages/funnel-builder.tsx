@@ -213,14 +213,14 @@ export default function FunnelBuilder() {
       
       <div className="flex-1 flex flex-col overflow-hidden">
         <header className="bg-card border-b border-border pl-14 pr-4 lg:px-6 py-4 sm:py-6">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 mb-2">
-            <div>
-              <h2 className="text-xl sm:text-2xl font-bold text-foreground" data-testid="text-page-title">Funis de venda</h2>
+          <div className="flex items-center justify-between gap-3 mb-2">
+            <div className="min-w-0">
+              <h2 className="text-xl sm:text-2xl font-bold text-foreground truncate" data-testid="text-page-title">Funis de venda</h2>
               <p className="text-xs sm:text-sm text-muted-foreground mt-1 hidden sm:block">
                 Crie fluxos de mensagens automatizados para aumentar suas conversões
               </p>
             </div>
-            <div className="flex items-center gap-2 flex-wrap w-full sm:w-auto">
+            <div className="flex items-center gap-2 shrink-0">
               <input
                 ref={fileInputRef}
                 type="file"
@@ -235,7 +235,6 @@ export default function FunnelBuilder() {
                 onClick={() => fileInputRef.current?.click()}
                 disabled={importMutation.isPending}
                 data-testid="button-import-funnels"
-                className="flex-1 sm:flex-initial"
               >
                 <Upload className="h-4 w-4 sm:mr-2" />
                 <span className="hidden sm:inline">{importMutation.isPending ? 'Importando...' : 'Importar'}</span>
@@ -246,7 +245,6 @@ export default function FunnelBuilder() {
                 onClick={handleExportFunnels}
                 disabled={!funnels || funnels.length === 0}
                 data-testid="button-export-funnels"
-                className="flex-1 sm:flex-initial"
               >
                 <Download className="h-4 w-4 sm:mr-2" />
                 <span className="hidden sm:inline">Exportar</span>
@@ -254,7 +252,7 @@ export default function FunnelBuilder() {
               <Button 
                 size="sm"
                 onClick={() => setIsCreateDialogOpen(true)}
-                className="bg-purple-600 hover:bg-purple-700 text-white font-semibold flex-1 sm:flex-initial"
+                className="bg-purple-600 hover:bg-purple-700 text-white font-semibold"
                 data-testid="button-create-funnel"
               >
                 <Plus className="h-4 w-4 sm:mr-2" />
