@@ -22,7 +22,7 @@ export default function Landing() {
       <section className="py-20 px-4">
         <div className="container mx-auto text-center">
           <h2 className="text-4xl md:text-6xl font-bold mb-6">
-            Automação WhatsApp
+            Automação para WhatsApp
             <span className="block text-primary">Profissional</span>
           </h2>
           <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">

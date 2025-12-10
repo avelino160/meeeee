@@ -34,7 +34,7 @@ const translations: Record<string, Record<string, string>> = {
     'plans': 'Planos',
     'settings': 'Configurações',
     'whatsapp_connection': 'Conexão WhatsApp',
-    'whatsapp_automation': 'Automação WhatsApp',
+    'whatsapp_automation': 'Automação para WhatsApp',
     
     // Common
     'connected': 'Conectado',
