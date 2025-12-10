@@ -3,7 +3,6 @@ import { useQuery } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "wouter";
 import Sidebar from "@/components/sidebar";
-import UsageDisplay from "@/components/usage-display";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -49,22 +48,6 @@ export default function Plans() {
   };
 
   const plans = [
-    {
-      id: "free",
-      name: "Gratuito",
-      description: "Para testar a plataforma",
-      monthlyPrice: 0,
-      yearlyPrice: 0,
-      popular: false,
-      features: [
-        { text: "1 conta WhatsApp", included: true },
-        { text: "50 mensagens/hora", included: true },
-        { text: "3 funis de venda", included: true },
-        { text: "500 contatos", included: true },
-        { text: "Suporte via comunidade", included: true },
-        { text: "Relatórios avançados", included: false },
-      ]
-    },
     {
       id: "basic",
       name: "Básico",
@@ -156,14 +139,9 @@ export default function Plans() {
             </div>
           </div>
 
-          {/* Current Usage */}
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-            <UsageDisplay />
-          </div>
-
           {/* Plans Grid */}
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
               {plans.map((plan) => {
                 const price = billingPeriod === "monthly" ? plan.monthlyPrice : plan.yearlyPrice;
                 const isCurrentPlan = currentPlan === plan.id;
