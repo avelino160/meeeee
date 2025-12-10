@@ -38,7 +38,7 @@ export default function Plans() {
     queryKey: ["/api/user/me"],
   });
   
-  const currentPlan = userData?.planType || "free";
+  const currentPlan = userData?.planType || "basic";
 
   const handleUpgrade = (planName: string) => {
     toast({
@@ -56,12 +56,11 @@ export default function Plans() {
       yearlyPrice: 2400,
       popular: false,
       features: [
-        { text: "2 contas WhatsApp", included: true },
+        { text: "1 conta WhatsApp", included: true },
         { text: "100 mensagens/hora", included: true },
-        { text: "10 funis de venda", included: true },
-        { text: "2.000 contatos", included: true },
+        { text: "3 funis de venda", included: true },
+        { text: "500 contatos", included: true },
         { text: "Suporte via email (48h)", included: true },
-        { text: "Múltiplas contas", included: false },
       ]
     },
     {
@@ -77,7 +76,6 @@ export default function Plans() {
         { text: "Funis ilimitados", included: true },
         { text: "5.000 contatos", included: true },
         { text: "Suporte prioritário (24h)", included: true },
-        { text: "Relatórios avançados", included: true },
       ]
     },
     {
@@ -93,7 +91,6 @@ export default function Plans() {
         { text: "Funis ilimitados", included: true },
         { text: "Contatos ilimitados", included: true },
         { text: "Chat ao vivo 24/7", included: true },
-        { text: "Gerente de conta dedicado", included: true },
       ]
     }
   ];

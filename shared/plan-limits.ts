@@ -21,10 +21,10 @@ export const PLAN_LIMITS: Record<PlanType, PlanLimits> = {
     hasDedicatedManager: false,
   },
   basic: {
-    maxWhatsappAccounts: 2,
+    maxWhatsappAccounts: 1,
     maxMessagesPerHour: 100,
-    maxFunnels: 10,
-    maxContacts: 2000,
+    maxFunnels: 3,
+    maxContacts: 500,
     hasAdvancedReports: false,
     hasPrioritySupport: false,
     hasDedicatedManager: false,
@@ -34,7 +34,7 @@ export const PLAN_LIMITS: Record<PlanType, PlanLimits> = {
     maxMessagesPerHour: 200,
     maxFunnels: -1, // Unlimited
     maxContacts: 5000,
-    hasAdvancedReports: true,
+    hasAdvancedReports: false,
     hasPrioritySupport: true,
     hasDedicatedManager: false,
   },
@@ -45,7 +45,7 @@ export const PLAN_LIMITS: Record<PlanType, PlanLimits> = {
     maxContacts: -1, // Unlimited
     hasAdvancedReports: true,
     hasPrioritySupport: true,
-    hasDedicatedManager: true,
+    hasDedicatedManager: false,
   },
 };
 
