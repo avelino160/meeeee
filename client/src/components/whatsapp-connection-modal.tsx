@@ -69,12 +69,13 @@ export default function WhatsAppConnectionModal({ open, onOpenChange }: WhatsApp
     },
     onError: (error: any) => {
       const isDatacenterBlock = error.message?.includes('bloqueou') || error.message?.includes('datacenter');
+      const isLimitExceeded = error.message?.includes('excedeu') || error.message?.includes('limite');
       
       toast({
-        title: isDatacenterBlock ? "⚠️ Ambiente Não Suportado" : "❌ Erro",
+        title: isDatacenterBlock ? "⚠️ Ambiente Não Suportado" : isLimitExceeded ? "Limite Excedido" : "❌ Erro",
         description: isDatacenterBlock 
           ? "WhatsApp bloqueia conexões de servidores cloud. Execute localmente no seu computador para testar." 
-          : "Falha ao gerar código. Verifique o número e tente novamente.",
+          : error.message || "Falha ao gerar código. Verifique o número e tente novamente.",
         variant: "destructive",
       });
     },
@@ -99,10 +100,11 @@ export default function WhatsAppConnectionModal({ open, onOpenChange }: WhatsApp
         description: "📱 Escaneie com seu WhatsApp para conectar!",
       });
     },
-    onError: (error) => {
+    onError: (error: any) => {
+      const isLimitExceeded = error.message?.includes('excedeu') || error.message?.includes('limite');
       toast({
-        title: "❌ Erro",
-        description: "Falha ao gerar QR Code.",
+        title: isLimitExceeded ? "Limite Excedido" : "❌ Erro",
+        description: error.message || "Falha ao gerar QR Code.",
         variant: "destructive",
       });
     },

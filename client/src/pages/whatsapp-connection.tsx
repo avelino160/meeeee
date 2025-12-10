@@ -15,18 +15,27 @@ import type { WhatsAppStatus } from "@shared/api-types";
 import { QrCode, Crown } from "lucide-react";
 import { Link } from "wouter";
 
+interface UserData {
+  planType: string;
+}
+
 export default function WhatsAppConnection() {
-  const [currentPlan] = useState("pro"); // Simula o plano atual (Plus)
   const [showConnectionModal, setShowConnectionModal] = useState(false);
 
+  const { data: userData } = useQuery<UserData>({
+    queryKey: ["/api/user/me"],
+  });
+
+  const currentPlan = userData?.planType || "basic";
+
   // Limites baseados no plano
-  const planLimits = {
-    free: 1,
+  const planLimits: Record<string, number> = {
+    basic: 1,
     pro: 3,
-    business: 5,
+    enterprise: 5,
   };
 
-  const maxAccounts = planLimits[currentPlan as keyof typeof planLimits];
+  const maxAccounts = planLimits[currentPlan] || 1;
 
   const { data: whatsappStatus, isLoading } = useQuery<WhatsAppStatus>({
     queryKey: ["/api/whatsapp/status"],
@@ -85,12 +94,12 @@ export default function WhatsAppConnection() {
                   </Badge>
                 </CardTitle>
                 <CardDescription>
-                  {currentPlan === "free" && "Plano Pro permite 1 conta"}
+                  {currentPlan === "basic" && "Plano Básico permite 1 conta"}
                   {currentPlan === "pro" && "Plano Plus permite 3 contas"}
-                  {currentPlan === "business" && "Plano Business permite até 5 contas"}
+                  {currentPlan === "enterprise" && "Plano Business permite até 5 contas"}
                 </CardDescription>
               </CardHeader>
-              {!canAddMore && currentPlan !== "business" && (
+              {!canAddMore && currentPlan !== "enterprise" && (
                 <CardContent>
                   <div className="bg-primary/5 border border-primary/20 rounded-lg p-4">
                     <p className="text-sm mb-3">

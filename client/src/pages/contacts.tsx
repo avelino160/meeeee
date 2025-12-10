@@ -80,10 +80,10 @@ export default function Contacts() {
       setShowCreateDialog(false);
       resetForm();
     },
-    onError: () => {
+    onError: (error: any) => {
       toast({
-        title: "Erro",
-        description: "Falha ao criar contato. Tente novamente.",
+        title: "Limite Excedido",
+        description: error.message || "Falha ao criar contato. Tente novamente.",
         variant: "destructive",
       });
     },

@@ -59,10 +59,10 @@ export default function FunnelBuilder() {
       setIsCreateDialogOpen(false);
       setNewFunnelName("");
     },
-    onError: () => {
+    onError: (error: any) => {
       toast({
-        title: "Erro",
-        description: "Falha ao criar funil. Tente novamente.",
+        title: "Limite Excedido",
+        description: error.message || "Falha ao criar funil. Tente novamente.",
         variant: "destructive",
       });
     },
