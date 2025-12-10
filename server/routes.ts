@@ -136,7 +136,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { id } = req.params;
       const { name } = req.body;
       
-      const updated = await storage.updateWhatsappConnection(id, { name });
+      // Validar nome
+      if (typeof name !== 'string' || name.trim().length === 0) {
+        return res.status(400).json({ message: "Name is required and cannot be empty" });
+      }
+      
+      const updated = await storage.updateWhatsappConnection(id, { name: name.trim() });
       if (!updated) {
         return res.status(404).json({ message: "Connection not found" });
       }

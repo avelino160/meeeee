@@ -1,10 +1,11 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import Sidebar from "@/components/sidebar";
 import WhatsAppConnectionModal from "@/components/whatsapp-connection-modal";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import {
   Accordion,
   AccordionContent,
@@ -12,15 +13,28 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import type { WhatsAppStatus } from "@shared/api-types";
-import { QrCode, Crown } from "lucide-react";
+import { QrCode, Crown, Phone, Pencil, Check, X, Smartphone } from "lucide-react";
 import { Link } from "wouter";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 
 interface UserData {
   planType: string;
 }
 
+interface WhatsAppConnection {
+  id: string;
+  userId: string;
+  phoneNumber: string;
+  name: string | null;
+  isConnected: boolean | null;
+  lastConnectedAt: string | null;
+  createdAt: string | null;
+}
+
 export default function WhatsAppConnection() {
   const [showConnectionModal, setShowConnectionModal] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editName, setEditName] = useState("");
 
   const { data: userData } = useQuery<UserData>({
     queryKey: ["/api/user/me"],
@@ -28,7 +42,6 @@ export default function WhatsAppConnection() {
 
   const currentPlan = userData?.planType || "basic";
 
-  // Limites baseados no plano
   const planLimits: Record<string, number> = {
     basic: 1,
     pro: 3,
@@ -37,18 +50,66 @@ export default function WhatsAppConnection() {
 
   const maxAccounts = planLimits[currentPlan] || 1;
 
-  const { data: whatsappStatus, isLoading } = useQuery<WhatsAppStatus>({
+  const { data: whatsappStatus } = useQuery<WhatsAppStatus>({
     queryKey: ["/api/whatsapp/status"],
     refetchInterval: 5000,
   });
+
+  const { data: allConnections = [] } = useQuery<WhatsAppConnection[]>({
+    queryKey: ["/api/whatsapp/connections"],
+    refetchInterval: 5000,
+  });
+
+  // Filtrar apenas conexões ativas
+  const connections = allConnections.filter(c => c.isConnected === true);
 
   const { data: connectedAccountsData } = useQuery<{ count: number }>({
     queryKey: ["/api/whatsapp/connected-count"],
     refetchInterval: 5000,
   });
 
+  const updateNameMutation = useMutation({
+    mutationFn: async ({ id, name }: { id: string; name: string }) => {
+      await apiRequest("PATCH", `/api/whatsapp/connections/${id}`, { name });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/whatsapp/connections"] });
+      setEditingId(null);
+      setEditName("");
+    },
+  });
+
   const connectedAccounts = connectedAccountsData?.count ?? 0;
   const canAddMore = connectedAccounts < maxAccounts;
+
+  const startEditing = (connection: WhatsAppConnection) => {
+    setEditingId(connection.id);
+    setEditName(connection.name || "");
+  };
+
+  const cancelEditing = () => {
+    setEditingId(null);
+    setEditName("");
+  };
+
+  const saveEditing = (id: string) => {
+    const trimmedName = editName.trim();
+    if (!trimmedName) {
+      cancelEditing();
+      return;
+    }
+    updateNameMutation.mutate({ id, name: trimmedName });
+  };
+
+  const formatPhoneNumber = (phone: string) => {
+    if (phone.length === 13 && phone.startsWith("55")) {
+      const ddd = phone.slice(2, 4);
+      const part1 = phone.slice(4, 9);
+      const part2 = phone.slice(9);
+      return `+55 (${ddd}) ${part1}-${part2}`;
+    }
+    return `+${phone}`;
+  };
 
   return (
     <div className="flex h-screen bg-background">
@@ -116,8 +177,95 @@ export default function WhatsAppConnection() {
               )}
             </Card>
 
+            {/* Connected Accounts List */}
+            {connections.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <Smartphone className="h-5 w-5 mr-2" />
+                    Contas Conectadas
+                  </CardTitle>
+                  <CardDescription>
+                    Suas contas WhatsApp conectadas. Clique no lápis para nomear cada conta.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {connections.map((connection) => (
+                      <div 
+                        key={connection.id}
+                        className="flex items-center justify-between p-4 border rounded-lg bg-muted/30"
+                        data-testid={`connection-item-${connection.id}`}
+                      >
+                        <div className="flex items-center gap-3 flex-1">
+                          <div className={`w-3 h-3 rounded-full ${connection.isConnected ? 'bg-green-500' : 'bg-gray-400'}`} />
+                          <Phone className="h-5 w-5 text-muted-foreground" />
+                          <div className="flex-1">
+                            {editingId === connection.id ? (
+                              <div className="flex items-center gap-2">
+                                <Input
+                                  value={editName}
+                                  onChange={(e) => setEditName(e.target.value)}
+                                  placeholder="Nome da conta"
+                                  className="h-8 w-48"
+                                  autoFocus
+                                  data-testid={`input-connection-name-${connection.id}`}
+                                />
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={() => saveEditing(connection.id)}
+                                  disabled={updateNameMutation.isPending}
+                                  data-testid={`button-save-name-${connection.id}`}
+                                >
+                                  <Check className="h-4 w-4 text-green-600" />
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={cancelEditing}
+                                  data-testid={`button-cancel-edit-${connection.id}`}
+                                >
+                                  <X className="h-4 w-4 text-red-600" />
+                                </Button>
+                              </div>
+                            ) : (
+                              <div>
+                                <div className="flex items-center gap-2">
+                                  <span className="font-medium">
+                                    {connection.name || formatPhoneNumber(connection.phoneNumber)}
+                                  </span>
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    className="h-6 w-6 p-0"
+                                    onClick={() => startEditing(connection)}
+                                    data-testid={`button-edit-name-${connection.id}`}
+                                  >
+                                    <Pencil className="h-3 w-3 text-muted-foreground" />
+                                  </Button>
+                                </div>
+                                {connection.name && (
+                                  <span className="text-sm text-muted-foreground">
+                                    {formatPhoneNumber(connection.phoneNumber)}
+                                  </span>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                        <Badge variant={connection.isConnected ? "default" : "secondary"}>
+                          {connection.isConnected ? "Conectado" : "Desconectado"}
+                        </Badge>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
             {/* Connection Methods */}
-            {!whatsappStatus?.connected && canAddMore && (
+            {canAddMore && (
               <Card>
                 <CardHeader>
                   <CardTitle>Conectar WhatsApp</CardTitle>
@@ -132,14 +280,14 @@ export default function WhatsAppConnection() {
                     data-testid="button-generate-qr"
                   >
                     <QrCode className="h-4 w-4 mr-2" />
-                    Gerar QR Code
+                    {connections.length > 0 ? "Conectar Outra Conta" : "Gerar QR Code"}
                   </Button>
                 </CardContent>
               </Card>
             )}
 
             {/* Limit Reached - Upgrade Required */}
-            {!whatsappStatus?.connected && !canAddMore && (
+            {!canAddMore && currentPlan !== "enterprise" && (
               <Card className="border-primary/20">
                 <CardContent className="pt-6">
                   <div className="text-center space-y-4">
