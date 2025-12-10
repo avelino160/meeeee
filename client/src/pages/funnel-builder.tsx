@@ -291,7 +291,7 @@ export default function FunnelBuilder() {
               <Button 
                 size="sm"
                 onClick={() => setIsCreateDialogOpen(true)}
-                className="bg-purple-600 hover:bg-purple-700 text-white font-semibold flex-1 sm:flex-initial pl-[122px] pr-[122px]"
+                className="bg-purple-600 hover:bg-purple-700 text-white font-semibold flex-1 sm:flex-initial pl-[12px] pr-[12px]"
                 data-testid="button-create-funnel"
               >
                 <Plus className="h-4 w-4 sm:mr-2" />
