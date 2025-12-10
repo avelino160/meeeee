@@ -350,9 +350,9 @@ export default function FunnelEditor() {
         </header>
 
         {/* Main Content */}
-        <div className="flex-1 flex">
+        <div className="flex-1 flex overflow-hidden">
           {/* Left Toolbox */}
-          <div className="hidden md:block w-48 lg:w-64 bg-[#252525] border-r border-[#333] p-3 lg:p-4 overflow-y-auto">
+          <div className="hidden md:flex md:flex-col w-48 lg:w-64 bg-[#252525] border-r border-[#333] p-3 lg:p-4 overflow-y-auto">
             <div className="space-y-6">
               {/* Message Types */}
               <div>

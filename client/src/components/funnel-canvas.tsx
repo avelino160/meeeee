@@ -289,7 +289,7 @@ function FunnelCanvasInner({ data, onDataChange, onNodeSelect }: FunnelCanvasPro
   };
 
   return (
-    <div ref={reactFlowWrapper} className="w-full h-full overflow-auto" data-testid="funnel-canvas">
+    <div ref={reactFlowWrapper} className="w-full h-full" data-testid="funnel-canvas">
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -301,11 +301,6 @@ function FunnelCanvasInner({ data, onDataChange, onNodeSelect }: FunnelCanvasPro
         onDragOver={onDragOver}
         nodeTypes={nodeTypes}
         fitView
-        fitViewOptions={{ padding: 0.2, maxZoom: 1 }}
-        minZoom={0.1}
-        maxZoom={2}
-        panOnScroll={true}
-        zoomOnScroll={true}
         className="bg-background"
         connectionMode={ConnectionMode.Loose}
       >
@@ -313,8 +308,6 @@ function FunnelCanvasInner({ data, onDataChange, onNodeSelect }: FunnelCanvasPro
         <MiniMap 
           className="bg-card border-border"
           nodeColor="#a855f7"
-          zoomable
-          pannable
         />
         <Background 
           variant={BackgroundVariant.Dots} 
