@@ -1,5 +1,12 @@
 // API Response Types for React Query
 
+export interface WeeklyDataPoint {
+  name: string;
+  mensagens: number;
+  contatos: number;
+  conversoes: number;
+}
+
 export interface DashboardAnalytics {
   activeFunnels: number;
   todayMessages: number;
@@ -9,6 +16,7 @@ export interface DashboardAnalytics {
   sentMessages: number;
   deliveredMessages: number;
   totalMessages: number;
+  weeklyData?: WeeklyDataPoint[];
 }
 
 export interface WhatsAppStatus {

@@ -38,7 +38,7 @@ export default function Dashboard() {
     retry: false,
   });
 
-  const metricsData = [
+  const metricsData = analytics?.weeklyData || [
     { name: 'Seg', mensagens: 0, contatos: 0, conversoes: 0 },
     { name: 'Ter', mensagens: 0, contatos: 0, conversoes: 0 },
     { name: 'Qua', mensagens: 0, contatos: 0, conversoes: 0 },

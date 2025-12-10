@@ -734,6 +734,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const sentMessages = messages.filter(m => m.status === 'sent');
       const deliveredMessages = messages.filter(m => m.status === 'delivered');
       
+      // Calculate weekly data for chart
+      const dayNames = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+      const weeklyData = [];
+      
+      for (let i = 6; i >= 0; i--) {
+        const date = new Date();
+        date.setDate(date.getDate() - i);
+        date.setHours(0, 0, 0, 0);
+        
+        const nextDate = new Date(date);
+        nextDate.setDate(nextDate.getDate() + 1);
+        
+        const dayMessages = messages.filter(m => {
+          if (!m.createdAt) return false;
+          const msgDate = new Date(m.createdAt);
+          return msgDate >= date && msgDate < nextDate;
+        });
+        
+        const dayContacts = contacts.filter(c => {
+          if (!c.createdAt) return false;
+          const contactDate = new Date(c.createdAt);
+          return contactDate >= date && contactDate < nextDate;
+        });
+        
+        weeklyData.push({
+          name: dayNames[date.getDay()],
+          mensagens: dayMessages.length,
+          contatos: dayContacts.length,
+          conversoes: dayMessages.filter(m => m.status === 'delivered').length,
+        });
+      }
+      
       const analytics = {
         totalFunnels: funnels.length,
         activeFunnels: funnels.filter(f => f.status === 'active').length,
@@ -745,6 +777,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         deliveredMessages: deliveredMessages.length,
         deliveryRate: sentMessages.length > 0 ? (deliveredMessages.length / sentMessages.length) * 100 : 0,
         schedulerTasks: schedulerService.getActiveTasksCount(),
+        weeklyData,
       };
 
       res.json(analytics);
