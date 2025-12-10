@@ -3,6 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useSettings } from "@/contexts/SettingsContext";
 import { useState } from "react";
+import UsageDisplay from "@/components/usage-display";
+import { Separator } from "@/components/ui/separator";
 import {
   MessageSquare,
   BarChart3,
@@ -79,6 +81,13 @@ export default function Sidebar() {
             );
           })}
         </nav>
+        
+        {!showMinimized && (
+          <>
+            <Separator />
+            <UsageDisplay compact />
+          </>
+        )}
       </>
     );
   };

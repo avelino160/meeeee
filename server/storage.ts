@@ -14,6 +14,14 @@ import {
   type InsertFunnelExecution,
 } from "@shared/schema";
 import { nanoid } from "nanoid";
+import { 
+  getPlanLimits, 
+  checkLimit, 
+  calculatePercentage,
+  type PlanType,
+  type UsageInfo,
+  type LimitCheckResult 
+} from "@shared/plan-limits";
 
 export interface IStorage {
   // User operations
@@ -64,6 +72,14 @@ export interface IStorage {
   createFunnelExecution(execution: InsertFunnelExecution): Promise<FunnelExecution>;
   updateFunnelExecution(id: string, updates: Partial<FunnelExecution>): Promise<FunnelExecution | undefined>;
   getActiveFunnelExecutions(): Promise<FunnelExecution[]>;
+  
+  // Plan limit checking operations
+  getUserUsage(userId: string): Promise<UsageInfo>;
+  checkFunnelLimit(userId: string): Promise<LimitCheckResult>;
+  checkContactLimit(userId: string): Promise<LimitCheckResult>;
+  checkWhatsappLimit(userId: string): Promise<LimitCheckResult>;
+  checkMessageLimit(userId: string): Promise<LimitCheckResult>;
+  getMessagesThisHour(userId: string): Promise<number>;
 }
 
 export class MemStorage implements IStorage {
@@ -361,6 +377,100 @@ export class MemStorage implements IStorage {
     }
     
     return isExpired;
+  }
+
+  async getMessagesThisHour(userId: string): Promise<number> {
+    const oneHourAgo = new Date();
+    oneHourAgo.setTime(oneHourAgo.getTime() - 60 * 60 * 1000);
+    
+    return Array.from(this.messages.values())
+      .filter(m => {
+        if (m.userId !== userId) return false;
+        if (m.status === 'failed') return false;
+        const timestamp = m.sentAt || m.createdAt;
+        if (!timestamp) return false;
+        return new Date(timestamp) >= oneHourAgo;
+      }).length;
+  }
+
+  async getUserUsage(userId: string): Promise<UsageInfo> {
+    const user = this.users.get(userId);
+    const planType = (user?.planType || "free") as PlanType;
+    const limits = getPlanLimits(planType);
+    
+    const funnelCount = Array.from(this.funnels.values())
+      .filter(f => f.userId === userId).length;
+    
+    const contactCount = Array.from(this.contacts.values())
+      .filter(c => c.userId === userId).length;
+    
+    const whatsappCount = await this.getConnectedAccountsCount(userId);
+    const messagesThisHour = await this.getMessagesThisHour(userId);
+    
+    return {
+      whatsappAccounts: {
+        current: whatsappCount,
+        limit: limits.maxWhatsappAccounts,
+        percentage: calculatePercentage(whatsappCount, limits.maxWhatsappAccounts)
+      },
+      messagesThisHour: {
+        current: messagesThisHour,
+        limit: limits.maxMessagesPerHour,
+        percentage: calculatePercentage(messagesThisHour, limits.maxMessagesPerHour)
+      },
+      funnels: {
+        current: funnelCount,
+        limit: limits.maxFunnels,
+        percentage: calculatePercentage(funnelCount, limits.maxFunnels)
+      },
+      contacts: {
+        current: contactCount,
+        limit: limits.maxContacts,
+        percentage: calculatePercentage(contactCount, limits.maxContacts)
+      }
+    };
+  }
+
+  async checkFunnelLimit(userId: string): Promise<LimitCheckResult> {
+    const user = this.users.get(userId);
+    const planType = (user?.planType || "free") as PlanType;
+    const limits = getPlanLimits(planType);
+    
+    const funnelCount = Array.from(this.funnels.values())
+      .filter(f => f.userId === userId).length;
+    
+    return checkLimit("funis", funnelCount, limits.maxFunnels);
+  }
+
+  async checkContactLimit(userId: string): Promise<LimitCheckResult> {
+    const user = this.users.get(userId);
+    const planType = (user?.planType || "free") as PlanType;
+    const limits = getPlanLimits(planType);
+    
+    const contactCount = Array.from(this.contacts.values())
+      .filter(c => c.userId === userId).length;
+    
+    return checkLimit("contatos", contactCount, limits.maxContacts);
+  }
+
+  async checkWhatsappLimit(userId: string): Promise<LimitCheckResult> {
+    const user = this.users.get(userId);
+    const planType = (user?.planType || "free") as PlanType;
+    const limits = getPlanLimits(planType);
+    
+    const whatsappCount = await this.getConnectedAccountsCount(userId);
+    
+    return checkLimit("contas WhatsApp", whatsappCount, limits.maxWhatsappAccounts);
+  }
+
+  async checkMessageLimit(userId: string): Promise<LimitCheckResult> {
+    const user = this.users.get(userId);
+    const planType = (user?.planType || "free") as PlanType;
+    const limits = getPlanLimits(planType);
+    
+    const messagesThisHour = await this.getMessagesThisHour(userId);
+    
+    return checkLimit("mensagens por hora", messagesThisHour, limits.maxMessagesPerHour);
   }
 }
 

@@ -56,11 +56,24 @@ Preferred communication style: Simple, everyday language.
 - **Blocked User Flow**: Blocked users are redirected to /blocked page and can only access /plans to renew
 - **Admin API Endpoints** (require X-Admin-Secret header):
   - `GET /api/user/plan-status` - Check current plan status (no auth required)
+  - `GET /api/user/usage` - Get current usage and limits for the user
   - `POST /api/admin/activate-plan` - Activate a plan for a user (params: userId, planType, durationDays)
   - `POST /api/admin/block-user` - Manually block a user
   - `POST /api/admin/unblock-user` - Manually unblock a user
 - **Admin Authentication**: Admin endpoints require `X-Admin-Secret` header. Default secret is 'ranzap-admin-2024'. Configure ADMIN_SECRET environment variable in production.
 - **Note**: Payment integration (Stripe) was not configured. Plans must be activated manually via the admin API endpoints when users pay externally.
+
+### Plan Limits Enforcement
+- **Limit Configuration**: Defined in `shared/plan-limits.ts` with strict limits per plan type
+- **Plan Limits**:
+  - **Free**: 1 WhatsApp, 50 msgs/hour, 3 funnels, 500 contacts
+  - **Basic**: 2 WhatsApp, 100 msgs/hour, 10 funnels, 2,000 contacts
+  - **Pro**: 3 WhatsApp, 200 msgs/hour, unlimited funnels, 5,000 contacts
+  - **Enterprise**: 5 WhatsApp, 1,000 msgs/hour, unlimited funnels, unlimited contacts
+- **Enforcement**: All creation endpoints check limits before allowing resource creation
+- **Error Response**: When limit is exceeded, returns 403 with `error: "limit_exceeded"`, `limit`, and `current` values
+- **Usage Display**: Sidebar shows compact usage stats; Plans page shows detailed usage with progress bars
+- **Real-time Updates**: Usage data refreshes every 30 seconds
 
 ### Authentication & Security
 - **Authentication Provider**: Replit OIDC integration

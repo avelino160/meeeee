@@ -179,6 +179,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Phone number is required" });
       }
 
+      const limitCheck = await storage.checkWhatsappLimit(userId);
+      if (!limitCheck.allowed) {
+        return res.status(403).json({ 
+          message: limitCheck.reason,
+          error: "limit_exceeded",
+          limit: limitCheck.limit,
+          current: limitCheck.current
+        });
+      }
+
       const success = await whatsappService.connectWhatsApp(userId, phoneNumber);
       res.json({ success });
     } catch (error) {
@@ -226,6 +236,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/funnels', async (req, res) => {
     try {
       const userId = DEFAULT_USER_ID;
+      
+      const limitCheck = await storage.checkFunnelLimit(userId);
+      if (!limitCheck.allowed) {
+        return res.status(403).json({ 
+          message: limitCheck.reason,
+          error: "limit_exceeded",
+          limit: limitCheck.limit,
+          current: limitCheck.current
+        });
+      }
+      
       const funnelData = insertFunnelSchema.parse({ ...req.body, userId });
       const funnel = await storage.createFunnel(funnelData);
       res.status(201).json(funnel);
@@ -242,6 +263,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       if (!Array.isArray(funnels)) {
         return res.status(400).json({ message: "Funnels must be an array" });
+      }
+
+      const user = await storage.getUser(userId);
+      const planType = user?.planType || 'free';
+      const { getPlanLimits } = await import('@shared/plan-limits');
+      const limits = getPlanLimits(planType as any);
+      const currentFunnels = await storage.getAllFunnels(userId);
+      
+      if (limits.maxFunnels !== -1) {
+        const availableSlots = limits.maxFunnels - currentFunnels.length;
+        if (availableSlots <= 0) {
+          return res.status(403).json({ 
+            message: `Limite de funis atingido. Seu plano permite apenas ${limits.maxFunnels} funis.`,
+            error: "limit_exceeded",
+            limit: limits.maxFunnels,
+            current: currentFunnels.length
+          });
+        }
+        if (funnels.length > availableSlots) {
+          return res.status(403).json({ 
+            message: `Você só pode importar ${availableSlots} funis. Tentando importar ${funnels.length}.`,
+            error: "limit_exceeded",
+            limit: limits.maxFunnels,
+            current: currentFunnels.length,
+            available: availableSlots
+          });
+        }
       }
 
       const importedFunnels = [];
@@ -366,6 +414,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/contacts', async (req, res) => {
     try {
       const userId = DEFAULT_USER_ID;
+      
+      const limitCheck = await storage.checkContactLimit(userId);
+      if (!limitCheck.allowed) {
+        return res.status(403).json({ 
+          message: limitCheck.reason,
+          error: "limit_exceeded",
+          limit: limitCheck.limit,
+          current: limitCheck.current
+        });
+      }
+      
       const contactData = insertContactSchema.parse({ ...req.body, userId });
       const contact = await storage.createContact(contactData);
       res.status(201).json(contact);
@@ -429,6 +488,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = DEFAULT_USER_ID;
       const { contactId, content, type, mediaUrl, scheduledAt } = req.body;
 
+      const limitCheck = await storage.checkMessageLimit(userId);
+      if (!limitCheck.allowed) {
+        return res.status(403).json({ 
+          message: limitCheck.reason,
+          error: "limit_exceeded",
+          limit: limitCheck.limit,
+          current: limitCheck.current
+        });
+      }
+
       if (scheduledAt) {
         // Schedule the message
         const messageId = await schedulerService.scheduleMessage(
@@ -467,6 +536,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error sending message:", error);
       res.status(500).json({ message: "Failed to send message" });
+    }
+  });
+
+  // User usage/limits endpoint
+  app.get('/api/user/usage', async (req, res) => {
+    try {
+      const userId = DEFAULT_USER_ID;
+      const usage = await storage.getUserUsage(userId);
+      const user = await storage.getUser(userId);
+      
+      res.json({
+        planType: user?.planType || 'free',
+        usage
+      });
+    } catch (error) {
+      console.error("Error fetching user usage:", error);
+      res.status(500).json({ message: "Failed to fetch user usage" });
     }
   });
 
