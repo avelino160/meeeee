@@ -1,11 +1,10 @@
 import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useToast } from "@/hooks/use-toast";
+import { useQuery } from "@tanstack/react-query";
 import Sidebar from "@/components/sidebar";
+import WhatsAppConnectionModal from "@/components/whatsapp-connection-modal";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 import {
   Accordion,
   AccordionContent,
@@ -13,23 +12,18 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import type { WhatsAppStatus } from "@shared/api-types";
-import { apiRequest } from "@/lib/queryClient";
 import {
-  MessageSquare,
   QrCode,
   CheckCircle,
   XCircle,
-  LogOut,
   Zap,
   Crown,
 } from "lucide-react";
 import { Link } from "wouter";
 
 export default function WhatsAppConnection() {
-  const [qrImageUrl, setQrImageUrl] = useState<string>("");
   const [currentPlan] = useState("free"); // Simula o plano atual
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
+  const [showConnectionModal, setShowConnectionModal] = useState(false);
 
   // Limites baseados no plano
   const planLimits = {
@@ -52,63 +46,6 @@ export default function WhatsAppConnection() {
 
   const connectedAccounts = connectedAccountsData?.count ?? 0;
   const canAddMore = connectedAccounts < maxAccounts;
-
-  const generateQRMutation = useMutation({
-    mutationFn: async () => {
-      const response = await apiRequest("POST", "/api/whatsapp/generate-qr", {});
-      
-      if (response.status === 405) {
-        const data = await response.json();
-        throw new Error(data.message || "Bloqueio de datacenter");
-      }
-      
-      return response.json();
-    },
-    onSuccess: (data) => {
-      if (data.qrImage) {
-        setQrImageUrl(data.qrImage);
-        toast({
-          title: "QR Code Gerado",
-          description: "Escaneie o código com o WhatsApp no seu celular.",
-        });
-      }
-      queryClient.invalidateQueries({ queryKey: ["/api/whatsapp/status"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/whatsapp/connected-count"] });
-    },
-    onError: (error: any) => {
-      const isDatacenterBlock = error.message?.includes('bloqueou') || error.message?.includes('datacenter');
-      
-      toast({
-        title: isDatacenterBlock ? "⚠️ Ambiente Não Suportado" : "❌ Erro",
-        description: isDatacenterBlock 
-          ? "WhatsApp bloqueia conexões de servidores cloud. Execute localmente para testar." 
-          : "Falha ao gerar QR Code. Tente novamente.",
-        variant: "destructive",
-      });
-    },
-  });
-
-  const disconnectMutation = useMutation({
-    mutationFn: async () => {
-      return await apiRequest("POST", "/api/whatsapp/disconnect", {});
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/whatsapp/status"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/whatsapp/connected-count"] });
-      setQrImageUrl("");
-      toast({
-        title: "Desconectado",
-        description: "WhatsApp desconectado com sucesso!",
-      });
-    },
-    onError: () => {
-      toast({
-        title: "Erro",
-        description: "Falha ao desconectar WhatsApp.",
-        variant: "destructive",
-      });
-    },
-  });
 
   return (
     <div className="flex h-screen bg-background">
@@ -210,39 +147,13 @@ export default function WhatsAppConnection() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <Button
-                    onClick={() => generateQRMutation.mutate()}
-                    disabled={generateQRMutation.isPending}
+                    onClick={() => setShowConnectionModal(true)}
                     className="w-full"
                     data-testid="button-generate-qr"
                   >
                     <QrCode className="h-4 w-4 mr-2" />
-                    {generateQRMutation.isPending ? "Gerando QR Code..." : "Gerar QR Code"}
+                    Gerar QR Code
                   </Button>
-
-                  {qrImageUrl && (
-                    <Card>
-                      <CardContent className="pt-6">
-                        <div className="text-center">
-                          <img
-                            src={qrImageUrl}
-                            alt="QR Code do WhatsApp"
-                            className="mx-auto max-w-xs rounded-lg border"
-                            data-testid="img-qr-code"
-                          />
-                          <Separator className="my-4" />
-                          <div className="text-left space-y-2 text-sm">
-                            <p className="font-medium">Como usar:</p>
-                            <ol className="list-decimal list-inside space-y-1 text-muted-foreground">
-                              <li>Abra o WhatsApp no seu celular</li>
-                              <li>Vá em Configurações → Aparelhos conectados</li>
-                              <li>Toque em "Conectar um aparelho"</li>
-                              <li>Escaneie o QR Code acima com a câmera</li>
-                            </ol>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  )}
                 </CardContent>
               </Card>
             )}
@@ -305,6 +216,11 @@ export default function WhatsAppConnection() {
           </div>
         </main>
       </div>
+
+      <WhatsAppConnectionModal 
+        open={showConnectionModal} 
+        onOpenChange={setShowConnectionModal} 
+      />
     </div>
   );
 }
