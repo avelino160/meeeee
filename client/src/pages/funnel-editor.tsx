@@ -13,6 +13,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { 
   Save, 
   Eye, 
@@ -29,7 +30,8 @@ import {
   CheckCircle,
   ArrowLeft,
   Plus,
-  X
+  X,
+  Menu
 } from "lucide-react";
 
 interface FunnelNode {
@@ -41,6 +43,8 @@ interface FunnelNode {
     content?: string;
     mediaUrl?: string;
     delayMinutes?: number;
+    nodeType?: string;
+    icon?: string;
   };
 }
 
@@ -66,6 +70,7 @@ export default function FunnelEditor() {
   const [funnelStatus, setFunnelStatus] = useState("draft");
   const [triggerPhrases, setTriggerPhrases] = useState<string[]>([]);
   const [showPreview, setShowPreview] = useState(false);
+  const [showMobileToolbox, setShowMobileToolbox] = useState(false);
 
   const { data: funnel, isLoading } = useQuery<Funnel>({
     queryKey: [`/api/funnels/${funnelId}`],
@@ -188,6 +193,72 @@ export default function FunnelEditor() {
   const onDragStart = (event: React.DragEvent, nodeType: string) => {
     event.dataTransfer.setData('application/reactflow', nodeType);
     event.dataTransfer.effectAllowed = 'move';
+  };
+
+  const addNodeMobile = (nodeType: string) => {
+    const nodeLabels: Record<string, string> = {
+      'message': 'Mensagem Texto',
+      'image': 'Imagem',
+      'video': 'Vídeo',
+      'audio': 'Áudio',
+      'document': 'Documento',
+      'location': 'Localização',
+      'condition': 'Condição',
+      'delay': 'Esperar',
+      'question': 'Pergunta',
+      'tag': 'Tag',
+      'verify': 'Verificar',
+    };
+    
+    const nodeIcons: Record<string, string> = {
+      'message': 'message',
+      'image': 'image',
+      'video': 'video',
+      'audio': 'mic',
+      'document': 'file',
+      'location': 'map-pin',
+      'condition': 'git-branch',
+      'delay': 'clock',
+      'question': 'help-circle',
+      'tag': 'tag',
+      'verify': 'check-circle',
+    };
+    
+    const newNodeId = `${nodeType}_${Date.now()}`;
+    const lastNode = funnelData.nodes[funnelData.nodes.length - 1];
+    const yPos = lastNode ? lastNode.position.y + 150 : 200;
+    
+    const newNode: FunnelNode = {
+      id: newNodeId,
+      type: nodeType,
+      position: { x: 150, y: yPos },
+      data: {
+        label: nodeLabels[nodeType] || nodeType,
+        content: '',
+        nodeType: nodeType,
+        icon: nodeIcons[nodeType] || 'message',
+        delayMinutes: nodeType === 'delay' ? 5 : 0,
+      },
+    };
+    
+    const newEdge = lastNode ? {
+      id: `edge_${lastNode.id}_${newNodeId}`,
+      source: lastNode.id,
+      target: newNodeId,
+    } : null;
+    
+    setFunnelData({
+      nodes: [...funnelData.nodes, newNode],
+      edges: newEdge ? [...funnelData.edges, newEdge] : funnelData.edges,
+    });
+    
+    setShowMobileToolbox(false);
+    setSelectedNode(newNode);
+    
+    toast({
+      title: "Elemento Adicionado",
+      description: `${nodeLabels[nodeType]} foi adicionado ao funil`,
+    });
   };
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -699,6 +770,120 @@ export default function FunnelEditor() {
           )}
         </div>
       </div>
+
+      {/* Mobile Add Button */}
+      <Sheet open={showMobileToolbox} onOpenChange={setShowMobileToolbox}>
+        <SheetTrigger asChild>
+          <Button
+            className="md:hidden fixed bottom-20 right-4 z-30 w-14 h-14 rounded-full bg-purple-600 hover:bg-purple-700 shadow-lg"
+            size="icon"
+            data-testid="button-add-mobile"
+          >
+            <Plus className="h-6 w-6" />
+          </Button>
+        </SheetTrigger>
+        <SheetContent side="bottom" className="bg-[#252525] border-t border-[#333] h-[70vh] rounded-t-2xl">
+          <SheetHeader className="pb-4">
+            <SheetTitle className="text-white text-lg">Adicionar Elemento</SheetTitle>
+          </SheetHeader>
+          <div className="overflow-y-auto h-full pb-8">
+            <div className="space-y-4">
+              <div>
+                <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
+                  Mensagens
+                </h3>
+                <div className="grid grid-cols-3 gap-2">
+                  <button 
+                    onClick={() => addNodeMobile('message')}
+                    className="p-3 bg-[#2a2a2a] rounded-lg hover:bg-[#333] transition-colors border border-gray-700 flex flex-col items-center"
+                  >
+                    <MessageSquare className="h-6 w-6 text-purple-500 mb-1" />
+                    <p className="text-xs font-medium text-gray-300">Texto</p>
+                  </button>
+                  <button 
+                    onClick={() => addNodeMobile('image')}
+                    className="p-3 bg-[#2a2a2a] rounded-lg hover:bg-[#333] transition-colors border border-gray-700 flex flex-col items-center"
+                  >
+                    <Image className="h-6 w-6 text-purple-500 mb-1" />
+                    <p className="text-xs font-medium text-gray-300">Imagem</p>
+                  </button>
+                  <button 
+                    onClick={() => addNodeMobile('video')}
+                    className="p-3 bg-[#2a2a2a] rounded-lg hover:bg-[#333] transition-colors border border-gray-700 flex flex-col items-center"
+                  >
+                    <Video className="h-6 w-6 text-purple-500 mb-1" />
+                    <p className="text-xs font-medium text-gray-300">Vídeo</p>
+                  </button>
+                  <button 
+                    onClick={() => addNodeMobile('audio')}
+                    className="p-3 bg-[#2a2a2a] rounded-lg hover:bg-[#333] transition-colors border border-gray-700 flex flex-col items-center"
+                  >
+                    <Mic className="h-6 w-6 text-purple-500 mb-1" />
+                    <p className="text-xs font-medium text-gray-300">Áudio</p>
+                  </button>
+                  <button 
+                    onClick={() => addNodeMobile('document')}
+                    className="p-3 bg-[#2a2a2a] rounded-lg hover:bg-[#333] transition-colors border border-gray-700 flex flex-col items-center"
+                  >
+                    <FileText className="h-6 w-6 text-purple-500 mb-1" />
+                    <p className="text-xs font-medium text-gray-300">Documento</p>
+                  </button>
+                  <button 
+                    onClick={() => addNodeMobile('location')}
+                    className="p-3 bg-[#2a2a2a] rounded-lg hover:bg-[#333] transition-colors border border-gray-700 flex flex-col items-center"
+                  >
+                    <MapPin className="h-6 w-6 text-purple-500 mb-1" />
+                    <p className="text-xs font-medium text-gray-300">Local</p>
+                  </button>
+                </div>
+              </div>
+              
+              <div>
+                <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
+                  Lógica
+                </h3>
+                <div className="grid grid-cols-2 gap-2">
+                  <button 
+                    onClick={() => addNodeMobile('condition')}
+                    className="p-3 bg-[#2a2a2a] rounded-lg hover:bg-[#333] transition-colors flex items-center border border-gray-700"
+                  >
+                    <GitBranch className="h-5 w-5 text-purple-500 mr-2" />
+                    <span className="text-sm font-medium text-gray-300">Condição</span>
+                  </button>
+                  <button 
+                    onClick={() => addNodeMobile('delay')}
+                    className="p-3 bg-[#2a2a2a] rounded-lg hover:bg-[#333] transition-colors flex items-center border border-gray-700"
+                  >
+                    <Clock className="h-5 w-5 text-purple-500 mr-2" />
+                    <span className="text-sm font-medium text-gray-300">Esperar</span>
+                  </button>
+                  <button 
+                    onClick={() => addNodeMobile('question')}
+                    className="p-3 bg-[#2a2a2a] rounded-lg hover:bg-[#333] transition-colors flex items-center border border-gray-700"
+                  >
+                    <HelpCircle className="h-5 w-5 text-purple-500 mr-2" />
+                    <span className="text-sm font-medium text-gray-300">Pergunta</span>
+                  </button>
+                  <button 
+                    onClick={() => addNodeMobile('tag')}
+                    className="p-3 bg-[#2a2a2a] rounded-lg hover:bg-[#333] transition-colors flex items-center border border-gray-700"
+                  >
+                    <Tag className="h-5 w-5 text-purple-500 mr-2" />
+                    <span className="text-sm font-medium text-gray-300">Tag</span>
+                  </button>
+                  <button 
+                    onClick={() => addNodeMobile('verify')}
+                    className="p-3 bg-[#2a2a2a] rounded-lg hover:bg-[#333] transition-colors flex items-center border border-gray-700 col-span-2"
+                  >
+                    <CheckCircle className="h-5 w-5 text-purple-500 mr-2" />
+                    <span className="text-sm font-medium text-gray-300">Verificar</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </SheetContent>
+      </Sheet>
 
       <WhatsAppPreview
         open={showPreview}
