@@ -195,6 +195,19 @@ function FunnelCanvasInner({ data, onDataChange, onNodeSelect }: FunnelCanvasPro
     [onNodeSelect]
   );
 
+  const onEdgeClick = useCallback(
+    (event: React.MouseEvent, edge: Edge) => {
+      const newEdges = edges.filter(e => e.id !== edge.id);
+      setEdges(newEdges);
+      
+      onDataChange({
+        nodes,
+        edges: newEdges,
+      });
+    },
+    [edges, nodes, onDataChange]
+  );
+
   const onDrop = useCallback(
     (event: React.DragEvent) => {
       event.preventDefault();
@@ -300,12 +313,14 @@ function FunnelCanvasInner({ data, onDataChange, onNodeSelect }: FunnelCanvasPro
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
         onNodeClick={onNodeClick}
+        onEdgeClick={onEdgeClick}
         onDrop={onDrop}
         onDragOver={onDragOver}
         nodeTypes={nodeTypes}
         fitView
         className="bg-background"
         connectionMode={ConnectionMode.Loose}
+        deleteKeyCode={['Backspace', 'Delete']}
       >
         <Controls className="bg-card border-border" />
         <MiniMap 
