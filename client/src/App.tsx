@@ -71,9 +71,9 @@ function App() {
         <TooltipProvider>
           <StarfieldBackground />
           <div className="relative z-10">
-            <Toaster />
             <Router />
           </div>
+          <Toaster />
         </TooltipProvider>
       </SettingsProvider>
     </QueryClientProvider>
