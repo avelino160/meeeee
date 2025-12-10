@@ -181,56 +181,56 @@ export default function WhatsAppPreview({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent 
-        className="max-w-[400px] h-[850px] p-0 bg-black border-none overflow-hidden rounded-[50px]"
+        className="max-w-[320px] h-[580px] p-0 bg-black border-none overflow-hidden rounded-[35px]"
         style={{ 
-          boxShadow: '0 0 0 12px #1a1a1a, 0 25px 50px -12px rgba(0, 0, 0, 0.7)' 
+          boxShadow: '0 0 0 8px #1a1a1a, 0 20px 40px -10px rgba(0, 0, 0, 0.6)' 
         }}
       >
         {/* iPhone Notch */}
-        <div className="absolute top-0 left-0 right-0 h-11 bg-[#111b21] z-50 flex items-center justify-between px-6">
-          <span className="text-white text-xs font-semibold">9:41</span>
-          <div className="w-24 h-6 bg-black rounded-b-2xl absolute left-1/2 -translate-x-1/2 top-0"></div>
-          <div className="flex items-center gap-1.5">
-            <svg width="17" height="11" viewBox="0 0 17 11" fill="white">
+        <div className="absolute top-0 left-0 right-0 h-8 bg-[#111b21] z-50 flex items-center justify-between px-4">
+          <span className="text-white text-[10px] font-semibold">9:41</span>
+          <div className="w-16 h-4 bg-black rounded-b-xl absolute left-1/2 -translate-x-1/2 top-0"></div>
+          <div className="flex items-center gap-1">
+            <svg width="14" height="9" viewBox="0 0 17 11" fill="white">
               <rect x="0" y="2" width="4" height="7" rx="0.8"/>
               <rect x="5.5" y="0.5" width="4" height="10" rx="0.8"/>
               <rect x="11" y="0" width="4" height="11" rx="0.8"/>
             </svg>
-            <svg width="15" height="11" viewBox="0 0 15 11">
+            <svg width="12" height="9" viewBox="0 0 15 11">
               <path d="M7.5 0C3.4 0 0 2.5 0 5.5s3.4 5.5 7.5 5.5 7.5-2.5 7.5-5.5S11.6 0 7.5 0zm0 9.5c-3.1 0-5.5-1.7-5.5-3.7s2.4-3.7 5.5-3.7 5.5 1.7 5.5 3.7-2.4 3.7-5.5 3.7z" fill="white"/>
             </svg>
-            <span className="text-white text-xs font-semibold">100%</span>
+            <span className="text-white text-[10px] font-semibold">100%</span>
           </div>
         </div>
 
         {/* WhatsApp Header */}
-        <div className="mt-11 bg-[#202c33] px-4 py-2.5 flex items-center justify-between border-b border-[#2a3942]">
-          <div className="flex items-center gap-3 flex-1">
+        <div className="mt-8 bg-[#202c33] px-3 py-2 flex items-center justify-between border-b border-[#2a3942]">
+          <div className="flex items-center gap-2 flex-1">
             <button 
               onClick={() => onOpenChange(false)}
               className="text-[#8696a0] hover:text-white"
             >
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M15 18l-6-6 6-6"/>
               </svg>
             </button>
-            <Avatar className="h-10 w-10">
-              <AvatarFallback className="bg-purple-600 text-white text-base font-bold">
+            <Avatar className="h-8 w-8">
+              <AvatarFallback className="bg-purple-600 text-white text-sm font-bold">
                 R
               </AvatarFallback>
             </Avatar>
             <div className="flex-1 min-w-0">
-              <DialogTitle className="text-white text-base font-medium truncate">
+              <DialogTitle className="text-white text-sm font-medium truncate">
                 RanZap
               </DialogTitle>
-              <p className="text-xs text-[#8696a0]">online</p>
+              <p className="text-[10px] text-[#8696a0]">online</p>
             </div>
           </div>
-          <div className="flex items-center gap-5">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#8696a0" strokeWidth="2.2">
+          <div className="flex items-center gap-3">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8696a0" strokeWidth="2.2">
               <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
             </svg>
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#8696a0" strokeWidth="2.5">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8696a0" strokeWidth="2.5">
               <circle cx="12" cy="12" r="1.5"/>
               <circle cx="12" cy="5" r="1.5"/>
               <circle cx="12" cy="19" r="1.5"/>
@@ -303,22 +303,22 @@ export default function WhatsAppPreview({
         </div>
 
         {/* Input Area */}
-        <div className="bg-[#202c33] px-3 py-2.5 border-t border-[#2a3942]">
-          <div className="flex items-center gap-2">
-            <div className="flex-1 flex items-center gap-3 bg-[#2a3942] rounded-3xl px-4 py-2.5">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#8696a0" strokeWidth="2">
+        <div className="bg-[#202c33] px-2 py-1.5 border-t border-[#2a3942]">
+          <div className="flex items-center gap-1.5">
+            <div className="flex-1 flex items-center gap-2 bg-[#2a3942] rounded-2xl px-3 py-1.5">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8696a0" strokeWidth="2">
                 <circle cx="12" cy="12" r="10"/>
                 <path d="M8 14s1.5 2 4 2 4-2 4-2"/>
                 <line x1="9" y1="9" x2="9.01" y2="9"/>
                 <line x1="15" y1="9" x2="15.01" y2="9"/>
               </svg>
-              <span className="text-sm text-[#8696a0] flex-1">Mensagem</span>
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#8696a0" strokeWidth="2">
+              <span className="text-xs text-[#8696a0] flex-1">Mensagem</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8696a0" strokeWidth="2">
                 <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/>
               </svg>
             </div>
-            <div className="w-11 h-11 rounded-full bg-[#00a884] flex items-center justify-center flex-shrink-0">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="white">
+            <div className="w-8 h-8 rounded-full bg-[#00a884] flex items-center justify-center flex-shrink-0">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="white">
                 <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
               </svg>
             </div>
@@ -326,7 +326,7 @@ export default function WhatsAppPreview({
         </div>
 
         {/* iPhone Home Indicator */}
-        <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-32 h-1 bg-white/20 rounded-full"></div>
+        <div className="absolute bottom-1.5 left-1/2 -translate-x-1/2 w-24 h-0.5 bg-white/20 rounded-full"></div>
       </DialogContent>
     </Dialog>
   );
