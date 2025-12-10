@@ -232,59 +232,20 @@ export default function WhatsAppConnectionModal({ open, onOpenChange }: WhatsApp
               {/* ⚠️ BLOQUEIO ATIVO NO REPLIT - MODO BLOQUEADO */}
               {isReplitEnvironment ? (
                 <>
-                  <div className="bg-red-50 border-2 border-red-300 p-6 rounded-xl space-y-4">
-                    <div className="flex items-start">
-                      <div className="flex-shrink-0">
-                        <svg className="h-6 w-6 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                        </svg>
-                      </div>
-                      <div className="ml-3 flex-1">
-                        <h3 className="text-base font-semibold text-red-800">
-                          ⛔ Conexão WhatsApp Bloqueada no Replit
-                        </h3>
-                        <div className="mt-2 text-sm text-red-700 space-y-2">
-                          <p>
-                            O WhatsApp <strong>bloqueia todas as conexões</strong> de servidores cloud/datacenters (erro 405) por questões de segurança anti-spam.
-                          </p>
-                          <p className="font-semibold">
-                            ✅ Para testar este sistema, você precisa:
-                          </p>
-                          <ul className="list-disc list-inside ml-2 space-y-1">
-                            <li>Baixar o projeto no seu computador</li>
-                            <li>Executar localmente com <code className="bg-red-100 px-1 rounded">npm run dev</code></li>
-                            <li>Acessar http://localhost:5000</li>
-                          </ul>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div className="bg-white p-4 rounded border-2 border-red-200">
-                      <p className="text-xs font-semibold text-red-900 mb-2">📋 GUIA COMPLETO DE INSTALAÇÃO:</p>
-                      <div className="text-xs text-gray-700 space-y-1 font-mono bg-gray-50 p-2 rounded">
-                        <div># 1. Clone o repositório</div>
-                        <div>git clone https://github.com/seu-repo/ranzap</div>
-                        <div className="mt-2"># 2. Instale dependências</div>
-                        <div>npm install</div>
-                        <div className="mt-2"># 3. Execute localmente</div>
-                        <div>npm run dev</div>
-                      </div>
-                      <p className="text-xs text-red-700 mt-3">
-                        ℹ️ Consulte <strong>WHATSAPP_CONNECTION.md</strong> para mais detalhes sobre soluções e alternativas.
-                      </p>
-                    </div>
+                  <div className="bg-red-50 border border-red-200 p-3 rounded-lg">
+                    <p className="text-sm text-red-700">
+                      <strong>Ambiente cloud detectado.</strong> Execute localmente com <code className="bg-red-100 px-1 rounded text-xs">npm run dev</code> para conectar o WhatsApp.
+                    </p>
                   </div>
 
-                  <div className="flex justify-center">
-                    <Button
-                      variant="outline"
-                      onClick={() => onOpenChange(false)}
-                      className="w-full"
-                      data-testid="button-close-modal"
-                    >
-                      Fechar
-                    </Button>
-                  </div>
+                  <Button
+                    variant="outline"
+                    onClick={() => onOpenChange(false)}
+                    className="w-full"
+                    data-testid="button-close-modal"
+                  >
+                    Fechar
+                  </Button>
                 </>
               ) : (
                 <>
