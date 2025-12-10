@@ -47,6 +47,7 @@ export const whatsappConnections = pgTable("whatsapp_connections", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
   phoneNumber: varchar("phone_number").notNull(),
+  name: varchar("name"),
   isConnected: boolean("is_connected").default(false),
   qrCode: text("qr_code"),
   lastConnectedAt: timestamp("last_connected_at"),

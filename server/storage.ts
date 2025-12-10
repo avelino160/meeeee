@@ -34,6 +34,7 @@ export interface IStorage {
   
   // WhatsApp connection operations
   getWhatsappConnection(userId: string): Promise<WhatsappConnection | undefined>;
+  getAllWhatsappConnections(userId: string): Promise<WhatsappConnection[]>;
   getConnectedAccountsCount(userId: string): Promise<number>;
   createWhatsappConnection(connection: InsertWhatsappConnection): Promise<WhatsappConnection>;
   updateWhatsappConnection(id: string, updates: Partial<WhatsappConnection>): Promise<WhatsappConnection | undefined>;
@@ -124,6 +125,12 @@ export class MemStorage implements IStorage {
 
   async getWhatsappConnection(userId: string): Promise<WhatsappConnection | undefined> {
     return Array.from(this.whatsappConnections.values()).find(c => c.userId === userId);
+  }
+
+  async getAllWhatsappConnections(userId: string): Promise<WhatsappConnection[]> {
+    return Array.from(this.whatsappConnections.values())
+      .filter(c => c.userId === userId)
+      .sort((a, b) => (b.createdAt?.getTime() || 0) - (a.createdAt?.getTime() || 0));
   }
 
   async getConnectedAccountsCount(userId: string): Promise<number> {
