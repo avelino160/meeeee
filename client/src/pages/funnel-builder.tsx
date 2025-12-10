@@ -212,15 +212,15 @@ export default function FunnelBuilder() {
       <Sidebar />
       
       <div className="flex-1 flex flex-col overflow-hidden">
-        <header className="bg-card border-b border-border px-6 py-6">
-          <div className="flex items-center justify-between mb-2">
-            <div>
-              <h2 className="text-2xl font-bold text-foreground" data-testid="text-page-title">Funis de venda</h2>
-              <p className="text-sm text-muted-foreground mt-1">
+        <header className="bg-card border-b border-border px-4 sm:px-6 py-4 sm:py-6">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 mb-2">
+            <div className="pl-12 sm:pl-0">
+              <h2 className="text-xl sm:text-2xl font-bold text-foreground" data-testid="text-page-title">Funis de venda</h2>
+              <p className="text-xs sm:text-sm text-muted-foreground mt-1 hidden sm:block">
                 Crie fluxos de mensagens automatizados para aumentar suas conversões
               </p>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap w-full sm:w-auto">
               <input
                 ref={fileInputRef}
                 type="file"
@@ -231,35 +231,41 @@ export default function FunnelBuilder() {
               />
               <Button 
                 variant="outline"
+                size="sm"
                 onClick={() => fileInputRef.current?.click()}
                 disabled={importMutation.isPending}
                 data-testid="button-import-funnels"
+                className="flex-1 sm:flex-initial"
               >
-                <Upload className="h-4 w-4 mr-2" />
-                {importMutation.isPending ? 'Importando...' : 'Importar'}
+                <Upload className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">{importMutation.isPending ? 'Importando...' : 'Importar'}</span>
               </Button>
               <Button 
                 variant="outline"
+                size="sm"
                 onClick={handleExportFunnels}
                 disabled={!funnels || funnels.length === 0}
                 data-testid="button-export-funnels"
+                className="flex-1 sm:flex-initial"
               >
-                <Download className="h-4 w-4 mr-2" />
-                Exportar
+                <Download className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">Exportar</span>
               </Button>
               <Button 
+                size="sm"
                 onClick={() => setIsCreateDialogOpen(true)}
-                className="bg-purple-600 hover:bg-purple-700 text-white font-semibold"
+                className="bg-purple-600 hover:bg-purple-700 text-white font-semibold flex-1 sm:flex-initial"
                 data-testid="button-create-funnel"
               >
-                <Plus className="h-4 w-4 mr-2" />
-                Novo Funil
+                <Plus className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">Novo Funil</span>
+                <span className="sm:hidden">Novo</span>
               </Button>
             </div>
           </div>
         </header>
 
-        <main className="flex-1 overflow-y-auto p-6">
+        <main className="flex-1 overflow-y-auto p-3 sm:p-6">
           {isLoading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {[1, 2, 3].map((i) => (

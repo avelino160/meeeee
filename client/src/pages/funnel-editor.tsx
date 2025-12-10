@@ -231,9 +231,9 @@ export default function FunnelEditor() {
       
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Top Header */}
-        <header className="bg-[#252525] border-b border-[#333] px-6 py-4">
+        <header className="bg-[#252525] border-b border-[#333] px-3 sm:px-6 py-3 sm:py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2 sm:space-x-4">
               <Button
                 variant="ghost"
                 size="icon"
@@ -244,32 +244,35 @@ export default function FunnelEditor() {
                 <ArrowLeft className="h-5 w-5" />
               </Button>
               <div>
-                <h2 className="text-xl font-semibold text-white" data-testid="text-page-title">
+                <h2 className="text-base sm:text-xl font-semibold text-white" data-testid="text-page-title">
                   Editor de Funil
                 </h2>
-                <p className="text-sm text-gray-400">
+                <p className="text-xs sm:text-sm text-gray-400 hidden sm:block">
                   Construa seu fluxo de mensagens automatizadas
                 </p>
               </div>
             </div>
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2 sm:space-x-4">
               <Button 
                 variant="outline"
+                size="sm"
                 onClick={handlePreviewFunnel}
                 className="border-gray-600 text-gray-300 hover:bg-gray-800"
                 data-testid="button-preview-funnel"
               >
-                <Eye className="h-4 w-4 mr-2" />
-                Visualizar
+                <Eye className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">Visualizar</span>
               </Button>
               <Button 
+                size="sm"
                 onClick={handleSaveFunnel}
                 disabled={saveFunnelMutation.isPending}
                 className="bg-purple-600 hover:bg-purple-700 text-white"
                 data-testid="button-save-funnel"
               >
-                <Save className="h-4 w-4 mr-2" />
-                {saveFunnelMutation.isPending ? "Salvando..." : "Salvar Funil"}
+                <Save className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">{saveFunnelMutation.isPending ? "Salvando..." : "Salvar Funil"}</span>
+                <span className="sm:hidden">{saveFunnelMutation.isPending ? "..." : "Salvar"}</span>
               </Button>
             </div>
           </div>
@@ -278,7 +281,7 @@ export default function FunnelEditor() {
         {/* Main Content */}
         <div className="flex-1 flex">
           {/* Left Toolbox */}
-          <div className="w-64 bg-[#252525] border-r border-[#333] p-4 overflow-y-auto">
+          <div className="hidden md:block w-48 lg:w-64 bg-[#252525] border-r border-[#333] p-3 lg:p-4 overflow-y-auto">
             <div className="space-y-6">
               {/* Message Types */}
               <div>
@@ -410,7 +413,7 @@ export default function FunnelEditor() {
 
           {/* Right Sidebar - Node Editor */}
           {selectedNode && (
-            <div className="w-80 bg-[#252525] border-l border-[#333] p-4 overflow-y-auto">
+            <div className="w-full md:w-72 lg:w-80 fixed md:relative bottom-0 left-0 right-0 md:bottom-auto md:left-auto md:right-auto max-h-[50vh] md:max-h-full bg-[#252525] border-t md:border-t-0 md:border-l border-[#333] p-3 lg:p-4 overflow-y-auto z-20">
               <div className="space-y-4">
                 <div>
                   <h3 className="text-lg font-semibold text-white mb-2">
