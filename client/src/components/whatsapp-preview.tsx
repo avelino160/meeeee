@@ -66,19 +66,52 @@ export default function WhatsAppPreview({
 
     const sortedNodes = getExecutionOrder(nodes, edges);
     
+    // Placeholder texts that should not be shown
+    const placeholderTexts = [
+      'Clique para editar esta mensagem...',
+      'Configurar este nó...',
+      'Digite sua mensagem aqui...',
+      'Aguardar 5 minutos',
+      'Se condição for verdadeira...',
+      'Qual é sua pergunta?',
+      'Adicionar tag ao contato',
+      'Verificar condição',
+    ];
+    
     for (const node of sortedNodes) {
+      const nodeType = (node.data as any)?.nodeType || node.type;
       const delay = node.data?.delayMinutes;
-      if (delay && delay > 0) {
-        await new Promise(resolve => setTimeout(resolve, Math.min(delay * 200, 3000)));
-      } else {
-        await new Promise(resolve => setTimeout(resolve, 1200));
+      
+      // Delay nodes just wait, don't show message
+      if (nodeType === 'delay') {
+        if (delay && delay > 0) {
+          await new Promise(resolve => setTimeout(resolve, Math.min(delay * 200, 3000)));
+        }
+        continue;
       }
+      
+      // Skip nodes without real content (just placeholders)
+      const content = node.data.content || "";
+      const isPlaceholder = placeholderTexts.some(p => content.includes(p)) || content.trim() === '';
+      
+      // Skip condition, tag, verify nodes - they are logic, not messages
+      if (['condition', 'tag', 'verify', 'question'].includes(nodeType) && isPlaceholder) {
+        await new Promise(resolve => setTimeout(resolve, 500));
+        continue;
+      }
+      
+      // Skip message nodes without content
+      if (isPlaceholder && !node.data.mediaUrl) {
+        continue;
+      }
+
+      await new Promise(resolve => setTimeout(resolve, 1200));
 
       const botMessage: Message = {
         id: node.id,
         type: "bot",
-        content: node.data.content || "",
-        mediaType: node.type,
+        content: isPlaceholder ? "" : content,
+        mediaType: nodeType,
         mediaUrl: node.data.mediaUrl,
         timestamp: new Date(),
       };
