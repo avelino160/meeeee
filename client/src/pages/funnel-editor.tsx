@@ -757,15 +757,17 @@ export default function FunnelEditor() {
                 <Separator className="bg-gray-700" />
 
                 <div className="space-y-2">
-                  <Button
-                    variant="outline"
-                    className="w-full border-red-600 text-red-400 hover:bg-red-900/50"
-                    onClick={deleteNode}
-                    data-testid="button-delete-node"
-                  >
-                    <X className="h-4 w-4 mr-2" />
-                    Excluir Elemento
-                  </Button>
+                  {selectedNode.id !== 'start' && selectedNode.type !== 'trigger' && (
+                    <Button
+                      variant="outline"
+                      className="w-full border-red-600 text-red-400 hover:bg-red-900/50"
+                      onClick={deleteNode}
+                      data-testid="button-delete-node"
+                    >
+                      <X className="h-4 w-4 mr-2" />
+                      Excluir Elemento
+                    </Button>
+                  )}
                   <Button
                     variant="outline"
                     className="w-full border-gray-600 text-gray-300 hover:bg-gray-800"
