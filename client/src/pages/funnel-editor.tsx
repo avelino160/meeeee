@@ -681,56 +681,25 @@ export default function FunnelEditor() {
                   </div>
                 )}
 
-                {/* Trigger Node - Multiple Phrases */}
+                {/* Trigger Node - Single Phrase */}
                 {selectedNode.type === 'trigger' && (
                   <div className="space-y-3">
                     <div>
                       <Label className="text-gray-300">
-                        Frases Gatilho (até 10)
+                        Frase Gatilho
                       </Label>
                       <p className="text-xs text-gray-500 mt-1 mb-3">
-                        Palavras ou frases que iniciam o funil
+                        Palavra ou frase que inicia o funil
                       </p>
-                      <div className="space-y-2">
-                        {triggerPhrases.map((phrase, index) => (
-                          <div key={index} className="flex gap-2">
-                            <Input
-                              value={phrase}
-                              onChange={(e) => {
-                                const newPhrases = [...triggerPhrases];
-                                newPhrases[index] = e.target.value;
-                                setTriggerPhrases(newPhrases);
-                              }}
-                              placeholder={`Frase ${index + 1}`}
-                              className="bg-[#1a1a1a] border-gray-700 text-white flex-1"
-                              data-testid={`input-trigger-phrase-${index}`}
-                            />
-                            <Button
-                              variant="outline"
-                              size="icon"
-                              onClick={() => {
-                                const newPhrases = triggerPhrases.filter((_, i) => i !== index);
-                                setTriggerPhrases(newPhrases);
-                              }}
-                              className="border-gray-600 text-gray-300 hover:bg-red-900"
-                              data-testid={`button-remove-phrase-${index}`}
-                            >
-                              <X className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        ))}
-                        {triggerPhrases.length < 10 && (
-                          <Button
-                            variant="outline"
-                            onClick={() => setTriggerPhrases([...triggerPhrases, ''])}
-                            className="w-full border-gray-600 text-gray-300 hover:bg-gray-800"
-                            data-testid="button-add-trigger-phrase"
-                          >
-                            <Plus className="h-4 w-4 mr-2" />
-                            Adicionar Frase
-                          </Button>
-                        )}
-                      </div>
+                      <Input
+                        value={triggerPhrases[0] || ''}
+                        onChange={(e) => {
+                          setTriggerPhrases([e.target.value]);
+                        }}
+                        placeholder="Digite a frase gatilho..."
+                        className="bg-[#1a1a1a] border-gray-700 text-white"
+                        data-testid="input-trigger-phrase"
+                      />
                     </div>
                   </div>
                 )}
