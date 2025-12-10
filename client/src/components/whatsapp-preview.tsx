@@ -181,30 +181,37 @@ export default function WhatsAppPreview({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent 
-        className="max-w-[320px] h-[580px] p-0 bg-black border-none overflow-hidden rounded-[35px]"
+        className="max-w-[320px] h-[580px] p-0 bg-black border-none overflow-hidden rounded-[35px] flex flex-col"
         style={{ 
           boxShadow: '0 0 0 8px #1a1a1a, 0 20px 40px -10px rgba(0, 0, 0, 0.6)' 
         }}
       >
-        {/* iPhone Notch */}
-        <div className="absolute top-0 left-0 right-0 h-8 bg-[#111b21] z-50 flex items-center justify-between px-4">
-          <span className="text-white text-[10px] font-semibold">9:41</span>
-          <div className="w-16 h-4 bg-black rounded-b-xl absolute left-1/2 -translate-x-1/2 top-0"></div>
-          <div className="flex items-center gap-1">
-            <svg width="14" height="9" viewBox="0 0 17 11" fill="white">
-              <rect x="0" y="2" width="4" height="7" rx="0.8"/>
-              <rect x="5.5" y="0.5" width="4" height="10" rx="0.8"/>
-              <rect x="11" y="0" width="4" height="11" rx="0.8"/>
-            </svg>
-            <svg width="12" height="9" viewBox="0 0 15 11">
-              <path d="M7.5 0C3.4 0 0 2.5 0 5.5s3.4 5.5 7.5 5.5 7.5-2.5 7.5-5.5S11.6 0 7.5 0zm0 9.5c-3.1 0-5.5-1.7-5.5-3.7s2.4-3.7 5.5-3.7 5.5 1.7 5.5 3.7-2.4 3.7-5.5 3.7z" fill="white"/>
-            </svg>
-            <span className="text-white text-[10px] font-semibold">100%</span>
-          </div>
+        {/* Top bezel - iPhone frame */}
+        <div className="h-6 bg-black flex-shrink-0 relative">
+          {/* Dynamic Island / Notch */}
+          <div className="absolute left-1/2 -translate-x-1/2 top-1 w-20 h-4 bg-black rounded-full border border-gray-800"></div>
         </div>
 
-        {/* WhatsApp Header */}
-        <div className="mt-8 bg-[#202c33] px-3 py-2 flex items-center justify-between border-b border-[#2a3942]">
+        {/* Screen content wrapper */}
+        <div className="flex-1 flex flex-col overflow-hidden mx-1 rounded-t-lg">
+          {/* Status bar */}
+          <div className="h-6 bg-[#111b21] flex items-center justify-between px-3 flex-shrink-0">
+            <span className="text-white text-[10px] font-semibold">9:41</span>
+            <div className="flex items-center gap-1">
+              <svg width="14" height="9" viewBox="0 0 17 11" fill="white">
+                <rect x="0" y="2" width="4" height="7" rx="0.8"/>
+                <rect x="5.5" y="0.5" width="4" height="10" rx="0.8"/>
+                <rect x="11" y="0" width="4" height="11" rx="0.8"/>
+              </svg>
+              <svg width="12" height="9" viewBox="0 0 15 11">
+                <path d="M7.5 0C3.4 0 0 2.5 0 5.5s3.4 5.5 7.5 5.5 7.5-2.5 7.5-5.5S11.6 0 7.5 0zm0 9.5c-3.1 0-5.5-1.7-5.5-3.7s2.4-3.7 5.5-3.7 5.5 1.7 5.5 3.7-2.4 3.7-5.5 3.7z" fill="white"/>
+              </svg>
+              <span className="text-white text-[10px] font-semibold">100%</span>
+            </div>
+          </div>
+
+          {/* WhatsApp Header */}
+          <div className="bg-[#202c33] px-3 py-2 flex items-center justify-between border-b border-[#2a3942] flex-shrink-0">
           <div className="flex items-center gap-2 flex-1">
             <button 
               onClick={() => onOpenChange(false)}
@@ -302,31 +309,35 @@ export default function WhatsAppPreview({
           )}
         </div>
 
-        {/* Input Area */}
-        <div className="bg-[#202c33] px-2 py-1.5 border-t border-[#2a3942]">
-          <div className="flex items-center gap-1.5">
-            <div className="flex-1 flex items-center gap-2 bg-[#2a3942] rounded-2xl px-3 py-1.5">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8696a0" strokeWidth="2">
-                <circle cx="12" cy="12" r="10"/>
-                <path d="M8 14s1.5 2 4 2 4-2 4-2"/>
-                <line x1="9" y1="9" x2="9.01" y2="9"/>
-                <line x1="15" y1="9" x2="15.01" y2="9"/>
-              </svg>
-              <span className="text-xs text-[#8696a0] flex-1">Mensagem</span>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8696a0" strokeWidth="2">
-                <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/>
-              </svg>
-            </div>
-            <div className="w-8 h-8 rounded-full bg-[#00a884] flex items-center justify-center flex-shrink-0">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="white">
-                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-              </svg>
+          {/* Input Area */}
+          <div className="bg-[#202c33] px-2 py-1.5 border-t border-[#2a3942] flex-shrink-0 rounded-b-lg">
+            <div className="flex items-center gap-1.5">
+              <div className="flex-1 flex items-center gap-2 bg-[#2a3942] rounded-2xl px-3 py-1.5">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8696a0" strokeWidth="2">
+                  <circle cx="12" cy="12" r="10"/>
+                  <path d="M8 14s1.5 2 4 2 4-2 4-2"/>
+                  <line x1="9" y1="9" x2="9.01" y2="9"/>
+                  <line x1="15" y1="9" x2="15.01" y2="9"/>
+                </svg>
+                <span className="text-xs text-[#8696a0] flex-1">Mensagem</span>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8696a0" strokeWidth="2">
+                  <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/>
+                </svg>
+              </div>
+              <div className="w-8 h-8 rounded-full bg-[#00a884] flex items-center justify-center flex-shrink-0">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="white">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                </svg>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* iPhone Home Indicator */}
-        <div className="absolute bottom-1.5 left-1/2 -translate-x-1/2 w-24 h-0.5 bg-white/20 rounded-full"></div>
+        {/* Bottom bezel - iPhone frame */}
+        <div className="h-8 bg-black flex-shrink-0 flex items-center justify-center">
+          {/* Home Indicator */}
+          <div className="w-28 h-1 bg-gray-600 rounded-full"></div>
+        </div>
       </DialogContent>
     </Dialog>
   );
