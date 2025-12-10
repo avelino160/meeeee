@@ -118,6 +118,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // 📱 Listar todas as conexões WhatsApp do usuário
+  app.get('/api/whatsapp/connections', async (req, res) => {
+    try {
+      const userId = DEFAULT_USER_ID;
+      const connections = await storage.getAllWhatsappConnections(userId);
+      res.json(connections);
+    } catch (error) {
+      console.error("Error getting WhatsApp connections:", error);
+      res.status(500).json({ message: "Failed to get WhatsApp connections" });
+    }
+  });
+
+  // ✏️ Atualizar nome da conexão WhatsApp
+  app.patch('/api/whatsapp/connections/:id', async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { name } = req.body;
+      
+      const updated = await storage.updateWhatsappConnection(id, { name });
+      if (!updated) {
+        return res.status(404).json({ message: "Connection not found" });
+      }
+      res.json(updated);
+    } catch (error) {
+      console.error("Error updating WhatsApp connection:", error);
+      res.status(500).json({ message: "Failed to update WhatsApp connection" });
+    }
+  });
+
   app.post('/api/whatsapp/qr', async (req, res) => {
     // 🛡️ GUARD: Bloquear tentativas em ambientes de datacenter
     if (isDatacenterEnvironment(req)) {
