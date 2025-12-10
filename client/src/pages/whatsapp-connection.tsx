@@ -176,34 +176,29 @@ export default function WhatsAppConnection() {
 
             {/* Status Card */}
             <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Zap className="h-5 w-5 mr-2 text-primary" />
-                  Status da Conexão
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center justify-between">
+              <CardHeader className="pb-4">
+                <div className="flex items-center justify-between flex-wrap gap-4">
                   <div className="flex items-center space-x-4">
+                    <Zap className="h-5 w-5 text-primary" />
+                    <span className="font-semibold">Status da Conexão</span>
                     {whatsappStatus?.connected ? (
-                      <CheckCircle className="h-8 w-8 text-green-500" />
+                      <CheckCircle className="h-5 w-5 text-green-500" />
                     ) : (
-                      <XCircle className="h-8 w-8 text-red-500" />
+                      <XCircle className="h-5 w-5 text-red-500" />
                     )}
-                    <div>
-                      <p className="font-medium">
-                        {whatsappStatus?.connected ? "WhatsApp Conectado" : "WhatsApp Desconectado"}
-                      </p>
-                      {whatsappStatus?.phoneNumber && (
-                        <p className="text-sm text-muted-foreground">
-                          Número: {whatsappStatus.phoneNumber}
-                        </p>
-                      )}
-                    </div>
+                    <span className="font-medium">
+                      {whatsappStatus?.connected ? "Conectado" : "Desconectado"}
+                    </span>
+                    {whatsappStatus?.phoneNumber && (
+                      <span className="text-sm text-muted-foreground">
+                        ({whatsappStatus.phoneNumber})
+                      </span>
+                    )}
                   </div>
                   {whatsappStatus?.connected && (
                     <Button
                       variant="destructive"
+                      size="sm"
                       onClick={() => disconnectMutation.mutate()}
                       disabled={disconnectMutation.isPending}
                       data-testid="button-disconnect"
@@ -213,7 +208,7 @@ export default function WhatsAppConnection() {
                     </Button>
                   )}
                 </div>
-              </CardContent>
+              </CardHeader>
             </Card>
 
             {/* Connection Methods */}
