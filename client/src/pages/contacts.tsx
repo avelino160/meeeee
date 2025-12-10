@@ -26,8 +26,10 @@ import {
   Mail,
   User,
   Upload,
-  Download
+  Download,
+  Check
 } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface Contact {
   id: string;
@@ -48,6 +50,8 @@ export default function Contacts() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [tagFilter, setTagFilter] = useState<string>("all");
   const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [showExportDialog, setShowExportDialog] = useState(false);
+  const [selectedContactsForExport, setSelectedContactsForExport] = useState<string[]>([]);
   const [editingContact, setEditingContact] = useState<Contact | null>(null);
   
   // Form state
@@ -234,6 +238,74 @@ export default function Contacts() {
     return phone.slice(-2);
   };
 
+  const handleOpenExportDialog = () => {
+    if (!contacts || contacts.length === 0) {
+      toast({
+        title: "Nenhum contato",
+        description: "Não há contatos para exportar.",
+        variant: "destructive",
+      });
+      return;
+    }
+    setSelectedContactsForExport(contacts.map((c: Contact) => c.id));
+    setShowExportDialog(true);
+  };
+
+  const handleToggleContactExport = (contactId: string) => {
+    setSelectedContactsForExport(prev => 
+      prev.includes(contactId) 
+        ? prev.filter(id => id !== contactId)
+        : [...prev, contactId]
+    );
+  };
+
+  const handleSelectAllContacts = () => {
+    if (contacts) {
+      if (selectedContactsForExport.length === contacts.length) {
+        setSelectedContactsForExport([]);
+      } else {
+        setSelectedContactsForExport(contacts.map((c: Contact) => c.id));
+      }
+    }
+  };
+
+  const handleExportSelectedContacts = () => {
+    if (selectedContactsForExport.length === 0) {
+      toast({
+        title: "Selecione contatos",
+        description: "Selecione pelo menos um contato para exportar.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const selectedContacts = contacts?.filter((c: Contact) => selectedContactsForExport.includes(c.id)) || [];
+    const exportData = selectedContacts.map((contact: Contact) => ({
+      phoneNumber: contact.phoneNumber,
+      name: contact.name,
+      email: contact.email,
+      tags: contact.tags,
+      isActive: contact.isActive,
+    }));
+
+    const dataStr = JSON.stringify(exportData, null, 2);
+    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(dataBlob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `contatos-ranzap-${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
+    toast({
+      title: "Contatos exportados!",
+      description: `${selectedContacts.length} contato(s) exportado(s) com sucesso.`,
+    });
+    setShowExportDialog(false);
+  };
+
   return (
     <div className="flex h-screen bg-background">
       <Sidebar />
@@ -251,7 +323,14 @@ export default function Contacts() {
                 <Upload className="h-4 w-4 sm:mr-2" />
                 <span className="hidden sm:inline">Importar</span>
               </Button>
-              <Button variant="outline" size="sm" className="hidden sm:flex" data-testid="button-export-contacts">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="hidden sm:flex" 
+                onClick={handleOpenExportDialog}
+                disabled={!contacts || contacts.length === 0}
+                data-testid="button-export-contacts"
+              >
                 <Download className="h-4 w-4 sm:mr-2" />
                 <span className="hidden sm:inline">Exportar</span>
               </Button>
@@ -578,6 +657,66 @@ export default function Contacts() {
                 {updateContactMutation.isPending ? "Salvando..." : "Salvar Alterações"}
               </Button>
             </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showExportDialog} onOpenChange={setShowExportDialog}>
+        <DialogContent className="sm:max-w-md" data-testid="dialog-export-contacts">
+          <DialogHeader>
+            <DialogTitle>Exportar Contatos</DialogTitle>
+            <DialogDescription>
+              Selecione os contatos que deseja exportar
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="flex items-center space-x-2 pb-2 border-b">
+              <Checkbox
+                id="select-all-contacts"
+                checked={contacts ? selectedContactsForExport.length === contacts.length : false}
+                onCheckedChange={handleSelectAllContacts}
+                data-testid="checkbox-select-all-contacts"
+              />
+              <label htmlFor="select-all-contacts" className="text-sm font-medium cursor-pointer">
+                Selecionar todos ({contacts?.length || 0})
+              </label>
+            </div>
+            <div className="max-h-60 overflow-y-auto space-y-2">
+              {contacts?.map((contact: Contact) => (
+                <div key={contact.id} className="flex items-center space-x-2 p-2 rounded hover:bg-muted">
+                  <Checkbox
+                    id={`export-contact-${contact.id}`}
+                    checked={selectedContactsForExport.includes(contact.id)}
+                    onCheckedChange={() => handleToggleContactExport(contact.id)}
+                    data-testid={`checkbox-export-contact-${contact.id}`}
+                  />
+                  <label htmlFor={`export-contact-${contact.id}`} className="flex-1 text-sm cursor-pointer">
+                    <span className="font-medium">{contact.name || 'Sem nome'}</span>
+                    <span className="text-muted-foreground ml-2 text-xs">{contact.phoneNumber}</span>
+                  </label>
+                  <span className={`text-xs px-2 py-0.5 rounded ${contact.isActive ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
+                    {contact.isActive ? 'Ativo' : 'Inativo'}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="flex justify-end space-x-2">
+            <Button
+              variant="outline"
+              onClick={() => setShowExportDialog(false)}
+              data-testid="button-cancel-export-contacts"
+            >
+              Cancelar
+            </Button>
+            <Button
+              onClick={handleExportSelectedContacts}
+              disabled={selectedContactsForExport.length === 0}
+              data-testid="button-confirm-export-contacts"
+            >
+              <Download className="h-4 w-4 mr-2" />
+              Exportar ({selectedContactsForExport.length})
+            </Button>
           </div>
         </DialogContent>
       </Dialog>

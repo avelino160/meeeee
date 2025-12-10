@@ -14,8 +14,10 @@ import {
   Edit,
   MessageSquare,
   Upload,
-  Download
+  Download,
+  Check
 } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -33,6 +35,8 @@ export default function FunnelBuilder() {
   const queryClient = useQueryClient();
   const [, setLocation] = useLocation();
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
+  const [selectedFunnelsForExport, setSelectedFunnelsForExport] = useState<string[]>([]);
   const [newFunnelName, setNewFunnelName] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -157,7 +161,7 @@ export default function FunnelBuilder() {
     }
   };
 
-  const handleExportFunnels = () => {
+  const handleOpenExportDialog = () => {
     if (!funnels || funnels.length === 0) {
       toast({
         title: "Nenhum funil",
@@ -166,8 +170,40 @@ export default function FunnelBuilder() {
       });
       return;
     }
+    setSelectedFunnelsForExport(funnels.map(f => f.id));
+    setIsExportDialogOpen(true);
+  };
 
-    const exportData = funnels.map(funnel => ({
+  const handleToggleFunnelExport = (funnelId: string) => {
+    setSelectedFunnelsForExport(prev => 
+      prev.includes(funnelId) 
+        ? prev.filter(id => id !== funnelId)
+        : [...prev, funnelId]
+    );
+  };
+
+  const handleSelectAllFunnels = () => {
+    if (funnels) {
+      if (selectedFunnelsForExport.length === funnels.length) {
+        setSelectedFunnelsForExport([]);
+      } else {
+        setSelectedFunnelsForExport(funnels.map(f => f.id));
+      }
+    }
+  };
+
+  const handleExportSelectedFunnels = () => {
+    if (selectedFunnelsForExport.length === 0) {
+      toast({
+        title: "Selecione funis",
+        description: "Selecione pelo menos um funil para exportar.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const selectedFunnels = funnels?.filter(f => selectedFunnelsForExport.includes(f.id)) || [];
+    const exportData = selectedFunnels.map(funnel => ({
       name: funnel.name,
       triggerPhrases: funnel.triggerPhrases,
       status: funnel.status,
@@ -187,8 +223,9 @@ export default function FunnelBuilder() {
 
     toast({
       title: "Funil exportado!",
-      description: `${funnels.length} funil foi exportado com sucesso.`,
+      description: `${selectedFunnels.length} funil(s) exportado(s) com sucesso.`,
     });
+    setIsExportDialogOpen(false);
   };
 
   const handleCreateFunnel = () => {
@@ -243,7 +280,7 @@ export default function FunnelBuilder() {
               <Button 
                 variant="outline"
                 size="sm"
-                onClick={handleExportFunnels}
+                onClick={handleOpenExportDialog}
                 disabled={!funnels || funnels.length === 0}
                 data-testid="button-export-funnels"
                 className="flex-1 sm:flex-initial"
@@ -406,6 +443,66 @@ export default function FunnelBuilder() {
               data-testid="button-confirm-create"
             >
               {createFunnelMutation.isPending ? "Criando..." : "Criar Funil"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isExportDialogOpen} onOpenChange={setIsExportDialogOpen}>
+        <DialogContent className="sm:max-w-md" data-testid="dialog-export-funnels">
+          <DialogHeader>
+            <DialogTitle>Exportar Funis</DialogTitle>
+            <DialogDescription>
+              Selecione os funis que deseja exportar
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="flex items-center space-x-2 pb-2 border-b">
+              <Checkbox
+                id="select-all-funnels"
+                checked={funnels ? selectedFunnelsForExport.length === funnels.length : false}
+                onCheckedChange={handleSelectAllFunnels}
+                data-testid="checkbox-select-all-funnels"
+              />
+              <label htmlFor="select-all-funnels" className="text-sm font-medium cursor-pointer">
+                Selecionar todos ({funnels?.length || 0})
+              </label>
+            </div>
+            <div className="max-h-60 overflow-y-auto space-y-2">
+              {funnels?.map((funnel) => (
+                <div key={funnel.id} className="flex items-center space-x-2 p-2 rounded hover:bg-muted">
+                  <Checkbox
+                    id={`export-funnel-${funnel.id}`}
+                    checked={selectedFunnelsForExport.includes(funnel.id)}
+                    onCheckedChange={() => handleToggleFunnelExport(funnel.id)}
+                    data-testid={`checkbox-export-funnel-${funnel.id}`}
+                  />
+                  <label htmlFor={`export-funnel-${funnel.id}`} className="flex-1 text-sm cursor-pointer">
+                    {funnel.name}
+                  </label>
+                  <span className={`text-xs px-2 py-0.5 rounded ${funnel.status === 'active' ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
+                    {funnel.status === 'active' ? 'Ativo' : 'Inativo'}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setIsExportDialogOpen(false)}
+              data-testid="button-cancel-export"
+            >
+              Cancelar
+            </Button>
+            <Button
+              onClick={handleExportSelectedFunnels}
+              disabled={selectedFunnelsForExport.length === 0}
+              className="bg-purple-600 hover:bg-purple-700 text-white"
+              data-testid="button-confirm-export"
+            >
+              <Download className="h-4 w-4 mr-2" />
+              Exportar ({selectedFunnelsForExport.length})
             </Button>
           </DialogFooter>
         </DialogContent>
