@@ -12,13 +12,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import type { WhatsAppStatus } from "@shared/api-types";
-import {
-  QrCode,
-  CheckCircle,
-  XCircle,
-  Zap,
-  Crown,
-} from "lucide-react";
+import { QrCode, Crown } from "lucide-react";
 import { Link } from "wouter";
 
 export default function WhatsAppConnection() {
@@ -111,29 +105,6 @@ export default function WhatsAppConnection() {
                   </div>
                 </CardContent>
               )}
-            </Card>
-
-            {/* Status Card */}
-            <Card>
-              <CardHeader className="pb-4">
-                <div className="flex items-center space-x-4">
-                  <Zap className="h-5 w-5 text-primary" />
-                  <span className="font-semibold">Status da Conexão</span>
-                  {whatsappStatus?.connected ? (
-                    <CheckCircle className="h-5 w-5 text-green-500" />
-                  ) : (
-                    <XCircle className="h-5 w-5 text-red-500" />
-                  )}
-                  <span className="font-medium">
-                    {whatsappStatus?.connected ? "Conectado" : "Desconectado"}
-                  </span>
-                  {whatsappStatus?.phoneNumber && (
-                    <span className="text-sm text-muted-foreground">
-                      ({whatsappStatus.phoneNumber})
-                    </span>
-                  )}
-                </div>
-              </CardHeader>
             </Card>
 
             {/* Connection Methods */}
