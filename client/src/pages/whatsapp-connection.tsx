@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import Sidebar from "@/components/sidebar";
-import WhatsAppConnectionModal from "@/components/whatsapp-connection-modal";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -29,7 +28,6 @@ import { Link } from "wouter";
 export default function WhatsAppConnection() {
   const [qrImageUrl, setQrImageUrl] = useState<string>("");
   const [currentPlan] = useState("free"); // Simula o plano atual
-  const [showConnectionModal, setShowConnectionModal] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -127,7 +125,7 @@ export default function WhatsAppConnection() {
                 <p className="text-sm text-muted-foreground">Gerencie a conexão da sua conta WhatsApp</p>
               </div>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
               <div 
                 className={`w-3 h-3 rounded-full ${
                   whatsappStatus?.connected ? 'status-connected' : 'status-disconnected'
@@ -137,28 +135,6 @@ export default function WhatsAppConnection() {
               <Badge variant={whatsappStatus?.connected ? "default" : "secondary"}>
                 {whatsappStatus?.connected ? "Conectado" : "Desconectado"}
               </Badge>
-              {whatsappStatus?.connected ? (
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  onClick={() => disconnectMutation.mutate()}
-                  disabled={disconnectMutation.isPending}
-                  data-testid="button-disconnect"
-                >
-                  <LogOut className="h-4 w-4 mr-2" />
-                  {disconnectMutation.isPending ? "Desconectando..." : "Desconectar"}
-                </Button>
-              ) : (
-                <Button
-                  variant="default"
-                  size="sm"
-                  onClick={() => setShowConnectionModal(true)}
-                  data-testid="button-connect"
-                >
-                  <QrCode className="h-4 w-4 mr-2" />
-                  Conectar
-                </Button>
-              )}
             </div>
           </div>
         </header>
@@ -329,11 +305,6 @@ export default function WhatsAppConnection() {
           </div>
         </main>
       </div>
-
-      <WhatsAppConnectionModal 
-        open={showConnectionModal} 
-        onOpenChange={setShowConnectionModal} 
-      />
     </div>
   );
 }
