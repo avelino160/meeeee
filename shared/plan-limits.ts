@@ -1,4 +1,4 @@
-export type PlanType = "free" | "basic" | "pro" | "enterprise";
+export type PlanType = "basic" | "pro" | "enterprise";
 
 export interface PlanLimits {
   maxWhatsappAccounts: number;
@@ -11,15 +11,6 @@ export interface PlanLimits {
 }
 
 export const PLAN_LIMITS: Record<PlanType, PlanLimits> = {
-  free: {
-    maxWhatsappAccounts: 1,
-    maxMessagesPerHour: 50,
-    maxFunnels: 3,
-    maxContacts: 500,
-    hasAdvancedReports: false,
-    hasPrioritySupport: false,
-    hasDedicatedManager: false,
-  },
   basic: {
     maxWhatsappAccounts: 1,
     maxMessagesPerHour: 100,
