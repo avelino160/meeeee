@@ -11,6 +11,7 @@ import { Boom } from '@hapi/boom';
 import QRCode from 'qrcode';
 import pino from 'pino';
 import { storage } from '../storage';
+import { getPlanLimits, type PlanType } from '@shared/plan-limits';
 
 interface WhatsAppConnection {
   connected: boolean;
@@ -370,14 +371,32 @@ export class WhatsAppService {
   }
 
   // 🛡️ ANTI-BAN: Configurações de segurança
-  private messageQueue: Array<{ phoneNumber: string; message: string; resolve: (value: boolean) => void }> = [];
+  private messageQueue: Array<{ phoneNumber: string; message: string; userId: string; resolve: (value: boolean) => void }> = [];
   private isProcessingQueue = false;
   private messagesThisHour = 0;
   private hourlyResetTime = Date.now();
-  private readonly MAX_MESSAGES_PER_HOUR = 50; // Limite seguro
   private readonly MIN_DELAY_MS = 3000; // Mínimo 3 segundos entre mensagens
   private readonly MAX_DELAY_MS = 8000; // Máximo 8 segundos entre mensagens
   private readonly TYPING_DELAY_PER_CHAR = 50; // 50ms por caractere (simulando digitação)
+
+  // 📊 Obter limite de mensagens por hora do plano do usuário
+  private async getMaxMessagesPerHour(userId?: string): Promise<number> {
+    try {
+      const userIdToCheck = userId || this.currentUserId;
+      if (userIdToCheck) {
+        const user = await storage.getUser(userIdToCheck);
+        if (user) {
+          const planLimits = getPlanLimits(user.planType as PlanType);
+          return planLimits.maxMessagesPerHour;
+        }
+      }
+      // Fallback para limite básico se não houver usuário
+      return getPlanLimits('basic').maxMessagesPerHour;
+    } catch (error) {
+      console.error('Erro ao obter limite do plano:', error);
+      return 100; // Fallback seguro
+    }
+  }
 
   // 🎲 Gerar delay aleatório humanizado
   private getRandomDelay(): number {
@@ -402,9 +421,10 @@ export class WhatsAppService {
   }
 
   // 📤 ENVIAR MENSAGEM (com Anti-Ban)
-  async sendMessage(phoneNumber: string, message: string): Promise<boolean> {
+  async sendMessage(phoneNumber: string, message: string, userId?: string): Promise<boolean> {
     return new Promise((resolve) => {
-      this.messageQueue.push({ phoneNumber, message, resolve });
+      const userIdToUse = userId || this.currentUserId || 'default-user';
+      this.messageQueue.push({ phoneNumber, message, userId: userIdToUse, resolve });
       this.processQueue();
     });
   }
@@ -420,9 +440,16 @@ export class WhatsAppService {
     while (this.messageQueue.length > 0) {
       this.checkHourlyReset();
 
+      // Peek primeiro item para obter o userId
+      const peekItem = this.messageQueue[0];
+      if (!peekItem) break;
+
+      // Obter limite do plano do usuário usando o userId do item
+      const maxMessagesPerHour = await this.getMaxMessagesPerHour(peekItem.userId);
+
       // Verificar limite por hora
-      if (this.messagesThisHour >= this.MAX_MESSAGES_PER_HOUR) {
-        console.log('⚠️ Limite de mensagens por hora atingido. Aguardando...');
+      if (this.messagesThisHour >= maxMessagesPerHour) {
+        console.log(`⚠️ Limite de mensagens por hora atingido (${maxMessagesPerHour}). Aguardando...`);
         const waitTime = 3600000 - (Date.now() - this.hourlyResetTime);
         await new Promise(r => setTimeout(r, Math.min(waitTime, 60000))); // Esperar até 1 minuto
         continue;
@@ -452,7 +479,7 @@ export class WhatsAppService {
         await this.sock.sendMessage(jid, { text: item.message });
         this.messagesThisHour++;
 
-        console.log(`✅ [Anti-Ban] Mensagem ${this.messagesThisHour}/${this.MAX_MESSAGES_PER_HOUR}/h enviada para ${item.phoneNumber}`);
+        console.log(`✅ [Anti-Ban] Mensagem ${this.messagesThisHour}/${maxMessagesPerHour}/h enviada para ${item.phoneNumber}`);
         item.resolve(true);
 
         // ⏳ Delay aleatório antes da próxima mensagem
@@ -475,11 +502,12 @@ export class WhatsAppService {
   }
 
   // 📊 Obter estatísticas anti-ban
-  getAntiBanStats(): { messagesThisHour: number; maxPerHour: number; queueSize: number } {
+  async getAntiBanStats(): Promise<{ messagesThisHour: number; maxPerHour: number; queueSize: number }> {
     this.checkHourlyReset();
+    const maxPerHour = await this.getMaxMessagesPerHour();
     return {
       messagesThisHour: this.messagesThisHour,
-      maxPerHour: this.MAX_MESSAGES_PER_HOUR,
+      maxPerHour,
       queueSize: this.messageQueue.length,
     };
   }

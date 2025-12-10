@@ -110,7 +110,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // 🛡️ Anti-ban stats endpoint
   app.get('/api/whatsapp/anti-ban-stats', async (req, res) => {
     try {
-      const stats = whatsappService.getAntiBanStats();
+      const stats = await whatsappService.getAntiBanStats();
       res.json(stats);
     } catch (error) {
       console.error("Error getting anti-ban stats:", error);
