@@ -90,7 +90,7 @@ export function checkLimitForCreation(
   if (wouldExceed) {
     return {
       allowed: false,
-      reason: `Limite de ${resourceType} atingido (${current}/${limit})`,
+      reason: `Você excedeu o seu limite de ${resourceType} (${current}/${limit}). Faça upgrade do seu plano para continuar.`,
       limit,
       current,
     };
