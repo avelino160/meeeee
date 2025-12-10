@@ -190,6 +190,23 @@ export default function FunnelEditor() {
     setSelectedNode({ ...selectedNode, data: { ...selectedNode.data, mediaUrl } });
   };
 
+  const deleteNode = () => {
+    if (!selectedNode) return;
+    
+    const updatedNodes = funnelData.nodes.filter(node => node.id !== selectedNode.id);
+    const updatedEdges = funnelData.edges.filter(
+      edge => edge.source !== selectedNode.id && edge.target !== selectedNode.id
+    );
+    
+    setFunnelData({ nodes: updatedNodes, edges: updatedEdges });
+    setSelectedNode(null);
+    
+    toast({
+      title: "Elemento Removido",
+      description: "O elemento foi excluído do funil",
+    });
+  };
+
   const onDragStart = (event: React.DragEvent, nodeType: string) => {
     event.dataTransfer.setData('application/reactflow', nodeType);
     event.dataTransfer.effectAllowed = 'move';
@@ -739,14 +756,25 @@ export default function FunnelEditor() {
 
                 <Separator className="bg-gray-700" />
 
-                <Button
-                  variant="outline"
-                  className="w-full border-gray-600 text-gray-300 hover:bg-gray-800"
-                  onClick={() => setSelectedNode(null)}
-                  data-testid="button-close-editor"
-                >
-                  Fechar
-                </Button>
+                <div className="space-y-2">
+                  <Button
+                    variant="outline"
+                    className="w-full border-red-600 text-red-400 hover:bg-red-900/50"
+                    onClick={deleteNode}
+                    data-testid="button-delete-node"
+                  >
+                    <X className="h-4 w-4 mr-2" />
+                    Excluir Elemento
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="w-full border-gray-600 text-gray-300 hover:bg-gray-800"
+                    onClick={() => setSelectedNode(null)}
+                    data-testid="button-close-editor"
+                  >
+                    Fechar
+                  </Button>
+                </div>
               </div>
             </div>
           )}
