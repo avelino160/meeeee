@@ -691,15 +691,28 @@ export default function FunnelEditor() {
                       <p className="text-xs text-gray-500 mt-1 mb-3">
                         Palavra ou frase que inicia o funil
                       </p>
-                      <Input
-                        value={triggerPhrases[0] || ''}
-                        onChange={(e) => {
-                          setTriggerPhrases([e.target.value]);
-                        }}
-                        placeholder="Digite a frase gatilho..."
-                        className="bg-[#1a1a1a] border-gray-700 text-white"
-                        data-testid="input-trigger-phrase"
-                      />
+                      <div className="flex gap-2">
+                        <Input
+                          value={triggerPhrases[0] || ''}
+                          onChange={(e) => {
+                            setTriggerPhrases([e.target.value]);
+                          }}
+                          placeholder="Digite a frase gatilho..."
+                          className="bg-[#1a1a1a] border-gray-700 text-white flex-1"
+                          data-testid="input-trigger-phrase"
+                        />
+                        {triggerPhrases[0] && (
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            onClick={() => setTriggerPhrases([])}
+                            className="border-gray-600 text-gray-300 hover:bg-red-900"
+                            data-testid="button-clear-trigger-phrase"
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </div>
                     </div>
                   </div>
                 )}
