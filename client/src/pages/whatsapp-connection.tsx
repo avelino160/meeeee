@@ -80,7 +80,7 @@ export default function WhatsAppConnection() {
                     <Crown className="h-5 w-5 mr-2 text-primary" />
                     Contas WhatsApp
                   </span>
-                  <Badge variant="outline">
+                  <Badge variant="outline" className="text-base px-3 py-1">
                     {connectedAccounts} de {maxAccounts} conectadas
                   </Badge>
                 </CardTitle>
