@@ -470,6 +470,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.post('/api/contacts/import', async (req, res) => {
+    try {
+      const userId = DEFAULT_USER_ID;
+      const { contacts } = req.body;
+
+      if (!contacts || !Array.isArray(contacts)) {
+        return res.status(400).json({ message: "Invalid contacts data" });
+      }
+
+      let imported = 0;
+      for (const contactData of contacts) {
+        try {
+          const limitCheck = await storage.checkContactLimit(userId);
+          if (!limitCheck.allowed) {
+            break;
+          }
+          
+          const contact = await storage.createContact({
+            userId,
+            phoneNumber: contactData.phoneNumber,
+            name: contactData.name || null,
+            email: contactData.email || null,
+            tags: contactData.tags || [],
+            isActive: contactData.isActive !== undefined ? contactData.isActive : true,
+          });
+          if (contact) imported++;
+        } catch (err) {
+          console.error("Error importing contact:", err);
+        }
+      }
+
+      res.json({ imported, total: contacts.length });
+    } catch (error) {
+      console.error("Error importing contacts:", error);
+      res.status(500).json({ message: "Failed to import contacts" });
+    }
+  });
+
   // Message routes
   app.get('/api/messages', async (req, res) => {
     try {

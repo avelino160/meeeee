@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
@@ -53,6 +53,7 @@ export default function Contacts() {
   const [showExportDialog, setShowExportDialog] = useState(false);
   const [selectedContactsForExport, setSelectedContactsForExport] = useState<string[]>([]);
   const [editingContact, setEditingContact] = useState<Contact | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
   // Form state
   const [formData, setFormData] = useState({
@@ -134,6 +135,55 @@ export default function Contacts() {
       });
     },
   });
+
+  const importMutation = useMutation({
+    mutationFn: async (contactsData: any[]) => {
+      const res = await apiRequest('POST', '/api/contacts/import', { contacts: contactsData });
+      return res.json();
+    },
+    onSuccess: (data: any) => {
+      toast({
+        title: "Contatos importados!",
+        description: `${data.imported} contato(s) importado(s) com sucesso.`,
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/contacts"] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Erro ao importar",
+        description: error.message || "Não foi possível importar os contatos. Verifique o formato do arquivo.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleFileImport = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const content = e.target?.result as string;
+        const jsonData = JSON.parse(content);
+        
+        const contactsData = Array.isArray(jsonData) ? jsonData : [jsonData];
+        
+        importMutation.mutate(contactsData);
+      } catch (error) {
+        toast({
+          title: "Arquivo inválido",
+          description: "O arquivo não está em formato JSON válido.",
+          variant: "destructive",
+        });
+      }
+    };
+    reader.readAsText(file);
+    
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
 
   const resetForm = () => {
     setFormData({
@@ -319,9 +369,24 @@ export default function Contacts() {
               <p className="text-xs sm:text-sm text-muted-foreground hidden sm:block">Gerencie sua lista de contatos</p>
             </div>
             <div className="flex space-x-2 w-full sm:w-auto">
-              <Button variant="outline" size="sm" className="hidden sm:flex" data-testid="button-import-contacts">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".json"
+                onChange={handleFileImport}
+                className="hidden"
+                data-testid="input-import-file"
+              />
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="hidden sm:flex" 
+                onClick={() => fileInputRef.current?.click()}
+                disabled={importMutation.isPending}
+                data-testid="button-import-contacts"
+              >
                 <Upload className="h-4 w-4 sm:mr-2" />
-                <span className="hidden sm:inline">Importar</span>
+                <span className="hidden sm:inline">{importMutation.isPending ? 'Importando...' : 'Importar'}</span>
               </Button>
               <Button 
                 variant="outline" 
