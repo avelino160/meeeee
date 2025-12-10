@@ -169,21 +169,10 @@ function FunnelCanvasInner({ data, onDataChange, onNodeSelect }: FunnelCanvasPro
 
   const onConnect = useCallback(
     (params: Connection) => {
-      const sourceNode = nodes.find(n => n.id === params.source);
-      const sourceNodeType = sourceNode?.data?.nodeType;
+      // Remove existing outgoing connection from source node (only 1 allowed)
+      const filteredEdges = edges.filter(e => e.source !== params.source);
       
-      // Check if source already has an outgoing connection
-      const existingOutgoingEdges = edges.filter(e => e.source === params.source);
-      
-      // Only condition nodes can have multiple outputs (Sim/Não)
-      const isConditionNode = sourceNodeType === 'condition' || sourceNodeType === 'question';
-      const maxConnections = isConditionNode ? 2 : 1;
-      
-      if (existingOutgoingEdges.length >= maxConnections) {
-        return; // Don't allow more connections
-      }
-      
-      const newEdges = addEdge(params, edges);
+      const newEdges = addEdge(params, filteredEdges);
       setEdges(newEdges);
       
       onDataChange({
