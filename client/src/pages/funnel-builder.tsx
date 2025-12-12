@@ -432,9 +432,6 @@ export default function FunnelBuilder() {
                 onChange={(e) => setNewFunnelName(e.target.value)}
                 data-testid="input-new-funnel-name"
               />
-              <p className="text-xs text-muted-foreground">
-                Configure a frase gatilho dentro do editor do funil
-              </p>
             </div>
           </div>
           <DialogFooter>
