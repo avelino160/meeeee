@@ -85,25 +85,6 @@ export default function WhatsAppPreview({
     if (!isActive()) return;
 
     const sortedNodes = getExecutionOrder(nodesRef.current, edgesRef.current);
-    console.log('Preview - Nodes to execute:', sortedNodes.map(n => ({
-      id: n.id,
-      type: n.type,
-      nodeType: (n.data as any)?.nodeType,
-      delayMinutes: n.data?.delayMinutes,
-      content: n.data?.content?.substring(0, 30)
-    })));
-    
-    // Placeholder texts that should not be shown
-    const placeholderTexts = [
-      'Clique para editar esta mensagem...',
-      'Configurar este nó...',
-      'Digite sua mensagem aqui...',
-      'Aguardar 5 minutos',
-      'Se condição for verdadeira...',
-      'Qual é sua pergunta?',
-      'Adicionar tag ao contato',
-      'Verificar condição',
-    ];
     
     for (const node of sortedNodes) {
       if (!isActive()) return;
@@ -115,13 +96,10 @@ export default function WhatsAppPreview({
         const delayMinutes = node.data?.delayMinutes || 5;
         const delayMs = delayMinutes * 60 * 1000;
         
-        console.log(`Preview - Starting delay: ${delayMinutes} minute(s) = ${delayMs}ms`);
-        
         // Wait for the actual configured time silently
         await new Promise(resolve => setTimeout(resolve, delayMs));
         
         if (!isActive()) return;
-        console.log(`Preview - Delay complete, continuing to next node`);
         continue;
       }
       
@@ -150,7 +128,6 @@ export default function WhatsAppPreview({
         timestamp: new Date(),
       };
 
-      console.log(`Preview - Sending message: ${displayContent.substring(0, 50)}`);
       setMessages(prev => [...prev, botMessage]);
     }
 
