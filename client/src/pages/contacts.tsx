@@ -359,10 +359,9 @@ export default function Contacts() {
   return (
     <div className="flex h-screen bg-background">
       <Sidebar />
-      
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Header */}
-        <header className="bg-card border-b border-border pl-14 pr-4 lg:px-6 py-3 sm:py-4">
+        <header className="bg-card border-b border-border pl-14 pr-4 lg:px-6 py-3 sm:py-4 pt-[16px] pb-[16px]">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
             <div className="w-full sm:w-auto">
               <h1 className="text-lg sm:text-2xl font-semibold" data-testid="text-page-title">Contatos</h1>
@@ -640,7 +639,6 @@ export default function Contacts() {
           )}
         </main>
       </div>
-
       {/* Edit Contact Dialog */}
       <Dialog open={!!editingContact} onOpenChange={(open) => !open && setEditingContact(null)}>
         <DialogContent data-testid="dialog-edit-contact">
@@ -725,7 +723,6 @@ export default function Contacts() {
           </div>
         </DialogContent>
       </Dialog>
-
       <Dialog open={showExportDialog} onOpenChange={setShowExportDialog}>
         <DialogContent className="sm:max-w-md" data-testid="dialog-export-contacts">
           <DialogHeader>
