@@ -110,13 +110,10 @@ export class FunnelService {
       if (nextEdge) {
         const nextNode = flowData.nodes.find(node => node.id === nextEdge.target);
         if (nextNode) {
-          // Get delay from the next node (configured in its properties)
-          delayMinutes = nextNode.data.delayMinutes || 0;
-          
-          // If next node is a message and has no delay, apply a default 1 minute delay
+          // Only apply delay if the next node is a "delay" type node
           const nextNodeType = (nextNode.data as any)?.nodeType || nextNode.type;
-          if (nextNodeType === 'message' && delayMinutes === 0) {
-            delayMinutes = 1; // Default 1 minute delay between messages
+          if (nextNodeType === 'delay') {
+            delayMinutes = nextNode.data.delayMinutes || 0;
           }
         }
       }
@@ -131,7 +128,7 @@ export class FunnelService {
         });
         console.log(`⏰ Próximo nó agendado para ${delayMinutes} minuto(s)`);
       } else {
-        // Only process immediately if there's no next node or it's not a message
+        // Process next node immediately
         setTimeout(() => this.processNextNode(executionId), 1000);
       }
     } catch (error) {
