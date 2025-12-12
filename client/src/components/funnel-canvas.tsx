@@ -331,7 +331,7 @@ function FunnelCanvasInner({ data, onDataChange, onNodeSelect }: FunnelCanvasPro
         defaultEdgeOptions={defaultEdgeOptions}
         snapToGrid={true}
         snapGrid={[15, 15]}
-        panOnScroll={true}
+        panOnScroll={false}
         selectionOnDrag={false}
         panOnDrag={[0, 1, 2]}
         zoomOnScroll={true}
