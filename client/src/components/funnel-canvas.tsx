@@ -7,7 +7,6 @@ import ReactFlow, {
   useNodesState,
   useEdgesState,
   Controls,
-  MiniMap,
   Background,
   BackgroundVariant,
   NodeTypes,
@@ -324,10 +323,6 @@ function FunnelCanvasInner({ data, onDataChange, onNodeSelect }: FunnelCanvasPro
         proOptions={{ hideAttribution: true }}
       >
         <Controls className="bg-card border-border" />
-        <MiniMap 
-          className="bg-card border-border"
-          nodeColor="#a855f7"
-        />
         <Background 
           variant={BackgroundVariant.Dots} 
           gap={20} 
