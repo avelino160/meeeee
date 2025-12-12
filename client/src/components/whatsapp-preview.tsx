@@ -196,9 +196,19 @@ export default function WhatsAppPreview({
 
     if (message.mediaType === 'audio') {
       return (
-        <div className="flex items-center gap-2 text-sm">
-          <Mic className="h-4 w-4" />
-          <span>🎤 Áudio</span>
+        <div>
+          {message.mediaUrl ? (
+            <audio 
+              controls 
+              className="w-full max-w-[200px] h-8"
+              src={message.mediaUrl}
+            />
+          ) : (
+            <div className="flex items-center gap-2 text-sm">
+              <Mic className="h-4 w-4" />
+              <span>🎤 Áudio</span>
+            </div>
+          )}
         </div>
       );
     }
