@@ -73,9 +73,69 @@ export default function FunnelNode({ data, selected }: NodeProps<FunnelNodeData>
       )}
 
       {/* Node Header */}
-      <div className="flex items-center gap-2 mb-2">
-        <IconComponent className="h-5 w-5 text-primary" />
-        <span className="text-sm font-medium truncate">{data.label}</span>
+      <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center">
+          <IconComponent className="h-4 w-4 text-primary mr-2" />
+          <span className="text-sm font-semibold text-foreground">{data.label}</span>
+        </div>
+        <button 
+          className="text-muted-foreground hover:text-foreground p-1 rounded"
+          data-testid="button-edit-node"
+        >
+          <Edit3 className="h-3 w-3" />
+        </button>
+      </div>
+
+      {/* Node Content */}
+      <div className="mb-3">
+        {data.nodeType === 'trigger' && (
+          <p className="text-xs text-muted-foreground mb-2">
+            {data.content}
+          </p>
+        )}
+        
+        {data.nodeType === 'message' && (
+          <div className="bg-muted rounded p-2 mb-2">
+            <p className="text-xs text-muted-foreground line-clamp-3">
+              {data.content || 'Clique para editar mensagem...'}
+            </p>
+          </div>
+        )}
+
+        {data.nodeType === 'delay' && (
+          <div className="bg-muted rounded p-2 mb-2">
+            <p className="text-xs text-muted-foreground">
+              Aguardar {data.delayMinutes || 5} minutos
+            </p>
+          </div>
+        )}
+
+        {data.nodeType === 'condition' && (
+          <div className="bg-muted rounded p-2 mb-2">
+            <p className="text-xs text-muted-foreground">
+              {data.content}
+            </p>
+          </div>
+        )}
+
+        {['image', 'video', 'audio', 'document', 'location'].includes(data.nodeType) && (
+          <div className="bg-muted rounded p-2 mb-2">
+            <div className="w-full h-8 bg-border rounded mb-2 flex items-center justify-center">
+              <IconComponent className="h-4 w-4 text-muted-foreground" />
+            </div>
+            <p className="text-xs text-muted-foreground">
+              {data.content || 'Clique para configurar mídia...'}
+            </p>
+          </div>
+        )}
+
+        {['question', 'tag', 'verify'].includes(data.nodeType) && (
+          <div className="bg-muted rounded p-2 mb-2">
+            <p className="text-xs text-muted-foreground">
+              {data.content}
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Node Footer */}
@@ -107,6 +167,11 @@ export default function FunnelNode({ data, selected }: NodeProps<FunnelNodeData>
           </div>
         ) : (
           <>
+            {(data.delayMinutes ?? 0) > 0 && (
+              <div className="text-xs text-muted-foreground">
+                Delay: {data.delayMinutes}min
+              </div>
+            )}
             <Handle
               type="source"
               position={Position.Bottom}
