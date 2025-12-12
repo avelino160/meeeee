@@ -581,20 +581,6 @@ export default function FunnelEditor() {
                         </div>
                       </div>
                     )}
-                    <div>
-                      <Label htmlFor="media-caption" className="text-gray-300">
-                        Legenda (opcional)
-                      </Label>
-                      <Textarea
-                        id="media-caption"
-                        value={selectedNode.data.content || ''}
-                        onChange={(e) => updateNodeContent(e.target.value)}
-                        placeholder="Adicione uma legenda..."
-                        className="mt-2 bg-[#1a1a1a] border-gray-700 text-white"
-                        rows={3}
-                        data-testid="input-media-caption"
-                      />
-                    </div>
                   </div>
                 )}
 
