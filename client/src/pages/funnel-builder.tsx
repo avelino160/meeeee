@@ -100,15 +100,26 @@ export default function FunnelBuilder() {
       });
       return response.json();
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/funnels"] });
+    onMutate: async ({ funnelId, newStatus }) => {
+      await queryClient.cancelQueries({ queryKey: ["/api/funnels"] });
+      const previousFunnels = queryClient.getQueryData<Funnel[]>(["/api/funnels"]);
+      queryClient.setQueryData<Funnel[]>(["/api/funnels"], (old) =>
+        old?.map((f) => (f.id === funnelId ? { ...f, status: newStatus as Funnel["status"] } : f))
+      );
+      return { previousFunnels };
     },
-    onError: () => {
+    onError: (_err, _vars, context) => {
+      if (context?.previousFunnels) {
+        queryClient.setQueryData(["/api/funnels"], context.previousFunnels);
+      }
       toast({
         title: "Erro",
         description: "Falha ao atualizar status do funil.",
         variant: "destructive",
       });
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/funnels"] });
     },
   });
 
