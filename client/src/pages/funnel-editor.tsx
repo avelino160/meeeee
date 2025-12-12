@@ -378,58 +378,58 @@ export default function FunnelEditor() {
                 </h3>
                 <div className="grid grid-cols-2 gap-2">
                   <div 
-                    className="p-3 bg-[#2a2a2a] rounded-lg cursor-grab hover:bg-[#333] transition-colors border border-gray-700 active:cursor-grabbing" 
+                    className="p-2 lg:p-3 bg-[#2a2a2a] rounded-lg cursor-grab hover:bg-[#333] transition-colors border border-gray-700 active:cursor-grabbing overflow-hidden flex flex-col items-center" 
                     data-testid="tool-text"
                     draggable
                     onDragStart={(e) => onDragStart(e, 'message')}
                   >
-                    <MessageSquare className="h-5 w-5 text-purple-500 mb-1" />
-                    <p className="text-xs font-medium text-gray-300">Texto</p>
+                    <MessageSquare className="h-5 w-5 text-purple-500 mb-1 flex-shrink-0" />
+                    <p className="text-xs font-medium text-gray-300 text-center truncate w-full">Texto</p>
                   </div>
                   <div 
-                    className="p-3 bg-[#2a2a2a] rounded-lg cursor-grab hover:bg-[#333] transition-colors border border-gray-700 active:cursor-grabbing" 
+                    className="p-2 lg:p-3 bg-[#2a2a2a] rounded-lg cursor-grab hover:bg-[#333] transition-colors border border-gray-700 active:cursor-grabbing overflow-hidden flex flex-col items-center" 
                     data-testid="tool-image"
                     draggable
                     onDragStart={(e) => onDragStart(e, 'image')}
                   >
-                    <Image className="h-5 w-5 text-purple-500 mb-1" />
-                    <p className="text-xs font-medium text-gray-300">Imagem</p>
+                    <Image className="h-5 w-5 text-purple-500 mb-1 flex-shrink-0" />
+                    <p className="text-xs font-medium text-gray-300 text-center truncate w-full">Imagem</p>
                   </div>
                   <div 
-                    className="p-3 bg-[#2a2a2a] rounded-lg cursor-grab hover:bg-[#333] transition-colors border border-gray-700 active:cursor-grabbing" 
+                    className="p-2 lg:p-3 bg-[#2a2a2a] rounded-lg cursor-grab hover:bg-[#333] transition-colors border border-gray-700 active:cursor-grabbing overflow-hidden flex flex-col items-center" 
                     data-testid="tool-video"
                     draggable
                     onDragStart={(e) => onDragStart(e, 'video')}
                   >
-                    <Video className="h-5 w-5 text-purple-500 mb-1" />
-                    <p className="text-xs font-medium text-gray-300">Vídeo</p>
+                    <Video className="h-5 w-5 text-purple-500 mb-1 flex-shrink-0" />
+                    <p className="text-xs font-medium text-gray-300 text-center truncate w-full">Vídeo</p>
                   </div>
                   <div 
-                    className="p-3 bg-[#2a2a2a] rounded-lg cursor-grab hover:bg-[#333] transition-colors border border-gray-700 active:cursor-grabbing" 
+                    className="p-2 lg:p-3 bg-[#2a2a2a] rounded-lg cursor-grab hover:bg-[#333] transition-colors border border-gray-700 active:cursor-grabbing overflow-hidden flex flex-col items-center" 
                     data-testid="tool-audio"
                     draggable
                     onDragStart={(e) => onDragStart(e, 'audio')}
                   >
-                    <Mic className="h-5 w-5 text-purple-500 mb-1" />
-                    <p className="text-xs font-medium text-gray-300">Áudio</p>
+                    <Mic className="h-5 w-5 text-purple-500 mb-1 flex-shrink-0" />
+                    <p className="text-xs font-medium text-gray-300 text-center truncate w-full">Áudio</p>
                   </div>
                   <div 
-                    className="p-3 bg-[#2a2a2a] rounded-lg cursor-grab hover:bg-[#333] transition-colors border border-gray-700 active:cursor-grabbing" 
+                    className="p-2 lg:p-3 bg-[#2a2a2a] rounded-lg cursor-grab hover:bg-[#333] transition-colors border border-gray-700 active:cursor-grabbing overflow-hidden flex flex-col items-center" 
                     data-testid="tool-document"
                     draggable
                     onDragStart={(e) => onDragStart(e, 'document')}
                   >
-                    <FileText className="h-5 w-5 text-purple-500 mb-1" />
-                    <p className="text-xs font-medium text-gray-300">Documento</p>
+                    <FileText className="h-5 w-5 text-purple-500 mb-1 flex-shrink-0" />
+                    <p className="text-xs font-medium text-gray-300 text-center truncate w-full">Doc</p>
                   </div>
                   <div 
-                    className="p-3 bg-[#2a2a2a] rounded-lg cursor-grab hover:bg-[#333] transition-colors border border-gray-700 active:cursor-grabbing" 
+                    className="p-2 lg:p-3 bg-[#2a2a2a] rounded-lg cursor-grab hover:bg-[#333] transition-colors border border-gray-700 active:cursor-grabbing overflow-hidden flex flex-col items-center" 
                     data-testid="tool-location"
                     draggable
                     onDragStart={(e) => onDragStart(e, 'location')}
                   >
-                    <MapPin className="h-5 w-5 text-purple-500 mb-1" />
-                    <p className="text-xs font-medium text-gray-300">Local</p>
+                    <MapPin className="h-5 w-5 text-purple-500 mb-1 flex-shrink-0" />
+                    <p className="text-xs font-medium text-gray-300 text-center truncate w-full">Local</p>
                   </div>
                 </div>
               </div>
