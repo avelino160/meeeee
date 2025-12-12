@@ -82,38 +82,13 @@ export default function WhatsAppPreview({
     for (const node of sortedNodes) {
       const nodeType = (node.data as any)?.nodeType || node.type;
       
-      // Delay nodes - show countdown timer with real time
+      // Delay nodes - wait silently for the configured time
       if (nodeType === 'delay') {
         const delayMinutes = node.data?.delayMinutes || 5;
-        const totalSeconds = delayMinutes * 60;
-        const waitingId = `waiting-${node.id}`;
+        const delayMs = delayMinutes * 60 * 1000;
         
-        // Wait for the actual time with countdown
-        for (let remaining = totalSeconds; remaining > 0; remaining--) {
-          const mins = Math.floor(remaining / 60);
-          const secs = remaining % 60;
-          const timeDisplay = mins > 0 
-            ? `${mins}:${secs.toString().padStart(2, '0')}` 
-            : `${secs}s`;
-          
-          const waitingMessage: Message = {
-            id: waitingId,
-            type: "waiting",
-            content: `⏳ Aguardando... ${timeDisplay}`,
-            timestamp: new Date(),
-            waitMinutes: delayMinutes,
-          };
-          
-          setMessages(prev => {
-            const filtered = prev.filter(m => m.id !== waitingId);
-            return [...filtered, waitingMessage];
-          });
-          
-          await new Promise(resolve => setTimeout(resolve, 1000));
-        }
-        
-        // Remove waiting message after countdown completes
-        setMessages(prev => prev.filter(m => m.id !== waitingId));
+        // Wait for the actual configured time silently
+        await new Promise(resolve => setTimeout(resolve, delayMs));
         continue;
       }
       
