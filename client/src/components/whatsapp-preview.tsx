@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Image, Video, Mic, FileText } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -42,18 +42,36 @@ export default function WhatsAppPreview({
 }: WhatsAppPreviewProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isSimulating, setIsSimulating] = useState(false);
+  const simulationIdRef = useRef<number>(0);
+  const nodesRef = useRef(nodes);
+  const edgesRef = useRef(edges);
+  
+  // Keep refs updated
+  useEffect(() => {
+    nodesRef.current = nodes;
+    edgesRef.current = edges;
+  }, [nodes, edges]);
 
   useEffect(() => {
     if (open) {
       setMessages([]);
       setIsSimulating(false);
-      setTimeout(() => simulateFunnel(), 100);
+      simulationIdRef.current += 1;
+      const currentSimulationId = simulationIdRef.current;
+      setTimeout(() => simulateFunnel(currentSimulationId), 100);
     }
+    return () => {
+      // Cancel any ongoing simulation when dialog closes
+      simulationIdRef.current += 1;
+    };
   }, [open]);
 
-  const simulateFunnel = async () => {
+  const simulateFunnel = async (simulationId: number) => {
     setIsSimulating(true);
     setMessages([]);
+
+    // Helper to check if this simulation is still active
+    const isActive = () => simulationIdRef.current === simulationId;
 
     const userMessage: Message = {
       id: "user-trigger",
@@ -64,8 +82,16 @@ export default function WhatsAppPreview({
 
     setMessages([userMessage]);
     await new Promise(resolve => setTimeout(resolve, 500));
+    if (!isActive()) return;
 
-    const sortedNodes = getExecutionOrder(nodes, edges);
+    const sortedNodes = getExecutionOrder(nodesRef.current, edgesRef.current);
+    console.log('Preview - Nodes to execute:', sortedNodes.map(n => ({
+      id: n.id,
+      type: n.type,
+      nodeType: (n.data as any)?.nodeType,
+      delayMinutes: n.data?.delayMinutes,
+      content: n.data?.content?.substring(0, 30)
+    })));
     
     // Placeholder texts that should not be shown
     const placeholderTexts = [
@@ -80,6 +106,8 @@ export default function WhatsAppPreview({
     ];
     
     for (const node of sortedNodes) {
+      if (!isActive()) return;
+      
       const nodeType = (node.data as any)?.nodeType || node.type;
       
       // Delay nodes - wait silently for the configured time
@@ -87,8 +115,13 @@ export default function WhatsAppPreview({
         const delayMinutes = node.data?.delayMinutes || 5;
         const delayMs = delayMinutes * 60 * 1000;
         
+        console.log(`Preview - Starting delay: ${delayMinutes} minute(s) = ${delayMs}ms`);
+        
         // Wait for the actual configured time silently
         await new Promise(resolve => setTimeout(resolve, delayMs));
+        
+        if (!isActive()) return;
+        console.log(`Preview - Delay complete, continuing to next node`);
         continue;
       }
       
@@ -99,6 +132,7 @@ export default function WhatsAppPreview({
       // Skip condition, tag, verify nodes - they are logic, not messages
       if (['condition', 'tag', 'verify', 'question'].includes(nodeType) && isPlaceholder) {
         await new Promise(resolve => setTimeout(resolve, 500));
+        if (!isActive()) return;
         continue;
       }
       
@@ -108,6 +142,7 @@ export default function WhatsAppPreview({
       }
 
       await new Promise(resolve => setTimeout(resolve, 400));
+      if (!isActive()) return;
 
       const botMessage: Message = {
         id: node.id,
@@ -118,10 +153,13 @@ export default function WhatsAppPreview({
         timestamp: new Date(),
       };
 
+      console.log(`Preview - Sending message: ${content.substring(0, 50)}`);
       setMessages(prev => [...prev, botMessage]);
     }
 
-    setIsSimulating(false);
+    if (isActive()) {
+      setIsSimulating(false);
+    }
   };
 
   const getExecutionOrder = (nodes: FunnelNode[], edges: Array<{ id: string; source: string; target: string }>): FunnelNode[] => {
