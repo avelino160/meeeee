@@ -23,6 +23,7 @@ interface FunnelNodeData {
   content: string;
   icon?: string;
   delayMinutes?: number;
+  mediaUrl?: string;
 }
 
 const iconMap = {
@@ -118,14 +119,28 @@ export default function FunnelNode({ data, selected }: NodeProps<FunnelNodeData>
           </div>
         )}
 
-        {['image', 'video', 'audio', 'document', 'location'].includes(data.nodeType) && (
+        {data.nodeType === 'audio' && (
           <div className="bg-muted rounded p-2 mb-2">
-            <div className="w-full h-8 bg-border rounded mb-2 flex items-center justify-center">
+            {data.mediaUrl ? (
+              <audio 
+                controls 
+                className="w-full h-8"
+                src={data.mediaUrl}
+                data-testid="audio-player"
+              />
+            ) : (
+              <div className="w-full h-8 bg-border rounded flex items-center justify-center">
+                <IconComponent className="h-4 w-4 text-muted-foreground" />
+              </div>
+            )}
+          </div>
+        )}
+
+        {['image', 'video', 'document', 'location'].includes(data.nodeType) && (
+          <div className="bg-muted rounded p-2 mb-2">
+            <div className="w-full h-8 bg-border rounded flex items-center justify-center">
               <IconComponent className="h-4 w-4 text-muted-foreground" />
             </div>
-            <p className="text-xs text-muted-foreground">
-              {data.content || 'Clique para configurar mídia...'}
-            </p>
           </div>
         )}
 
