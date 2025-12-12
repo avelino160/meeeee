@@ -25,11 +25,12 @@ interface WhatsAppPreviewProps {
 
 interface Message {
   id: string;
-  type: "user" | "bot";
+  type: "user" | "bot" | "waiting";
   content: string;
   mediaType?: string;
   mediaUrl?: string;
   timestamp: Date;
+  waitMinutes?: number;
 }
 
 export default function WhatsAppPreview({ 
@@ -81,13 +82,25 @@ export default function WhatsAppPreview({
     for (const node of sortedNodes) {
       const nodeType = (node.data as any)?.nodeType || node.type;
       
-      // Delay nodes - wait AFTER this node before showing the next message
+      // Delay nodes - show waiting indicator then wait
       if (nodeType === 'delay') {
-        const delay = node.data?.delayMinutes || 0;
-        if (delay > 0) {
-          // Show a visual indicator that we're waiting
-          await new Promise(resolve => setTimeout(resolve, Math.min(delay * 1000, 5000)));
-        }
+        const delay = node.data?.delayMinutes || 5;
+        
+        // Add waiting message
+        const waitingMessage: Message = {
+          id: `waiting-${node.id}`,
+          type: "waiting",
+          content: `⏳ Aguardando ${delay} minuto(s)...`,
+          timestamp: new Date(),
+          waitMinutes: delay,
+        };
+        setMessages(prev => [...prev, waitingMessage]);
+        
+        // Simulated wait (max 3 seconds for preview)
+        await new Promise(resolve => setTimeout(resolve, Math.min(delay * 500, 3000)));
+        
+        // Remove waiting message
+        setMessages(prev => prev.filter(m => m.id !== `waiting-${node.id}`));
         continue;
       }
       
@@ -293,37 +306,47 @@ export default function WhatsAppPreview({
               key={`${message.id}-${index}`}
               className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
             >
-              <div className="max-w-[80%]">
-                <div
-                  className={`rounded-lg px-3 py-2 shadow-lg relative ${
-                    message.type === 'user'
-                      ? 'bg-[#005c4b] text-white rounded-br-sm'
-                      : 'bg-[#202c33] text-[#e9edef] rounded-bl-sm'
-                  }`}
-                >
-                  <div className={`absolute bottom-0 ${
-                    message.type === 'user' 
-                      ? 'right-[-7px] border-l-[7px] border-l-[#005c4b]' 
-                      : 'left-[-7px] border-r-[7px] border-r-[#202c33]'
-                  } border-b-[7px] border-b-transparent w-0 h-0`}></div>
-                  
-                  {renderMessageContent(message)}
-                  
-                  <div className={`text-[10px] mt-1 flex items-center gap-1 justify-end ${
-                    message.type === 'user' ? 'text-[#a5c8bb]' : 'text-[#8696a0]'
-                  }`}>
-                    {message.timestamp.toLocaleTimeString('pt-BR', { 
-                      hour: '2-digit', 
-                      minute: '2-digit' 
-                    })}
-                    {message.type === 'user' && (
-                      <svg viewBox="0 0 16 15" width="13" height="13" className="fill-current ml-0.5">
-                        <path d="M15.01 3.316l-.478-.372a.365.365 0 0 0-.51.063L8.666 9.879a.32.32 0 0 1-.484.033l-.358-.325a.319.319 0 0 0-.484.032l-.378.483a.418.418 0 0 0 .036.541l1.32 1.266c.143.14.361.125.484-.033l6.272-8.048a.366.366 0 0 0-.064-.512zm-4.1 0l-.478-.372a.365.365 0 0 0-.51.063L4.566 9.879a.32.32 0 0 1-.484.033L1.891 7.769a.366.366 0 0 0-.515.006l-.423.433a.364.364 0 0 0 .006.514l3.258 3.185c.143.14.361.125.484-.033l6.272-8.048a.365.365 0 0 0-.063-.51z"/>
-                      </svg>
-                    )}
+              {message.type === 'waiting' ? (
+                <div className="max-w-[80%]">
+                  <div className="bg-yellow-600/20 border border-yellow-600/50 rounded-lg px-3 py-2 shadow-lg">
+                    <div className="flex items-center gap-2 text-yellow-400 text-sm">
+                      <span className="animate-pulse">{message.content}</span>
+                    </div>
                   </div>
                 </div>
-              </div>
+              ) : (
+                <div className="max-w-[80%]">
+                  <div
+                    className={`rounded-lg px-3 py-2 shadow-lg relative ${
+                      message.type === 'user'
+                        ? 'bg-[#005c4b] text-white rounded-br-sm'
+                        : 'bg-[#202c33] text-[#e9edef] rounded-bl-sm'
+                    }`}
+                  >
+                    <div className={`absolute bottom-0 ${
+                      message.type === 'user' 
+                        ? 'right-[-7px] border-l-[7px] border-l-[#005c4b]' 
+                        : 'left-[-7px] border-r-[7px] border-r-[#202c33]'
+                    } border-b-[7px] border-b-transparent w-0 h-0`}></div>
+                    
+                    {renderMessageContent(message)}
+                    
+                    <div className={`text-[10px] mt-1 flex items-center gap-1 justify-end ${
+                      message.type === 'user' ? 'text-[#a5c8bb]' : 'text-[#8696a0]'
+                    }`}>
+                      {message.timestamp.toLocaleTimeString('pt-BR', { 
+                        hour: '2-digit', 
+                        minute: '2-digit' 
+                      })}
+                      {message.type === 'user' && (
+                        <svg viewBox="0 0 16 15" width="13" height="13" className="fill-current ml-0.5">
+                          <path d="M15.01 3.316l-.478-.372a.365.365 0 0 0-.51.063L8.666 9.879a.32.32 0 0 1-.484.033l-.358-.325a.319.319 0 0 0-.484.032l-.378.483a.418.418 0 0 0 .036.541l1.32 1.266c.143.14.361.125.484-.033l6.272-8.048a.366.366 0 0 0-.064-.512zm-4.1 0l-.478-.372a.365.365 0 0 0-.51.063L4.566 9.879a.32.32 0 0 1-.484.033L1.891 7.769a.366.366 0 0 0-.515.006l-.423.433a.364.364 0 0 0 .006.514l3.258 3.185c.143.14.361.125.484-.033l6.272-8.048a.365.365 0 0 0-.063-.51z"/>
+                        </svg>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           ))}
 
