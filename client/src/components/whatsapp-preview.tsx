@@ -62,7 +62,7 @@ export default function WhatsAppPreview({
     };
 
     setMessages([userMessage]);
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    await new Promise(resolve => setTimeout(resolve, 500));
 
     const sortedNodes = getExecutionOrder(nodes, edges);
     
@@ -105,7 +105,7 @@ export default function WhatsAppPreview({
         continue;
       }
 
-      await new Promise(resolve => setTimeout(resolve, 1200));
+      await new Promise(resolve => setTimeout(resolve, 400));
 
       const botMessage: Message = {
         id: node.id,
