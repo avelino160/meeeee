@@ -72,9 +72,10 @@ export default function FunnelNode({ data, selected }: NodeProps<FunnelNodeData>
         />
       )}
 
-      {/* Node Header - Icon only */}
-      <div className="flex items-center justify-center mb-2">
+      {/* Node Header */}
+      <div className="flex items-center gap-2 mb-2">
         <IconComponent className="h-5 w-5 text-primary" />
+        <span className="text-sm font-medium truncate">{data.label}</span>
       </div>
 
       {/* Node Footer */}
