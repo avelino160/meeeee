@@ -89,6 +89,20 @@ export default function FunnelNode({ data, selected }: NodeProps<FunnelNodeData>
 
       {/* Node Content */}
       <div className="mb-3">
+        {data.nodeType === 'trigger' && (
+          <p className="text-xs text-muted-foreground mb-2">
+            {data.content}
+          </p>
+        )}
+        
+        {data.nodeType === 'message' && (
+          <div className="bg-muted rounded p-2 mb-2">
+            <p className="text-xs text-muted-foreground line-clamp-3">
+              {data.content || 'Clique para editar mensagem...'}
+            </p>
+          </div>
+        )}
+
         {data.nodeType === 'delay' && (
           <div className="bg-muted rounded p-2 mb-2">
             <p className="text-xs text-muted-foreground">
@@ -97,14 +111,44 @@ export default function FunnelNode({ data, selected }: NodeProps<FunnelNodeData>
           </div>
         )}
 
-        {data.nodeType === 'audio' && data.mediaUrl && (
+        {data.nodeType === 'condition' && (
           <div className="bg-muted rounded p-2 mb-2">
-            <audio 
-              controls 
-              className="w-full h-8"
-              src={data.mediaUrl}
-              data-testid="audio-player"
-            />
+            <p className="text-xs text-muted-foreground">
+              {data.content}
+            </p>
+          </div>
+        )}
+
+        {data.nodeType === 'audio' && (
+          <div className="bg-muted rounded p-2 mb-2">
+            {data.mediaUrl ? (
+              <audio 
+                controls 
+                className="w-full h-8"
+                src={data.mediaUrl}
+                data-testid="audio-player"
+              />
+            ) : (
+              <div className="w-full h-8 bg-border rounded flex items-center justify-center">
+                <IconComponent className="h-4 w-4 text-muted-foreground" />
+              </div>
+            )}
+          </div>
+        )}
+
+        {['image', 'video', 'document', 'location'].includes(data.nodeType) && (
+          <div className="bg-muted rounded p-2 mb-2">
+            <div className="w-full h-8 bg-border rounded flex items-center justify-center">
+              <IconComponent className="h-4 w-4 text-muted-foreground" />
+            </div>
+          </div>
+        )}
+
+        {['question', 'tag', 'verify'].includes(data.nodeType) && (
+          <div className="bg-muted rounded p-2 mb-2">
+            <p className="text-xs text-muted-foreground">
+              {data.content}
+            </p>
           </div>
         )}
       </div>
