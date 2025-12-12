@@ -168,7 +168,7 @@ export default function WhatsAppPreview({
   const renderMessageContent = (message: Message) => {
     if (message.mediaType === 'image' && message.mediaUrl) {
       return (
-        <div className="space-y-2">
+        <div>
           {message.mediaUrl.startsWith('data:') || message.mediaUrl.startsWith('http') ? (
             <img 
               src={message.mediaUrl} 
@@ -181,43 +181,33 @@ export default function WhatsAppPreview({
               <span>📷 Imagem</span>
             </div>
           )}
-          {message.content && <p className="text-sm">{message.content}</p>}
         </div>
       );
     }
 
     if (message.mediaType === 'video') {
       return (
-        <div className="space-y-2">
-          <div className="flex items-center gap-2 text-sm">
-            <Video className="h-4 w-4" />
-            <span>🎥 Vídeo</span>
-          </div>
-          {message.content && <p className="text-sm">{message.content}</p>}
+        <div className="flex items-center gap-2 text-sm">
+          <Video className="h-4 w-4" />
+          <span>🎥 Vídeo</span>
         </div>
       );
     }
 
     if (message.mediaType === 'audio') {
       return (
-        <div className="space-y-2">
-          <div className="flex items-center gap-2 text-sm">
-            <Mic className="h-4 w-4" />
-            <span>🎤 Áudio</span>
-          </div>
-          {message.content && <p className="text-sm">{message.content}</p>}
+        <div className="flex items-center gap-2 text-sm">
+          <Mic className="h-4 w-4" />
+          <span>🎤 Áudio</span>
         </div>
       );
     }
 
     if (message.mediaType === 'document') {
       return (
-        <div className="space-y-2">
-          <div className="flex items-center gap-2 text-sm">
-            <FileText className="h-4 w-4" />
-            <span>📄 Documento</span>
-          </div>
-          {message.content && <p className="text-sm">{message.content}</p>}
+        <div className="flex items-center gap-2 text-sm">
+          <FileText className="h-4 w-4" />
+          <span>📄 Documento</span>
         </div>
       );
     }
