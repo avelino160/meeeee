@@ -80,12 +80,13 @@ export default function WhatsAppPreview({
     
     for (const node of sortedNodes) {
       const nodeType = (node.data as any)?.nodeType || node.type;
-      const delay = node.data?.delayMinutes;
       
-      // Delay nodes just wait, don't show message
+      // Delay nodes - wait AFTER this node before showing the next message
       if (nodeType === 'delay') {
-        if (delay && delay > 0) {
-          await new Promise(resolve => setTimeout(resolve, Math.min(delay * 200, 3000)));
+        const delay = node.data?.delayMinutes || 0;
+        if (delay > 0) {
+          // Show a visual indicator that we're waiting
+          await new Promise(resolve => setTimeout(resolve, Math.min(delay * 1000, 5000)));
         }
         continue;
       }

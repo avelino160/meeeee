@@ -95,6 +95,9 @@ export class FunnelService {
         return;
       }
 
+      // Get the current node type
+      const currentNodeType = (currentNode.data as any)?.nodeType || currentNode.type;
+      
       // Process the current node
       await this.processNode(execution, currentNode);
       
@@ -103,34 +106,23 @@ export class FunnelService {
         currentNodeId: currentNode.id,
       });
 
-      // Find the next node to determine if we need a delay
-      const nextEdge = flowData.edges.find(edge => edge.source === currentNode.id);
-      let delayMinutes = 0;
-      
-      if (nextEdge) {
-        const nextNode = flowData.nodes.find(node => node.id === nextEdge.target);
-        if (nextNode) {
-          // Only apply delay if the next node is a "delay" type node
-          const nextNodeType = (nextNode.data as any)?.nodeType || nextNode.type;
-          if (nextNodeType === 'delay') {
-            delayMinutes = nextNode.data.delayMinutes || 0;
-          }
+      // If current node is a delay node, wait before continuing to next node
+      if (currentNodeType === 'delay') {
+        const delayMinutes = currentNode.data.delayMinutes || 0;
+        if (delayMinutes > 0) {
+          const schedulerService = await getSchedulerService();
+          await schedulerService.scheduleTask({
+            type: 'funnel_next_node',
+            data: { executionId },
+            executeAt: new Date(Date.now() + delayMinutes * 60 * 1000),
+          });
+          console.log(`⏰ Aguardando ${delayMinutes} minuto(s) antes da próxima mensagem`);
+          return; // Stop here, scheduler will call processNextNode later
         }
       }
       
-      // Schedule next node processing with the appropriate delay
-      if (delayMinutes > 0) {
-        const schedulerService = await getSchedulerService();
-        await schedulerService.scheduleTask({
-          type: 'funnel_next_node',
-          data: { executionId },
-          executeAt: new Date(Date.now() + delayMinutes * 60 * 1000),
-        });
-        console.log(`⏰ Próximo nó agendado para ${delayMinutes} minuto(s)`);
-      } else {
-        // Process next node immediately
-        setTimeout(() => this.processNextNode(executionId), 1000);
-      }
+      // For all other nodes, process next node immediately
+      setTimeout(() => this.processNextNode(executionId), 1000);
     } catch (error) {
       console.error('Process next node error:', error);
       
