@@ -125,21 +125,18 @@ export default function WhatsAppPreview({
         continue;
       }
       
-      // Skip nodes without real content (just placeholders)
+      // Get content
       const content = node.data.content || "";
-      const isPlaceholder = placeholderTexts.some(p => content.includes(p)) || content.trim() === '';
       
       // Skip condition, tag, verify nodes - they are logic, not messages
-      if (['condition', 'tag', 'verify', 'question'].includes(nodeType) && isPlaceholder) {
+      if (['condition', 'tag', 'verify', 'question'].includes(nodeType)) {
         await new Promise(resolve => setTimeout(resolve, 500));
         if (!isActive()) return;
         continue;
       }
       
-      // Skip message nodes without content
-      if (isPlaceholder && !node.data.mediaUrl) {
-        continue;
-      }
+      // For message nodes, show even if placeholder - just use default text if empty
+      const displayContent = content.trim() || "Mensagem de exemplo";
 
       await new Promise(resolve => setTimeout(resolve, 400));
       if (!isActive()) return;
@@ -147,13 +144,13 @@ export default function WhatsAppPreview({
       const botMessage: Message = {
         id: node.id,
         type: "bot",
-        content: isPlaceholder ? "" : content,
+        content: displayContent,
         mediaType: nodeType,
         mediaUrl: node.data.mediaUrl,
         timestamp: new Date(),
       };
 
-      console.log(`Preview - Sending message: ${content.substring(0, 50)}`);
+      console.log(`Preview - Sending message: ${displayContent.substring(0, 50)}`);
       setMessages(prev => [...prev, botMessage]);
     }
 
