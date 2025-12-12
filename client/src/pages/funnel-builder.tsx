@@ -258,9 +258,8 @@ export default function FunnelBuilder() {
   return (
     <div className="flex h-screen bg-background">
       <Sidebar />
-      
       <div className="flex-1 flex flex-col overflow-hidden">
-        <header className="bg-card border-b border-border pl-14 pr-4 lg:px-6 py-4 sm:py-6">
+        <header className="bg-card border-b border-border pl-14 pr-4 lg:px-6 py-4 sm:py-6 pt-[16px] pb-[16px]">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 mb-2">
             <div>
               <h2 className="text-xl sm:text-2xl font-bold text-foreground" data-testid="text-page-title">Funil de venda</h2>
@@ -415,7 +414,6 @@ export default function FunnelBuilder() {
           )}
         </main>
       </div>
-
       <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
         <DialogContent className="sm:max-w-md" data-testid="dialog-create-funnel">
           <DialogHeader>
@@ -458,7 +456,6 @@ export default function FunnelBuilder() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-
       <Dialog open={isExportDialogOpen} onOpenChange={setIsExportDialogOpen}>
         <DialogContent className="sm:max-w-md" data-testid="dialog-export-funnels">
           <DialogHeader>
