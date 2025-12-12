@@ -167,11 +167,6 @@ export default function FunnelNode({ data, selected }: NodeProps<FunnelNodeData>
           </div>
         ) : (
           <>
-            {(data.delayMinutes ?? 0) > 0 && (
-              <div className="text-xs text-muted-foreground">
-                Delay: {data.delayMinutes}min
-              </div>
-            )}
             <Handle
               type="source"
               position={Position.Bottom}
