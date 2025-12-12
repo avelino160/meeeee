@@ -103,7 +103,7 @@ function FunnelCanvasInner({ data, onDataChange, onNodeSelect }: FunnelCanvasPro
             label: 'Mensagem Texto',
             nodeType: 'message',
             content: 'Clique para editar esta mensagem...',
-            delayMinutes: 1,
+            delayMinutes: 0,
             icon: 'message'
           },
         },
