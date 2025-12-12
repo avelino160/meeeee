@@ -420,7 +420,7 @@ export default function FunnelEditor() {
                     onDragStart={(e) => onDragStart(e, 'document')}
                   >
                     <FileText className="h-5 w-5 text-purple-500 mb-1 flex-shrink-0" />
-                    <p className="text-xs font-medium text-gray-300 text-center truncate w-full">Doc</p>
+                    <p className="text-[10px] font-medium text-gray-300 text-center truncate w-full">Documento</p>
                   </div>
                   <div 
                     className="p-2 lg:p-3 bg-[#2a2a2a] rounded-lg cursor-grab hover:bg-[#333] transition-colors border border-gray-700 active:cursor-grabbing overflow-hidden flex flex-col items-center" 
