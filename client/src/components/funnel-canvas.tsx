@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useRef } from 'react';
+import React, { useCallback, useRef, useMemo, memo } from 'react';
 import ReactFlow, {
   Node,
   Edge,
@@ -13,6 +13,7 @@ import ReactFlow, {
   useReactFlow,
   ReactFlowProvider,
   ConnectionMode,
+  ConnectionLineType,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 import FunnelNode from './funnel-node';
@@ -36,53 +37,41 @@ interface FunnelCanvasProps {
   onNodeSelect: (node: any) => void;
 }
 
+const MemoizedFunnelNode = memo(FunnelNode);
+
 const nodeTypes: NodeTypes = {
-  funnelNode: FunnelNode,
+  funnelNode: MemoizedFunnelNode,
 };
 
 function FunnelCanvasInner({ data, onDataChange, onNodeSelect }: FunnelCanvasProps) {
-  const [nodes, setNodes, _onNodesChange] = useNodesState([]);
-  const [edges, setEdges, _onEdgesChange] = useEdgesState([]);
+  const [nodes, setNodes, onNodesChange] = useNodesState([]);
+  const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const reactFlowInstance = useReactFlow();
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
+  const initializedRef = useRef(false);
+  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Wrap onNodesChange
-  const onNodesChange = useCallback(
-    (changes: any) => {
-      _onNodesChange(changes);
-    },
-    [_onNodesChange]
-  );
-
-  // Wrap onEdgesChange
-  const onEdgesChange = useCallback(
-    (changes: any) => {
-      _onEdgesChange(changes);
-    },
-    [_onEdgesChange]
-  );
-
-  // Sync nodes/edges changes back to parent
-  React.useEffect(() => {
-    // Debounce the onDataChange call to avoid excessive updates
-    const timeoutId = setTimeout(() => {
+  const saveToParent = useCallback((newNodes: Node[], newEdges: Edge[]) => {
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
+    }
+    saveTimeoutRef.current = setTimeout(() => {
       onDataChange({
-        nodes,
-        edges,
+        nodes: newNodes,
+        edges: newEdges,
       });
-    }, 100);
-    
-    return () => clearTimeout(timeoutId);
-  }, [nodes, edges, onDataChange]);
+    }, 500);
+  }, [onDataChange]);
 
-  // Initialize with sample nodes if empty, or sync from parent data
   React.useEffect(() => {
-    if (data.nodes.length === 0 && nodes.length === 0) {
+    if (initializedRef.current) return;
+    
+    if (data.nodes.length === 0) {
       const phrasesText = data.triggerPhrases && data.triggerPhrases.length > 0
         ? data.triggerPhrases.filter(p => p.trim()).map(p => `"${p}"`).join(', ')
         : null;
       
-      const initialNodes = [
+      const initialNodes: Node[] = [
         {
           id: 'start',
           type: 'funnelNode',
@@ -108,7 +97,7 @@ function FunnelCanvasInner({ data, onDataChange, onNodeSelect }: FunnelCanvasPro
         },
       ];
 
-      const initialEdges = [
+      const initialEdges: Edge[] = [
         {
           id: 'start-message1',
           source: 'start',
@@ -119,32 +108,23 @@ function FunnelCanvasInner({ data, onDataChange, onNodeSelect }: FunnelCanvasPro
 
       setNodes(initialNodes);
       setEdges(initialEdges);
-      
-      onDataChange({
-        nodes: initialNodes,
-        edges: initialEdges,
-      });
+      onDataChange({ nodes: initialNodes, edges: initialEdges });
+      initializedRef.current = true;
     } else if (data.nodes.length > 0) {
-      // Update nodes from parent data while preserving positions
-      setNodes(currentNodes => {
-        return data.nodes.map(dataNode => {
-          const existingNode = currentNodes.find(n => n.id === dataNode.id);
-          return {
-            ...dataNode,
-            type: 'funnelNode',
-            position: existingNode?.position || dataNode.position,
-            data: {
-              ...dataNode.data,
-              nodeType: dataNode.data.nodeType || dataNode.type,
-            }
-          };
-        });
-      });
-      setEdges(data.edges);
+      const formattedNodes = data.nodes.map(dataNode => ({
+        ...dataNode,
+        type: 'funnelNode',
+        data: {
+          ...dataNode.data,
+          nodeType: dataNode.data.nodeType || dataNode.type,
+        }
+      }));
+      setNodes(formattedNodes);
+      setEdges(data.edges.map(e => ({ ...e, animated: true })));
+      initializedRef.current = true;
     }
-  }, [data, nodes.length]);
+  }, [data.nodes.length]);
 
-  // Update trigger node when triggerPhrases changes
   React.useEffect(() => {
     const phrasesText = data.triggerPhrases && data.triggerPhrases.length > 0
       ? data.triggerPhrases.filter(p => p.trim()).map(p => `"${p}"`).join(', ')
@@ -166,20 +146,41 @@ function FunnelCanvasInner({ data, onDataChange, onNodeSelect }: FunnelCanvasPro
     });
   }, [data.triggerPhrases]);
 
+  const handleNodesChange = useCallback((changes: any) => {
+    onNodesChange(changes);
+    setNodes(currentNodes => {
+      setEdges(currentEdges => {
+        saveToParent(currentNodes, currentEdges);
+        return currentEdges;
+      });
+      return currentNodes;
+    });
+  }, [onNodesChange, saveToParent]);
+
+  const handleEdgesChange = useCallback((changes: any) => {
+    onEdgesChange(changes);
+    setNodes(currentNodes => {
+      setEdges(currentEdges => {
+        saveToParent(currentNodes, currentEdges);
+        return currentEdges;
+      });
+      return currentNodes;
+    });
+  }, [onEdgesChange, saveToParent]);
+
   const onConnect = useCallback(
     (params: Connection) => {
-      // Remove existing outgoing connection from source node (only 1 allowed)
-      const filteredEdges = edges.filter(e => e.source !== params.source);
-      
-      const newEdges = addEdge(params, filteredEdges);
-      setEdges(newEdges);
-      
-      onDataChange({
-        nodes,
-        edges: newEdges,
+      const newEdge = { ...params, animated: true };
+      setEdges(currentEdges => {
+        const newEdges = addEdge(newEdge, currentEdges);
+        setNodes(currentNodes => {
+          saveToParent(currentNodes, newEdges);
+          return currentNodes;
+        });
+        return newEdges;
       });
     },
-    [edges, nodes, onDataChange]
+    [saveToParent]
   );
 
   const onNodeClick = useCallback(
@@ -196,15 +197,16 @@ function FunnelCanvasInner({ data, onDataChange, onNodeSelect }: FunnelCanvasPro
 
   const onEdgeClick = useCallback(
     (event: React.MouseEvent, edge: Edge) => {
-      const newEdges = edges.filter(e => e.id !== edge.id);
-      setEdges(newEdges);
-      
-      onDataChange({
-        nodes,
-        edges: newEdges,
+      setEdges(currentEdges => {
+        const newEdges = currentEdges.filter(e => e.id !== edge.id);
+        setNodes(currentNodes => {
+          saveToParent(currentNodes, newEdges);
+          return currentNodes;
+        });
+        return newEdges;
       });
     },
-    [edges, nodes, onDataChange]
+    [saveToParent]
   );
 
   const onDrop = useCallback(
@@ -221,14 +223,13 @@ function FunnelCanvasInner({ data, onDataChange, onNodeSelect }: FunnelCanvasPro
         return;
       }
 
-      const reactFlowBounds = reactFlowWrapper.current.getBoundingClientRect();
       const position = reactFlowInstance.screenToFlowPosition({
         x: event.clientX,
         y: event.clientY,
       });
 
       const newNodeId = `${nodeType}_${Date.now()}`;
-      const newNode = {
+      const newNode: Node = {
         id: newNodeId,
         type: 'funnelNode',
         position,
@@ -241,15 +242,16 @@ function FunnelCanvasInner({ data, onDataChange, onNodeSelect }: FunnelCanvasPro
         },
       };
 
-      const newNodes = [...nodes, newNode];
-      setNodes(newNodes);
-      
-      onDataChange({
-        nodes: newNodes,
-        edges,
+      setNodes(currentNodes => {
+        const newNodes = [...currentNodes, newNode];
+        setEdges(currentEdges => {
+          saveToParent(newNodes, currentEdges);
+          return currentEdges;
+        });
+        return newNodes;
       });
     },
-    [nodes, edges, onDataChange, reactFlowInstance]
+    [reactFlowInstance, saveToParent]
   );
 
   const onDragOver = useCallback((event: React.DragEvent) => {
@@ -303,13 +305,18 @@ function FunnelCanvasInner({ data, onDataChange, onNodeSelect }: FunnelCanvasPro
     return icons[nodeType] || 'circle';
   };
 
+  const defaultEdgeOptions = useMemo(() => ({
+    animated: true,
+    type: 'smoothstep',
+  }), []);
+
   return (
     <div ref={reactFlowWrapper} className="w-full h-full" data-testid="funnel-canvas">
       <ReactFlow
         nodes={nodes}
         edges={edges}
-        onNodesChange={onNodesChange}
-        onEdgesChange={onEdgesChange}
+        onNodesChange={handleNodesChange}
+        onEdgesChange={handleEdgesChange}
         onConnect={onConnect}
         onNodeClick={onNodeClick}
         onEdgeClick={onEdgeClick}
@@ -317,10 +324,23 @@ function FunnelCanvasInner({ data, onDataChange, onNodeSelect }: FunnelCanvasPro
         onDragOver={onDragOver}
         nodeTypes={nodeTypes}
         fitView
+        fitViewOptions={{ padding: 0.2 }}
         className="bg-background"
         connectionMode={ConnectionMode.Loose}
+        connectionLineType={ConnectionLineType.SmoothStep}
+        connectionRadius={30}
         deleteKeyCode={['Backspace', 'Delete']}
         proOptions={{ hideAttribution: true }}
+        defaultEdgeOptions={defaultEdgeOptions}
+        snapToGrid={true}
+        snapGrid={[15, 15]}
+        panOnScroll={true}
+        selectionOnDrag={false}
+        panOnDrag={[0, 1, 2]}
+        zoomOnScroll={true}
+        zoomOnDoubleClick={true}
+        minZoom={0.1}
+        maxZoom={2}
       >
         <Controls className="bg-card border-border" />
         <Background 

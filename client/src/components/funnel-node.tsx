@@ -68,7 +68,7 @@ export default function FunnelNode({ data, selected }: NodeProps<FunnelNodeData>
         <Handle
           type="target"
           position={Position.Top}
-          className="w-3 h-3 !bg-border"
+          className="!w-4 !h-4 !bg-purple-500 !border-2 !border-purple-300 hover:!bg-purple-400 transition-colors"
           data-testid="handle-input"
         />
       )}
@@ -164,13 +164,13 @@ export default function FunnelNode({ data, selected }: NodeProps<FunnelNodeData>
       {/* Node Footer */}
       <div className="flex justify-between items-center">
         {data.nodeType === 'condition' ? (
-          <div className="flex space-x-4">
+          <div className="flex space-x-4 w-full justify-around">
             <div className="text-center">
               <Handle
                 type="source"
                 position={Position.Bottom}
                 id="yes"
-                className="w-3 h-3 !bg-green-500 relative"
+                className="!w-4 !h-4 !bg-green-500 !border-2 !border-green-300 hover:!bg-green-400 transition-colors"
                 style={{ left: '25%' }}
                 data-testid="handle-output-yes"
               />
@@ -181,7 +181,7 @@ export default function FunnelNode({ data, selected }: NodeProps<FunnelNodeData>
                 type="source"
                 position={Position.Bottom}
                 id="no"
-                className="w-3 h-3 !bg-red-500 relative"
+                className="!w-4 !h-4 !bg-red-500 !border-2 !border-red-300 hover:!bg-red-400 transition-colors"
                 style={{ left: '75%' }}
                 data-testid="handle-output-no"
               />
@@ -198,7 +198,7 @@ export default function FunnelNode({ data, selected }: NodeProps<FunnelNodeData>
             <Handle
               type="source"
               position={Position.Bottom}
-              className="w-3 h-3 !bg-primary"
+              className="!w-4 !h-4 !bg-purple-500 !border-2 !border-purple-300 hover:!bg-purple-400 transition-colors"
               data-testid="handle-output"
             />
           </>
