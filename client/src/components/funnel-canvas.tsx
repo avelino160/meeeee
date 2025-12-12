@@ -13,7 +13,6 @@ import ReactFlow, {
   useReactFlow,
   ReactFlowProvider,
   ConnectionMode,
-  ConnectionLineType,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 import FunnelNode from './funnel-node';
@@ -307,7 +306,6 @@ function FunnelCanvasInner({ data, onDataChange, onNodeSelect }: FunnelCanvasPro
 
   const defaultEdgeOptions = useMemo(() => ({
     animated: true,
-    type: 'smoothstep',
   }), []);
 
   return (
@@ -327,7 +325,6 @@ function FunnelCanvasInner({ data, onDataChange, onNodeSelect }: FunnelCanvasPro
         fitViewOptions={{ padding: 0.2 }}
         className="bg-background"
         connectionMode={ConnectionMode.Loose}
-        connectionLineType={ConnectionLineType.SmoothStep}
         connectionRadius={30}
         deleteKeyCode={['Backspace', 'Delete']}
         proOptions={{ hideAttribution: true }}
