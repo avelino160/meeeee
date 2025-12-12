@@ -129,8 +129,16 @@ export default function FunnelNode({ data, selected }: NodeProps<FunnelNodeData>
                 data-testid="audio-player"
               />
             ) : (
-              <div className="w-full h-8 bg-border rounded flex items-center justify-center">
-                <IconComponent className="h-4 w-4 text-muted-foreground" />
+              <div className="w-full h-10 bg-border rounded flex items-center px-2 gap-2">
+                <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center">
+                  <Play className="h-3 w-3 text-primary" />
+                </div>
+                <div className="flex-1">
+                  <div className="h-1 bg-muted-foreground/30 rounded-full">
+                    <div className="h-1 w-0 bg-primary rounded-full"></div>
+                  </div>
+                </div>
+                <span className="text-xs text-muted-foreground">0:00</span>
               </div>
             )}
           </div>
