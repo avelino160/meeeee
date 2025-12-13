@@ -7,6 +7,7 @@ import type { Funnel } from "@shared/schema";
 import Sidebar from "@/components/sidebar";
 import FunnelCanvas from "@/components/funnel-canvas";
 import WhatsAppPreview from "@/components/whatsapp-preview";
+import LocationPicker from "@/components/location-picker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -31,6 +32,12 @@ import {
   X
 } from "lucide-react";
 
+interface LocationData {
+  latitude: number;
+  longitude: number;
+  address: string;
+}
+
 interface FunnelNode {
   id: string;
   type: string;
@@ -42,6 +49,7 @@ interface FunnelNode {
     delayMinutes?: number;
     nodeType?: string;
     icon?: string;
+    location?: LocationData;
   };
 }
 
@@ -184,6 +192,19 @@ export default function FunnelEditor() {
     
     setFunnelData({ ...funnelData, nodes: updatedNodes });
     setSelectedNode({ ...selectedNode, data: { ...selectedNode.data, mediaUrl } });
+  };
+
+  const updateNodeLocation = (location: LocationData) => {
+    if (!selectedNode) return;
+    
+    const updatedNodes = funnelData.nodes.map(node => 
+      node.id === selectedNode.id 
+        ? { ...node, data: { ...node.data, location } }
+        : node
+    );
+    
+    setFunnelData({ ...funnelData, nodes: updatedNodes });
+    setSelectedNode({ ...selectedNode, data: { ...selectedNode.data, location } });
   };
 
   const deleteNode = () => {
@@ -517,20 +538,10 @@ export default function FunnelEditor() {
                 {/* Location Node */}
                 {selectedNode.type === 'location' && (
                   <div className="space-y-3">
-                    <div>
-                      <Label htmlFor="location-content" className="text-gray-300">
-                        Informações de localização
-                      </Label>
-                      <Textarea
-                        id="location-content"
-                        value={selectedNode.data.content || ''}
-                        onChange={(e) => updateNodeContent(e.target.value)}
-                        placeholder="Digite as coordenadas ou endereço..."
-                        className="mt-2 bg-[#1a1a1a] border-gray-700 text-white"
-                        rows={3}
-                        data-testid="input-location-content"
-                      />
-                    </div>
+                    <LocationPicker
+                      value={selectedNode.data.location}
+                      onChange={updateNodeLocation}
+                    />
                   </div>
                 )}
 
