@@ -125,6 +125,26 @@ function FunnelCanvasInner({ data, onDataChange, onNodeSelect }: FunnelCanvasPro
   }, [data.nodes.length]);
 
   React.useEffect(() => {
+    if (!initializedRef.current || data.nodes.length === 0) return;
+    
+    setNodes(currentNodes => {
+      return currentNodes.map(node => {
+        const dataNode = data.nodes.find(n => n.id === node.id);
+        if (dataNode) {
+          return {
+            ...node,
+            data: {
+              ...dataNode.data,
+              nodeType: dataNode.data.nodeType || dataNode.type,
+            }
+          };
+        }
+        return node;
+      });
+    });
+  }, [data.nodes]);
+
+  React.useEffect(() => {
     const phrasesText = data.triggerPhrases && data.triggerPhrases.length > 0
       ? data.triggerPhrases.filter(p => p.trim()).map(p => `"${p}"`).join(', ')
       : null;
