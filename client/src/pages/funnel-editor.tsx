@@ -199,12 +199,12 @@ export default function FunnelEditor() {
     
     const updatedNodes = funnelData.nodes.map(node => 
       node.id === selectedNode.id 
-        ? { ...node, data: { ...node.data, location } }
+        ? { ...node, data: { ...node.data, location, nodeType: node.data.nodeType || 'location' } }
         : node
     );
     
     setFunnelData({ ...funnelData, nodes: updatedNodes });
-    setSelectedNode({ ...selectedNode, data: { ...selectedNode.data, location } });
+    setSelectedNode({ ...selectedNode, data: { ...selectedNode.data, location, nodeType: selectedNode.data.nodeType || 'location' } });
   };
 
   const deleteNode = () => {
