@@ -144,10 +144,32 @@ export default function FunnelNode({ data, selected }: NodeProps<FunnelNodeData>
           </div>
         )}
 
-        {['image', 'video', 'document', 'location'].includes(data.nodeType) && (
+        {['image', 'video', 'document'].includes(data.nodeType) && (
           <div className="bg-muted rounded p-2 mb-2">
             <div className="w-full h-8 bg-border rounded flex items-center justify-center">
               <IconComponent className="h-4 w-4 text-muted-foreground" />
+            </div>
+          </div>
+        )}
+
+        {data.nodeType === 'location' && (
+          <div className="bg-muted rounded p-2 mb-2">
+            <div className="w-full h-24 bg-border rounded overflow-hidden relative">
+              <iframe
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3657.1975!2d-46.6565!3d-23.5611!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMjPCsDMzJzQwLjAiUyA0NsKwMzknMjMuNCJX!5e0!3m2!1spt-BR!2sbr!4v1"
+                width="100%"
+                height="100%"
+                style={{ border: 0 }}
+                allowFullScreen
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                className="rounded"
+                data-testid="location-map"
+              />
+              <div className="absolute bottom-1 left-1 bg-background/80 rounded px-1.5 py-0.5 flex items-center gap-1">
+                <MapPin className="h-3 w-3 text-red-500" />
+                <span className="text-[10px] text-foreground">Localização</span>
+              </div>
             </div>
           </div>
         )}
