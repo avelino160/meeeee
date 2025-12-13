@@ -466,7 +466,7 @@ export default function FunnelEditor() {
                 <Separator className="bg-gray-700" />
 
                 {/* Text Message Node */}
-                {selectedNode.type === 'message' && (
+                {selectedNode.data.nodeType === 'message' && (
                   <div className="space-y-3">
                     <div>
                       <Label htmlFor="message-content" className="text-gray-300">
@@ -486,7 +486,7 @@ export default function FunnelEditor() {
                 )}
 
                 {/* Media Nodes (Image, Video, Audio, Document) */}
-                {['image', 'video', 'audio', 'document'].includes(selectedNode.type) && (
+                {['image', 'video', 'audio', 'document'].includes(selectedNode.data.nodeType || '') && (
                   <div className="space-y-3">
                     <div>
                       <Label htmlFor="media-url" className="text-gray-300">
@@ -497,7 +497,7 @@ export default function FunnelEditor() {
                         type="text"
                         value={selectedNode.data.mediaUrl || ''}
                         onChange={(e) => updateNodeMediaUrl(e.target.value)}
-                        placeholder={`URL do ${selectedNode.type}...`}
+                        placeholder={`URL do ${selectedNode.data.nodeType}...`}
                         className="mt-2 bg-[#1a1a1a] border-gray-700 text-white"
                         data-testid="input-media-url"
                       />
@@ -510,9 +510,9 @@ export default function FunnelEditor() {
                         id="media-file"
                         type="file"
                         accept={
-                          selectedNode.type === 'image' ? 'image/*' :
-                          selectedNode.type === 'video' ? 'video/*' :
-                          selectedNode.type === 'audio' ? 'audio/*' :
+                          selectedNode.data.nodeType === 'image' ? 'image/*' :
+                          selectedNode.data.nodeType === 'video' ? 'video/*' :
+                          selectedNode.data.nodeType === 'audio' ? 'audio/*' :
                           '*/*'
                         }
                         onChange={handleFileUpload}
@@ -520,7 +520,7 @@ export default function FunnelEditor() {
                         data-testid="input-media-file"
                       />
                     </div>
-                    {selectedNode.data.mediaUrl && selectedNode.type === 'image' && (
+                    {selectedNode.data.mediaUrl && selectedNode.data.nodeType === 'image' && (
                       <div>
                         <Label className="text-gray-300">Preview</Label>
                         <div className="mt-2 border border-gray-700 rounded overflow-hidden bg-[#1a1a1a]">
@@ -536,7 +536,7 @@ export default function FunnelEditor() {
                 )}
 
                 {/* Location Node */}
-                {selectedNode.type === 'location' && (
+                {selectedNode.data.nodeType === 'location' && (
                   <div className="space-y-3">
                     <LocationPicker
                       value={selectedNode.data.location}
@@ -546,7 +546,7 @@ export default function FunnelEditor() {
                 )}
 
                 {/* Delay Node */}
-                {selectedNode.type === 'delay' && (
+                {selectedNode.data.nodeType === 'delay' && (
                   <div className="space-y-3">
                     <div>
                       <Label htmlFor="delay-minutes" className="text-gray-300">
@@ -566,7 +566,7 @@ export default function FunnelEditor() {
                 )}
 
                 {/* Condition Node */}
-                {selectedNode.type === 'condition' && (
+                {selectedNode.data.nodeType === 'condition' && (
                   <div className="space-y-3">
                     <div>
                       <Label htmlFor="condition-content" className="text-gray-300">
@@ -586,7 +586,7 @@ export default function FunnelEditor() {
                 )}
 
                 {/* Question Node */}
-                {selectedNode.type === 'question' && (
+                {selectedNode.data.nodeType === 'question' && (
                   <div className="space-y-3">
                     <div>
                       <Label htmlFor="question-content" className="text-gray-300">
@@ -606,7 +606,7 @@ export default function FunnelEditor() {
                 )}
 
                 {/* Tag Node */}
-                {selectedNode.type === 'tag' && (
+                {selectedNode.data.nodeType === 'tag' && (
                   <div className="space-y-3">
                     <div>
                       <Label htmlFor="tag-content" className="text-gray-300">
@@ -626,7 +626,7 @@ export default function FunnelEditor() {
                 )}
 
                 {/* Trigger Node - Single Phrase */}
-                {selectedNode.type === 'trigger' && (
+                {selectedNode.data.nodeType === 'trigger' && (
                   <div className="space-y-3">
                     <div>
                       <Label className="text-gray-300">
@@ -662,7 +662,7 @@ export default function FunnelEditor() {
                 )}
 
                 {/* Verify Node */}
-                {selectedNode.type === 'verify' && (
+                {selectedNode.data.nodeType === 'verify' && (
                   <div className="space-y-3">
                     <div>
                       <Label htmlFor="verify-content" className="text-gray-300">
@@ -684,7 +684,7 @@ export default function FunnelEditor() {
                 <Separator className="bg-gray-700" />
 
                 <div className="space-y-2">
-                  {selectedNode.id !== 'start' && selectedNode.type !== 'trigger' && (
+                  {selectedNode.id !== 'start' && selectedNode.data.nodeType !== 'trigger' && (
                     <Button
                       variant="outline"
                       className="w-full border-red-600 text-red-400 hover:bg-red-900/50"
