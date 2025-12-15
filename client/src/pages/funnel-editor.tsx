@@ -221,6 +221,7 @@ export default function FunnelEditor() {
     toast({
       title: "Elemento Removido",
       description: "O elemento foi excluído do funil",
+      duration: 5000,
     });
   };
 

@@ -120,6 +120,7 @@ export default function FunnelBuilder() {
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/funnels"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/analytics/dashboard"] });
     },
   });
 

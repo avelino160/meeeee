@@ -1,7 +1,13 @@
 import { useEffect, useState, useRef } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Image, Video, Mic, FileText } from "lucide-react";
+import { Image, Video, Mic, FileText, MapPin, Navigation } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+
+interface LocationData {
+  latitude: number;
+  longitude: number;
+  address: string;
+}
 
 interface FunnelNode {
   id: string;
@@ -12,6 +18,8 @@ interface FunnelNode {
     content?: string;
     mediaUrl?: string;
     delayMinutes?: number;
+    nodeType?: string;
+    location?: LocationData;
   };
 }
 
@@ -31,6 +39,7 @@ interface Message {
   mediaUrl?: string;
   timestamp: Date;
   waitMinutes?: number;
+  location?: LocationData;
 }
 
 export default function WhatsAppPreview({ 
@@ -126,6 +135,7 @@ export default function WhatsAppPreview({
         mediaType: nodeType,
         mediaUrl: node.data.mediaUrl,
         timestamp: new Date(),
+        location: node.data.location,
       };
 
       setMessages(prev => [...prev, botMessage]);
@@ -218,6 +228,40 @@ export default function WhatsAppPreview({
         <div className="flex items-center gap-2 text-sm">
           <FileText className="h-4 w-4" />
           <span>📄 Documento</span>
+        </div>
+      );
+    }
+
+    if (message.mediaType === 'location' && message.location) {
+      return (
+        <div className="w-[180px]">
+          <div className="relative w-full h-24 bg-[#1a2e35] rounded-lg overflow-hidden">
+            <iframe
+              src={`https://www.openstreetmap.org/export/embed.html?bbox=${message.location.longitude - 0.005}%2C${message.location.latitude - 0.005}%2C${message.location.longitude + 0.005}%2C${message.location.latitude + 0.005}&layer=mapnik&marker=${message.location.latitude}%2C${message.location.longitude}`}
+              width="100%"
+              height="100%"
+              style={{ border: 0 }}
+              loading="lazy"
+              className="rounded-t-lg"
+            />
+          </div>
+          <div className="bg-[#1a2e35] rounded-b-lg p-2 border-t border-[#2a3942]">
+            <div className="flex items-start gap-2">
+              <MapPin className="h-4 w-4 text-red-500 mt-0.5 flex-shrink-0" />
+              <div className="flex-1 min-w-0">
+                <p className="text-xs text-white font-medium truncate">
+                  {message.location.address.split(',')[0]}
+                </p>
+                <p className="text-[10px] text-[#8696a0] truncate">
+                  {message.location.address.split(',').slice(1, 3).join(',')}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-1 mt-2 text-[#00a884]">
+              <Navigation className="h-3 w-3" />
+              <span className="text-[10px] font-medium">Ver no mapa</span>
+            </div>
+          </div>
         </div>
       );
     }
