@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { useToast } from "@/hooks/use-toast";
-import type { AnalyticsResponse, CampaignsResponse, ContactsResponse } from "@shared/api-types";
+import type { AnalyticsResponse } from "@shared/api-types";
 import Sidebar from "@/components/sidebar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -22,8 +21,8 @@ import {
 } from "lucide-react";
 
 interface AnalyticsData {
-  totalCampaigns: number;
-  activeCampaigns: number;
+  totalFunnels: number;
+  activeFunnels: number;
   totalContacts: number;
   activeContacts: number;
   totalMessages: number;
@@ -35,60 +34,43 @@ interface AnalyticsData {
 }
 
 export default function Analytics() {
-  const { toast } = useToast();
-
   const { data: analytics, isLoading: analyticsLoading, error } = useQuery<AnalyticsResponse>({
     queryKey: ["/api/analytics/dashboard"],
     retry: false,
     refetchInterval: 30000, // Refetch every 30 seconds for real-time updates
   });
 
-  const { data: campaigns } = useQuery<CampaignsResponse>({
-    queryKey: ["/api/campaigns"],
-    retry: false,
-  });
-
-  const { data: contacts } = useQuery<ContactsResponse>({
-    queryKey: ["/api/contacts"],
-    retry: false,
-  });
-
-  const { data: messages } = useQuery<any[]>({
-    queryKey: ["/api/messages"],
-    retry: false,
-  });
-
-
-  // Calculate additional metrics from data
+  // Calculate additional metrics from analytics data only
   const calculateMetrics = () => {
-    if (!analytics || !campaigns || !contacts || !messages) {
+    const deliveryRate = analytics?.deliveryRate || 0;
+    
+    if (!analytics) {
       return {
-        campaignSuccessRate: 0,
-        avgMessagesPerCampaign: 0,
+        funnelSuccessRate: 0,
+        avgMessagesPerFunnel: 0,
         contactEngagementRate: 0,
         recentActivity: [],
       };
     }
 
-    const activeCampaigns = campaigns.filter((c: any) => c.status === 'active').length;
-    const campaignSuccessRate = analytics.totalCampaigns > 0 
-      ? (activeCampaigns / analytics.totalCampaigns) * 100 
+    const funnelSuccessRate = analytics.totalFunnels > 0 
+      ? (analytics.activeFunnels / analytics.totalFunnels) * 100 
       : 0;
 
-    const avgMessagesPerCampaign = analytics.totalCampaigns > 0 
-      ? analytics.totalMessages / analytics.totalCampaigns 
+    const avgMessagesPerFunnel = analytics.totalFunnels > 0 
+      ? analytics.totalMessages / analytics.totalFunnels 
       : 0;
 
     const contactEngagementRate = analytics.totalContacts > 0 
       ? (analytics.activeContacts / analytics.totalContacts) * 100 
       : 0;
 
-    // Create recent activity from actual data
+    // Create recent activity from analytics data
     const recentActivity = [
       {
         id: 1,
-        type: 'campaign',
-        title: `${analytics.activeCampaigns} campanhas ativas`,
+        type: 'funnel',
+        title: `${analytics.activeFunnels} funis ativos`,
         time: 'Agora',
         status: 'success'
       },
@@ -109,15 +91,15 @@ export default function Analytics() {
       {
         id: 4,
         type: 'delivery',
-        title: `Taxa de entrega: ${analytics.deliveryRate.toFixed(1)}%`,
+        title: `Taxa de entrega: ${deliveryRate.toFixed(1)}%`,
         time: 'Média geral',
-        status: analytics.deliveryRate >= 90 ? 'success' : analytics.deliveryRate >= 70 ? 'warning' : 'error'
+        status: deliveryRate >= 90 ? 'success' : deliveryRate >= 70 ? 'warning' : 'error'
       }
     ];
 
     return {
-      campaignSuccessRate,
-      avgMessagesPerCampaign,
+      funnelSuccessRate,
+      avgMessagesPerFunnel,
       contactEngagementRate,
       recentActivity,
     };
@@ -135,7 +117,7 @@ export default function Analytics() {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-2xl font-semibold" data-testid="text-page-title">Relatórios e Analytics</h1>
-              <p className="text-sm text-muted-foreground">Acompanhe o desempenho das suas campanhas em tempo real</p>
+              <p className="text-sm text-muted-foreground">Acompanhe o desempenho dos seus funis em tempo real</p>
             </div>
             <div className="flex items-center space-x-2">
               <Badge variant="outline" className="text-primary border-primary">
@@ -166,7 +148,27 @@ export default function Analytics() {
           ) : (
             <div className="space-y-8">
               {/* Overview Cards */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Funis Ativos</CardTitle>
+                    <Zap className="h-4 w-4 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold" data-testid="text-active-funnels">
+                      {analytics?.activeFunnels || 0}
+                    </div>
+                    <div className="flex items-center space-x-2 mt-1">
+                      <Badge variant="outline" className="text-primary border-primary text-xs">
+                        {analytics?.totalFunnels || 0} total
+                      </Badge>
+                      <p className="text-xs text-muted-foreground">
+                        {metrics.funnelSuccessRate.toFixed(0)}% ativos
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+
                 <Card>
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-sm font-medium">Mensagens Enviadas</CardTitle>
@@ -181,7 +183,7 @@ export default function Analytics() {
                         {analytics?.todayMessages || 0} hoje
                       </Badge>
                       <p className="text-xs text-muted-foreground">
-                        {metrics.avgMessagesPerCampaign.toFixed(1)} por campanha
+                        {metrics.avgMessagesPerFunnel.toFixed(1)} por funil
                       </p>
                     </div>
                   </CardContent>
@@ -218,7 +220,7 @@ export default function Analytics() {
                     </div>
                     <div className="flex items-center space-x-2 mt-1">
                       <Badge 
-                        variant={analytics?.deliveryRate >= 90 ? "default" : "secondary"}
+                        variant={(analytics?.deliveryRate || 0) >= 90 ? "default" : "secondary"}
                         className="text-xs"
                       >
                         {analytics?.deliveredMessages || 0} entregues
@@ -272,8 +274,8 @@ export default function Analytics() {
                         <div className="flex justify-between text-sm mb-2">
                           <span>Taxa de Sucesso Geral</span>
                           <span className={`font-medium ${
-                            analytics?.deliveryRate >= 90 ? 'text-green-600' : 
-                            analytics?.deliveryRate >= 70 ? 'text-yellow-600' : 'text-red-600'
+                            (analytics?.deliveryRate || 0) >= 90 ? 'text-green-600' : 
+                            (analytics?.deliveryRate || 0) >= 70 ? 'text-yellow-600' : 'text-red-600'
                           }`}>
                             {analytics?.deliveryRate ? `${analytics.deliveryRate.toFixed(1)}%` : '0.0%'}
                           </span>

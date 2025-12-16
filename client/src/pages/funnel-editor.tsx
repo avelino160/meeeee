@@ -113,6 +113,7 @@ export default function FunnelEditor() {
       });
       queryClient.invalidateQueries({ queryKey: ["/api/funnels"] });
       queryClient.invalidateQueries({ queryKey: ["/api/funnels", funnelId] });
+      queryClient.invalidateQueries({ queryKey: ["/api/analytics/dashboard"] });
     },
     onError: () => {
       toast({

@@ -78,6 +78,7 @@ export default function Contacts() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/contacts"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/analytics/dashboard"] });
       toast({
         title: "Contato Criado",
         description: "Novo contato adicionado com sucesso!",
@@ -101,6 +102,7 @@ export default function Contacts() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/contacts"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/analytics/dashboard"] });
       toast({
         title: "Contato Atualizado",
         description: "As alterações foram salvas com sucesso!",
@@ -122,6 +124,7 @@ export default function Contacts() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/contacts"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/analytics/dashboard"] });
       toast({
         title: "Contato Excluído",
         description: "O contato foi removido com sucesso!",
@@ -147,6 +150,7 @@ export default function Contacts() {
         description: `${data.imported} contato(s) importado(s) com sucesso.`,
       });
       queryClient.invalidateQueries({ queryKey: ["/api/contacts"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/analytics/dashboard"] });
     },
     onError: (error: any) => {
       toast({

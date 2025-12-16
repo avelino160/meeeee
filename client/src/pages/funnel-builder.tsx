@@ -60,6 +60,7 @@ export default function FunnelBuilder() {
         description: "Seu funil foi criado com sucesso!",
       });
       queryClient.invalidateQueries({ queryKey: ["/api/funnels"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/analytics/dashboard"] });
       setIsCreateDialogOpen(false);
       setNewFunnelName("");
     },
@@ -83,6 +84,7 @@ export default function FunnelBuilder() {
         description: "Funil removido com sucesso!",
       });
       queryClient.invalidateQueries({ queryKey: ["/api/funnels"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/analytics/dashboard"] });
     },
     onError: () => {
       toast({
@@ -135,6 +137,7 @@ export default function FunnelBuilder() {
         description: `${data.imported} funil foi adicionado com sucesso.`,
       });
       queryClient.invalidateQueries({ queryKey: ["/api/funnels"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/analytics/dashboard"] });
     },
     onError: (error: any) => {
       toast({
