@@ -8,6 +8,7 @@ export interface WeeklyDataPoint {
 }
 
 export interface DashboardAnalytics {
+  totalFunnels: number;
   activeFunnels: number;
   todayMessages: number;
   activeContacts: number;
@@ -17,6 +18,10 @@ export interface DashboardAnalytics {
   deliveredMessages: number;
   totalMessages: number;
   weeklyData?: WeeklyDataPoint[];
+  // Comparison data
+  yesterdayMessages: number;
+  yesterdayDeliveryRate: number;
+  yesterdaySentMessages: number;
 }
 
 export interface WhatsAppStatus {

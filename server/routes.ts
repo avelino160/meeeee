@@ -772,12 +772,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const today = new Date();
       today.setHours(0, 0, 0, 0);
       
+      const yesterday = new Date(today);
+      yesterday.setDate(yesterday.getDate() - 1);
+      
       const todayMessages = messages.filter(m => 
         m.createdAt && new Date(m.createdAt) >= today
       );
       
+      const yesterdayMessages = messages.filter(m => {
+        if (!m.createdAt) return false;
+        const msgDate = new Date(m.createdAt);
+        return msgDate >= yesterday && msgDate < today;
+      });
+      
       const sentMessages = messages.filter(m => m.status === 'sent');
       const deliveredMessages = messages.filter(m => m.status === 'delivered');
+      
+      const yesterdaySentMessages = yesterdayMessages.filter(m => m.status === 'sent');
+      const yesterdayDeliveredMessages = yesterdayMessages.filter(m => m.status === 'delivered');
+      const yesterdayDeliveryRate = yesterdaySentMessages.length > 0 
+        ? (yesterdayDeliveredMessages.length / yesterdaySentMessages.length) * 100 
+        : 0;
       
       // Calculate weekly data for chart
       const dayNames = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
@@ -823,6 +838,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         deliveryRate: sentMessages.length > 0 ? (deliveredMessages.length / sentMessages.length) * 100 : 0,
         schedulerTasks: schedulerService.getActiveTasksCount(),
         weeklyData,
+        // Comparison data (yesterday)
+        yesterdayMessages: yesterdayMessages.length,
+        yesterdayDeliveryRate,
+        yesterdaySentMessages: yesterdaySentMessages.length,
       };
 
       res.json(analytics);

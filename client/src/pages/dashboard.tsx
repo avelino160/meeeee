@@ -48,6 +48,37 @@ export default function Dashboard() {
     { name: 'Dom', mensagens: 0, contatos: 0, conversoes: 0 },
   ];
 
+  // Calculate comparison metrics
+  const getMessageDiff = () => {
+    if (!analytics) return { value: 0, text: "0%" };
+    const today = analytics.todayMessages || 0;
+    const yesterday = analytics.yesterdayMessages || 0;
+    if (yesterday === 0) {
+      return today > 0 ? { value: 100, text: `+${today} novas` } : { value: 0, text: "0%" };
+    }
+    const diff = ((today - yesterday) / yesterday) * 100;
+    const sign = diff >= 0 ? "+" : "";
+    return { value: diff, text: `${sign}${diff.toFixed(0)}% desde ontem` };
+  };
+
+  const getFunnelInfo = () => {
+    if (!analytics) return "Total: 0 funis";
+    const total = analytics.totalFunnels || 0;
+    const active = analytics.activeFunnels || 0;
+    if (total === 0) return "Nenhum funil criado";
+    return `${active}/${total} ativos`;
+  };
+
+  const getDeliveryInfo = () => {
+    if (!analytics) return "0 mensagens enviadas";
+    const sent = analytics.sentMessages || 0;
+    const delivered = analytics.deliveredMessages || 0;
+    if (sent === 0) return "Nenhuma mensagem enviada";
+    return `${delivered}/${sent} entregues (${analytics.deliveryRate?.toFixed(0) || 0}%)`;
+  };
+
+  const messageDiff = getMessageDiff();
+
   return (
     <div className="flex h-screen bg-background">
       <Sidebar />
@@ -118,7 +149,7 @@ export default function Dashboard() {
                   {analyticsLoading ? "..." : analytics?.activeFunnels || 0}
                 </div>
                 <p className="text-[9px] sm:text-[10px] lg:text-xs text-muted-foreground">
-                  +0 desde ontem
+                  {analyticsLoading ? "..." : getFunnelInfo()}
                 </p>
               </CardContent>
             </Card>
@@ -132,8 +163,8 @@ export default function Dashboard() {
                 <div className="text-lg sm:text-xl lg:text-2xl font-bold" data-testid="text-today-messages">
                   {analyticsLoading ? "..." : analytics?.todayMessages || 0}
                 </div>
-                <p className="text-[9px] sm:text-[10px] lg:text-xs text-muted-foreground">
-                  +0% desde ontem
+                <p className={`text-[9px] sm:text-[10px] lg:text-xs ${messageDiff.value > 0 ? 'text-green-600' : messageDiff.value < 0 ? 'text-red-600' : 'text-muted-foreground'}`}>
+                  {analyticsLoading ? "..." : messageDiff.text}
                 </p>
               </CardContent>
             </Card>
@@ -163,7 +194,7 @@ export default function Dashboard() {
                   {analyticsLoading ? "..." : `${(analytics?.deliveryRate || 0).toFixed(1)}%`}
                 </div>
                 <p className="text-[9px] sm:text-[10px] lg:text-xs text-muted-foreground">
-                  {analyticsLoading ? "..." : analytics?.sentMessages || 0} mensagens enviadas
+                  {analyticsLoading ? "..." : getDeliveryInfo()}
                 </p>
               </CardContent>
             </Card>
