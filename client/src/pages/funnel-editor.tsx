@@ -211,12 +211,23 @@ export default function FunnelEditor() {
   const deleteNode = () => {
     if (!selectedNode) return;
     
+    // Prevent deletion of start and trigger nodes
+    if (selectedNode.id === 'start' || selectedNode.data.nodeType === 'trigger') {
+      toast({
+        title: "Ação não permitida",
+        description: "Este elemento não pode ser excluído",
+        variant: "destructive",
+        duration: 3000,
+      });
+      return;
+    }
+    
     const updatedNodes = funnelData.nodes.filter(node => node.id !== selectedNode.id);
     const updatedEdges = funnelData.edges.filter(
       edge => edge.source !== selectedNode.id && edge.target !== selectedNode.id
     );
     
-    setFunnelData({ nodes: updatedNodes, edges: updatedEdges });
+    setFunnelData({ ...funnelData, nodes: updatedNodes, edges: updatedEdges });
     setSelectedNode(null);
     
     toast({
