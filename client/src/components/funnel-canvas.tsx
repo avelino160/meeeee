@@ -127,20 +127,33 @@ function FunnelCanvasInner({ data, onDataChange, onNodeSelect }: FunnelCanvasPro
   React.useEffect(() => {
     if (!initializedRef.current || data.nodes.length === 0) return;
     
+    // Get the list of node IDs that should exist
+    const nodeIds = new Set(data.nodes.map(n => n.id));
+    
     setNodes(currentNodes => {
-      return currentNodes.map(node => {
-        const dataNode = data.nodes.find(n => n.id === node.id);
-        if (dataNode) {
-          return {
-            ...node,
-            data: {
-              ...dataNode.data,
-              nodeType: dataNode.data.nodeType || dataNode.type,
-            }
-          };
-        }
-        return node;
-      });
+      // Filter out deleted nodes, then update remaining ones
+      return currentNodes
+        .filter(node => nodeIds.has(node.id))
+        .map(node => {
+          const dataNode = data.nodes.find(n => n.id === node.id);
+          if (dataNode) {
+            return {
+              ...node,
+              data: {
+                ...dataNode.data,
+                nodeType: dataNode.data.nodeType || dataNode.type,
+              }
+            };
+          }
+          return node;
+        });
+    });
+    
+    // Also sync edges - remove edges connected to deleted nodes
+    setEdges(currentEdges => {
+      return currentEdges.filter(edge => 
+        nodeIds.has(edge.source) && nodeIds.has(edge.target)
+      );
     });
   }, [data.nodes]);
 
