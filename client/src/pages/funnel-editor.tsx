@@ -269,6 +269,28 @@ export default function FunnelEditor() {
       return;
     }
 
+    // For document files, store with filename prefix
+    if (nodeType === 'document') {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const dataUrl = reader.result as string;
+        updateNodeMediaUrl(`doc:${file.name}|${dataUrl}`);
+        toast({
+          title: "✅ Documento Adicionado",
+          description: `${file.name} foi anexado ao nó`,
+        });
+      };
+      reader.onerror = () => {
+        toast({
+          title: "❌ Erro",
+          description: "Falha ao carregar o documento",
+          variant: "destructive",
+        });
+      };
+      reader.readAsDataURL(file);
+      return;
+    }
+
     const reader = new FileReader();
     reader.onloadend = () => {
       const dataUrl = reader.result as string;
@@ -600,12 +622,24 @@ export default function FunnelEditor() {
                             <div className="flex items-center gap-3 p-3 bg-[#2a2a2a] rounded">
                               <FileText className="h-10 w-10 text-purple-500 flex-shrink-0" />
                               <div className="flex-1 min-w-0">
-                                <p className="text-sm text-gray-300 truncate">Documento anexado</p>
+                                <p className="text-sm text-gray-300">Documento anexado</p>
+                                <p className="text-xs text-gray-500 truncate mb-1">
+                                  {selectedNode.data.mediaUrl?.startsWith('doc:') 
+                                    ? selectedNode.data.mediaUrl.split('|')[0].replace('doc:', '')
+                                    : selectedNode.data.mediaUrl?.startsWith('data:') 
+                                      ? 'Arquivo carregado'
+                                      : selectedNode.data.mediaUrl}
+                                </p>
                                 <Button
                                   variant="link"
                                   size="sm"
                                   className="text-xs text-purple-400 hover:text-purple-300 p-0 h-auto"
-                                  onClick={() => window.open(selectedNode.data.mediaUrl, '_blank')}
+                                  onClick={() => {
+                                    const url = selectedNode.data.mediaUrl?.startsWith('doc:')
+                                      ? selectedNode.data.mediaUrl.split('|')[1]
+                                      : selectedNode.data.mediaUrl;
+                                    window.open(url, '_blank');
+                                  }}
                                   data-testid="button-open-document"
                                 >
                                   Abrir documento
