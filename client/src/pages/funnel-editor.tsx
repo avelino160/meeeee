@@ -542,38 +542,57 @@ export default function FunnelEditor() {
                               src={selectedNode.data.mediaUrl} 
                               alt="Preview" 
                               className="w-full h-auto max-h-48 object-contain"
+                              loading="lazy"
                             />
                           )}
                           {selectedNode.data.nodeType === 'video' && (
-                            <video 
-                              src={selectedNode.data.mediaUrl}
-                              controls
-                              className="w-full h-auto max-h-48"
-                              data-testid="video-preview"
-                            />
+                            <div className="flex flex-col items-center gap-2">
+                              <div className="flex items-center gap-3 p-3 bg-[#2a2a2a] rounded w-full">
+                                <Video className="h-10 w-10 text-purple-500 flex-shrink-0" />
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-sm text-gray-300">Vídeo anexado</p>
+                                  <p className="text-xs text-gray-500">Clique para reproduzir</p>
+                                </div>
+                              </div>
+                              <video 
+                                src={selectedNode.data.mediaUrl}
+                                controls
+                                preload="none"
+                                poster=""
+                                className="w-full h-auto max-h-32 rounded"
+                                data-testid="video-preview"
+                              />
+                            </div>
                           )}
                           {selectedNode.data.nodeType === 'audio' && (
-                            <audio 
-                              src={selectedNode.data.mediaUrl}
-                              controls
-                              className="w-full"
-                              data-testid="audio-preview"
-                            />
+                            <div className="flex flex-col gap-2">
+                              <div className="flex items-center gap-3 p-2 bg-[#2a2a2a] rounded">
+                                <Mic className="h-8 w-8 text-purple-500 flex-shrink-0" />
+                                <p className="text-sm text-gray-300">Áudio anexado</p>
+                              </div>
+                              <audio 
+                                src={selectedNode.data.mediaUrl}
+                                controls
+                                preload="metadata"
+                                className="w-full"
+                                data-testid="audio-preview"
+                              />
+                            </div>
                           )}
                           {selectedNode.data.nodeType === 'document' && (
                             <div className="flex items-center gap-3 p-3 bg-[#2a2a2a] rounded">
                               <FileText className="h-10 w-10 text-purple-500 flex-shrink-0" />
                               <div className="flex-1 min-w-0">
                                 <p className="text-sm text-gray-300 truncate">Documento anexado</p>
-                                <a 
-                                  href={selectedNode.data.mediaUrl} 
-                                  target="_blank" 
-                                  rel="noopener noreferrer"
-                                  className="text-xs text-purple-400 hover:text-purple-300 underline"
-                                  data-testid="link-document-preview"
+                                <Button
+                                  variant="link"
+                                  size="sm"
+                                  className="text-xs text-purple-400 hover:text-purple-300 p-0 h-auto"
+                                  onClick={() => window.open(selectedNode.data.mediaUrl, '_blank')}
+                                  data-testid="button-open-document"
                                 >
                                   Abrir documento
-                                </a>
+                                </Button>
                               </div>
                             </div>
                           )}
