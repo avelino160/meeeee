@@ -246,6 +246,29 @@ export default function FunnelEditor() {
     const file = event.target.files?.[0];
     if (!file || !selectedNode) return;
 
+    const nodeType = selectedNode.data.nodeType;
+    const maxSizeMB = nodeType === 'image' ? 5 : nodeType === 'audio' ? 10 : nodeType === 'video' ? 50 : 20;
+    const maxSizeBytes = maxSizeMB * 1024 * 1024;
+
+    if (file.size > maxSizeBytes) {
+      toast({
+        title: "Arquivo muito grande",
+        description: `O tamanho máximo para ${nodeType} é ${maxSizeMB}MB`,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // For video files, just store the file name to avoid freezing
+    if (nodeType === 'video') {
+      updateNodeMediaUrl(`video:${file.name}`);
+      toast({
+        title: "✅ Vídeo Adicionado",
+        description: `${file.name} foi anexado ao nó`,
+      });
+      return;
+    }
+
     const reader = new FileReader();
     reader.onloadend = () => {
       const dataUrl = reader.result as string;
@@ -546,22 +569,16 @@ export default function FunnelEditor() {
                             />
                           )}
                           {selectedNode.data.nodeType === 'video' && (
-                            <div className="flex flex-col items-center gap-2">
-                              <div className="flex items-center gap-3 p-3 bg-[#2a2a2a] rounded w-full">
-                                <Video className="h-10 w-10 text-purple-500 flex-shrink-0" />
-                                <div className="flex-1 min-w-0">
-                                  <p className="text-sm text-gray-300">Vídeo anexado</p>
-                                  <p className="text-xs text-gray-500">Clique para reproduzir</p>
-                                </div>
+                            <div className="flex items-center gap-3 p-3 bg-[#2a2a2a] rounded w-full">
+                              <Video className="h-10 w-10 text-purple-500 flex-shrink-0" />
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm text-gray-300">Vídeo anexado</p>
+                                <p className="text-xs text-gray-500 truncate">
+                                  {selectedNode.data.mediaUrl?.startsWith('video:') 
+                                    ? selectedNode.data.mediaUrl.replace('video:', '')
+                                    : 'Arquivo de vídeo'}
+                                </p>
                               </div>
-                              <video 
-                                src={selectedNode.data.mediaUrl}
-                                controls
-                                preload="none"
-                                poster=""
-                                className="w-full h-auto max-h-32 rounded"
-                                data-testid="video-preview"
-                              />
                             </div>
                           )}
                           {selectedNode.data.nodeType === 'audio' && (
