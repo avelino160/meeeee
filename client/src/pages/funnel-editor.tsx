@@ -271,10 +271,24 @@ export default function FunnelEditor() {
 
     // For document files, store with filename prefix
     if (nodeType === 'document') {
+      // Show filename immediately
+      const tempUrl = `doc:${file.name}|loading`;
+      updateNodeMediaUrl(tempUrl);
+      
       const reader = new FileReader();
       reader.onloadend = () => {
         const dataUrl = reader.result as string;
-        updateNodeMediaUrl(`doc:${file.name}|${dataUrl}`);
+        const fullUrl = `doc:${file.name}|${dataUrl}`;
+        
+        // Update with full data
+        const updatedNodes = funnelData.nodes.map(node => 
+          node.id === selectedNode.id 
+            ? { ...node, data: { ...node.data, mediaUrl: fullUrl } }
+            : node
+        );
+        setFunnelData({ ...funnelData, nodes: updatedNodes });
+        setSelectedNode(prev => prev ? { ...prev, data: { ...prev.data, mediaUrl: fullUrl } } : null);
+        
         toast({
           title: "✅ Documento Adicionado",
           description: `${file.name} foi anexado ao nó`,
@@ -630,20 +644,42 @@ export default function FunnelEditor() {
                                       ? 'Arquivo carregado'
                                       : selectedNode.data.mediaUrl}
                                 </p>
-                                <Button
-                                  variant="link"
-                                  size="sm"
-                                  className="text-xs text-purple-400 hover:text-purple-300 p-0 h-auto"
-                                  onClick={() => {
-                                    const url = selectedNode.data.mediaUrl?.startsWith('doc:')
-                                      ? selectedNode.data.mediaUrl.split('|')[1]
-                                      : selectedNode.data.mediaUrl;
-                                    window.open(url, '_blank');
-                                  }}
-                                  data-testid="button-open-document"
-                                >
-                                  Abrir documento
-                                </Button>
+                                {selectedNode.data.mediaUrl?.includes('|loading') ? (
+                                  <p className="text-xs text-yellow-500">Carregando...</p>
+                                ) : (
+                                  <Button
+                                    variant="link"
+                                    size="sm"
+                                    className="text-xs text-purple-400 hover:text-purple-300 p-0 h-auto"
+                                    onClick={() => {
+                                      const mediaUrl = selectedNode.data.mediaUrl;
+                                      if (!mediaUrl) return;
+                                      
+                                      let dataUrl = mediaUrl;
+                                      let fileName = 'documento';
+                                      
+                                      if (mediaUrl.startsWith('doc:')) {
+                                        const parts = mediaUrl.split('|');
+                                        fileName = parts[0].replace('doc:', '');
+                                        dataUrl = parts[1] || '';
+                                      }
+                                      
+                                      if (dataUrl && dataUrl !== 'loading') {
+                                        // Create a link and trigger download
+                                        const link = document.createElement('a');
+                                        link.href = dataUrl;
+                                        link.download = fileName;
+                                        link.target = '_blank';
+                                        document.body.appendChild(link);
+                                        link.click();
+                                        document.body.removeChild(link);
+                                      }
+                                    }}
+                                    data-testid="button-open-document"
+                                  >
+                                    Abrir documento
+                                  </Button>
+                                )}
                               </div>
                             </div>
                           )}
