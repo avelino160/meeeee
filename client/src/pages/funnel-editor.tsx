@@ -454,8 +454,8 @@ export default function FunnelEditor() {
 
           {/* Right Sidebar - Node Editor */}
           {selectedNode && (
-            <div className="w-full md:w-72 lg:w-80 fixed md:relative bottom-0 left-0 right-0 md:bottom-auto md:left-auto md:right-auto max-h-[50vh] md:max-h-full bg-[#252525] border-t md:border-t-0 md:border-l border-[#333] p-3 lg:p-4 overflow-y-auto z-20">
-              <div className="space-y-4">
+            <div className="w-full md:w-72 lg:w-80 fixed md:relative bottom-0 left-0 right-0 md:bottom-auto md:left-auto md:right-auto max-h-[60vh] md:max-h-full bg-[#252525] border-t md:border-t-0 md:border-l border-[#333] p-3 lg:p-4 overflow-y-auto z-20 flex flex-col">
+              <div className="space-y-4 flex-1 overflow-y-auto min-h-0">
                 <div>
                   <h3 className="text-lg font-semibold text-white mb-2">
                     Editar Nó
@@ -683,29 +683,29 @@ export default function FunnelEditor() {
                   </div>
                 )}
 
-                <Separator className="bg-gray-700" />
-
-                <div className="space-y-2">
-                  {selectedNode.id !== 'start' && selectedNode.data.nodeType !== 'trigger' && (
-                    <Button
-                      variant="outline"
-                      className="w-full border-red-600 text-red-400 hover:bg-red-900/50"
-                      onClick={deleteNode}
-                      data-testid="button-delete-node"
-                    >
-                      <X className="h-4 w-4 mr-2" />
-                      Excluir Elemento
-                    </Button>
-                  )}
+              </div>
+              
+              {/* Action buttons - always visible at bottom */}
+              <div className="pt-3 mt-3 border-t border-gray-700 space-y-2 flex-shrink-0">
+                {selectedNode.id !== 'start' && selectedNode.data.nodeType !== 'trigger' && (
                   <Button
                     variant="outline"
-                    className="w-full border-gray-600 text-gray-300 hover:bg-gray-800"
-                    onClick={() => setSelectedNode(null)}
-                    data-testid="button-close-editor"
+                    className="w-full border-red-600 text-red-400 hover:bg-red-900/50"
+                    onClick={deleteNode}
+                    data-testid="button-delete-node"
                   >
-                    Fechar
+                    <X className="h-4 w-4 mr-2" />
+                    Excluir Elemento
                   </Button>
-                </div>
+                )}
+                <Button
+                  variant="outline"
+                  className="w-full border-gray-600 text-gray-300 hover:bg-gray-800"
+                  onClick={() => setSelectedNode(null)}
+                  data-testid="button-close-editor"
+                >
+                  Fechar
+                </Button>
               </div>
             </div>
           )}
