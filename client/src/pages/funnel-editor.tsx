@@ -533,15 +533,50 @@ export default function FunnelEditor() {
                         data-testid="input-media-file"
                       />
                     </div>
-                    {selectedNode.data.mediaUrl && selectedNode.data.nodeType === 'image' && (
+                    {selectedNode.data.mediaUrl && (
                       <div>
                         <Label className="text-gray-300">Preview</Label>
-                        <div className="mt-2 border border-gray-700 rounded overflow-hidden bg-[#1a1a1a]">
-                          <img 
-                            src={selectedNode.data.mediaUrl} 
-                            alt="Preview" 
-                            className="w-full h-auto max-h-48 object-contain"
-                          />
+                        <div className="mt-2 border border-gray-700 rounded overflow-hidden bg-[#1a1a1a] p-2">
+                          {selectedNode.data.nodeType === 'image' && (
+                            <img 
+                              src={selectedNode.data.mediaUrl} 
+                              alt="Preview" 
+                              className="w-full h-auto max-h-48 object-contain"
+                            />
+                          )}
+                          {selectedNode.data.nodeType === 'video' && (
+                            <video 
+                              src={selectedNode.data.mediaUrl}
+                              controls
+                              className="w-full h-auto max-h-48"
+                              data-testid="video-preview"
+                            />
+                          )}
+                          {selectedNode.data.nodeType === 'audio' && (
+                            <audio 
+                              src={selectedNode.data.mediaUrl}
+                              controls
+                              className="w-full"
+                              data-testid="audio-preview"
+                            />
+                          )}
+                          {selectedNode.data.nodeType === 'document' && (
+                            <div className="flex items-center gap-3 p-3 bg-[#2a2a2a] rounded">
+                              <FileText className="h-10 w-10 text-purple-500 flex-shrink-0" />
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm text-gray-300 truncate">Documento anexado</p>
+                                <a 
+                                  href={selectedNode.data.mediaUrl} 
+                                  target="_blank" 
+                                  rel="noopener noreferrer"
+                                  className="text-xs text-purple-400 hover:text-purple-300 underline"
+                                  data-testid="link-document-preview"
+                                >
+                                  Abrir documento
+                                </a>
+                              </div>
+                            </div>
+                          )}
                         </div>
                       </div>
                     )}
