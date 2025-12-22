@@ -39,6 +39,13 @@ export default function WhatsAppConnectionModal({ open, onOpenChange }: WhatsApp
   const generateQRMutation = useMutation({
     mutationFn: async () => {
       const response = await apiRequest("POST", "/api/whatsapp/qr");
+      if (!response.ok) {
+        const data = await response.json();
+        const error = new Error(data.message || "Falha ao gerar QR Code");
+        (error as any).status = response.status;
+        (error as any).details = data.details;
+        throw error;
+      }
       return response.json();
     },
     onSuccess: (data) => {
@@ -55,12 +62,21 @@ export default function WhatsAppConnectionModal({ open, onOpenChange }: WhatsApp
       });
     },
     onError: (error: any) => {
-      const isLimitExceeded = error.message?.includes('excedeu') || error.message?.includes('limite');
-      toast({
-        title: isLimitExceeded ? "Limite Excedido" : "❌ Erro",
-        description: error.message || "Falha ao gerar QR Code.",
-        variant: "destructive",
-      });
+      const isDatacenterBlock = error.status === 405 || error.message?.includes('cloud') || error.message?.includes('datacenter');
+      
+      if (isDatacenterBlock) {
+        toast({
+          title: "⚠️ Ambiente Cloud Detectado",
+          description: "WhatsApp bloqueia conexões de servidores cloud. Para testar, execute o projeto localmente: npm run dev",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "❌ Erro ao Gerar QR Code",
+          description: error.message || "Falha ao gerar QR Code. Tente novamente.",
+          variant: "destructive",
+        });
+      }
     },
   });
 
@@ -149,6 +165,15 @@ export default function WhatsAppConnectionModal({ open, onOpenChange }: WhatsApp
 
           {!whatsappStatus?.connected ? (
             <>
+              {/* Cloud Environment Warning */}
+              {isReplitEnvironment && (
+                <div className="bg-yellow-50 border-2 border-yellow-200 p-4 rounded-lg">
+                  <p className="text-sm text-yellow-800">
+                    <strong>💻 Ambiente Cloud Detectado:</strong> O WhatsApp bloqueia conexões de servidores cloud por segurança. Para gerar o QR Code, você precisa executar este projeto <strong>localmente</strong> no seu computador.
+                  </p>
+                </div>
+              )}
+
               {/* QR Code Generation */}
               <div className="text-center space-y-4">
                 {showQR && qrImageUrl ? (
