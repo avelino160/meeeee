@@ -163,16 +163,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
 
     try {
+      console.log('📱 Starting QR code generation...');
       const userId = DEFAULT_USER_ID;
       const qrCodeData = await whatsappService.getQRCode(userId);
       
       // 🔒 SEGURANÇA: QR gerado pelo Baileys no servidor, frontend renderiza
       const qrImageURL = whatsappService.qrCodeImage;
       
+      console.log('✅ QR Code generated successfully, image URL length:', qrImageURL?.length || 0);
       res.json({ qrCode: qrCodeData, qrImage: qrImageURL });
-    } catch (error) {
-      console.error("Error generating QR code:", error);
-      res.status(500).json({ message: "Failed to generate QR code" });
+    } catch (error: any) {
+      console.error("❌ Error generating QR code:", error?.message || error);
+      res.status(500).json({ 
+        message: error?.message || "Failed to generate QR code",
+        error: error?.error || "qr_generation_failed"
+      });
     }
   });
 
