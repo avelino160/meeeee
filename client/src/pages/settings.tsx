@@ -32,6 +32,7 @@ import {
   ChevronDown,
   Phone,
   Send,
+  MessageCircle,
 } from "lucide-react";
 
 export default function Settings() {
@@ -243,15 +244,17 @@ export default function Settings() {
                         </a>
                         <Separator />
                         <a 
-                          href="tel:+5511987654321"
+                          href="https://wa.me/258864014350?text=Olá, preciso de ajuda com a plataforma RanZap"
+                          target="_blank"
+                          rel="noopener noreferrer"
                           className="flex items-start space-x-3 p-3 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
-                          data-testid="link-phone-support"
+                          data-testid="link-whatsapp-support"
                         >
-                          <Phone className="h-5 w-5 text-primary mt-0.5" />
+                          <MessageCircle className="h-5 w-5 text-primary mt-0.5" />
                           <div>
-                            <p className="font-medium">Telefone</p>
-                            <p className="text-sm text-muted-foreground">+55 11 98765-4321</p>
-                            <p className="text-xs text-muted-foreground mt-1">Seg-Sex, 9h às 18h (Apenas Business)</p>
+                            <p className="font-medium">WhatsApp</p>
+                            <p className="text-sm text-muted-foreground">+258 864 014 350</p>
+                            <p className="text-xs text-muted-foreground mt-1">Suporte direto via WhatsApp</p>
                           </div>
                         </a>
                         
