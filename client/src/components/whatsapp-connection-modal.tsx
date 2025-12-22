@@ -260,14 +260,14 @@ export default function WhatsAppConnectionModal({ open, onOpenChange }: WhatsApp
                       </div>
                       <Input
                         id="phone"
-                        placeholder="+258 84 123 4567"
+                        placeholder="+55 11 99999-8888"
                         value={phoneNumber}
                         onChange={(e) => setPhoneNumber(e.target.value)}
                         data-testid="input-phone-number"
                       />
                     </div>
                     <p className="text-xs text-muted-foreground">
-                      Digite seu número com código do país (ex: +258 para Moçambique)
+                      Digite seu número com código do país (ex: +55 para Brasil, +258 para Moçambique)
                     </p>
                   </div>
 
