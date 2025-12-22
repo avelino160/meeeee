@@ -44,6 +44,7 @@ export class WhatsAppService {
       
       console.log('🔧 Estado de autenticação carregado, creds:', !!state.creds?.me);
       
+      // Sempre criar um novo socket para QR generation
       this.sock = makeWASocket({
         auth: {
           creds: state.creds,
@@ -54,9 +55,15 @@ export class WhatsAppService {
         browser: Browsers.macOS('Desktop'),
         syncFullHistory: false,
         generateHighQualityLinkPreview: true,
+        markOnlineOnConnect: false, // Não marcar como online para evitar timeout rápido
       });
 
       console.log('✅ Socket criado com sucesso');
+      
+      // Garantir que o socket tenha tempo para emitir QR antes de qualquer validação
+      if (this.sock && !phoneNumber) {
+        console.log('⏳ Aguardando socket ficar pronto para emitir QR...');
+      }
       
       // Se tiver número de telefone, aguardar conexão e usar pairing code
       if (phoneNumber && !state.creds?.registered) {
@@ -306,9 +313,13 @@ export class WhatsAppService {
       // Limpar socket antigo se existir
       if (this.sock) {
         console.log('🔌 Fechando socket antigo...');
-        this.sock.end(undefined);
+        try {
+          this.sock.end(undefined);
+        } catch (e) {
+          console.log('⚠️ Erro ao fechar socket antigo:', e);
+        }
         this.sock = null;
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        await new Promise(resolve => setTimeout(resolve, 500));
       }
 
       // Limpar credenciais antigas antes de gerar novo QR
@@ -319,7 +330,7 @@ export class WhatsAppService {
         await fs.rm(authPath, { recursive: true, force: true });
         console.log('✅ Credenciais antigas removidas');
       } catch (err) {
-        // Ignorar erro se pasta não existir
+        console.log('⚠️ Pasta wa_auth não existe (esperado)');
       }
 
       // Resetar QR codes
@@ -327,37 +338,51 @@ export class WhatsAppService {
       this.qrImage = '';
       this.pairingCode = '';
       
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise(resolve => setTimeout(resolve, 300));
       
-      console.log('🔄 Inicializando socket Baileys...');
-      await this.initializeSocket();
-
-      // Aguardar QR Code ser gerado
-      return new Promise((resolve, reject) => {
-        let attempts = 0;
-        const timeout = setTimeout(() => {
-          this.isGeneratingQR = false;
-          console.error(`❌ Timeout: QR Code não foi gerado após 30 segundos. Socket conectado: ${this.sock?.user?.id ? 'sim' : 'não'}`);
-          reject(new Error('Timeout aguardando QR Code - socket não respondeu'));
-        }, 30000);
-
-        const checkQR = () => {
-          attempts++;
-          console.log(`🔍 Tentativa ${attempts}: QR Code disponível? ${this.qrCode ? 'SIM' : 'NÃO'}`);
+      console.log('🔄 Inicializando socket Baileys para gerar QR...');
+      
+      return new Promise(async (resolve, reject) => {
+        let timeout: NodeJS.Timeout | null = null;
+        
+        try {
+          // Inicializar socket e garantir que listeners estão ativados
+          await this.initializeSocket();
           
-          if (this.qrCode) {
-            clearTimeout(timeout);
+          let attempts = 0;
+          timeout = setTimeout(() => {
             this.isGeneratingQR = false;
-            console.log('✅ QR Code recuperado com sucesso');
-            resolve(this.qrCode);
-          } else {
-            if (attempts % 5 === 0) {
-              console.log(`⏳ Aguardando QR Code... (${attempts}s)`);
+            const err = new Error(`QR Code não gerado após 25 segundos. Socket status: ${this.sock ? 'ativo' : 'nulo'}`);
+            console.error('❌', err.message);
+            reject(err);
+          }, 25000);
+
+          const checkQR = () => {
+            attempts++;
+            
+            if (this.qrCode) {
+              if (timeout) clearTimeout(timeout);
+              this.isGeneratingQR = false;
+              console.log('✅ QR Code gerado com sucesso na tentativa', attempts);
+              resolve(this.qrCode);
+              return;
             }
-            setTimeout(checkQR, 1000);
-          }
-        };
-        checkQR();
+            
+            if (attempts === 1 || attempts % 3 === 0) {
+              console.log(`🔄 Tentativa ${attempts}: Aguardando QR Code...`);
+            }
+            
+            setTimeout(checkQR, 500); // Verificar a cada 500ms
+          };
+          
+          checkQR();
+          
+        } catch (err) {
+          if (timeout) clearTimeout(timeout);
+          this.isGeneratingQR = false;
+          console.error('❌ Erro ao inicializar socket:', err);
+          reject(err);
+        }
       });
 
     } catch (error) {
