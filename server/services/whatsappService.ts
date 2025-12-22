@@ -334,17 +334,26 @@ export class WhatsAppService {
 
       // Aguardar QR Code ser gerado
       return new Promise((resolve, reject) => {
+        let attempts = 0;
         const timeout = setTimeout(() => {
           this.isGeneratingQR = false;
-          reject(new Error('Timeout aguardando QR Code'));
+          console.error(`❌ Timeout: QR Code não foi gerado após 30 segundos. Socket conectado: ${this.sock?.user?.id ? 'sim' : 'não'}`);
+          reject(new Error('Timeout aguardando QR Code - socket não respondeu'));
         }, 30000);
 
         const checkQR = () => {
+          attempts++;
+          console.log(`🔍 Tentativa ${attempts}: QR Code disponível? ${this.qrCode ? 'SIM' : 'NÃO'}`);
+          
           if (this.qrCode) {
             clearTimeout(timeout);
             this.isGeneratingQR = false;
+            console.log('✅ QR Code recuperado com sucesso');
             resolve(this.qrCode);
           } else {
+            if (attempts % 5 === 0) {
+              console.log(`⏳ Aguardando QR Code... (${attempts}s)`);
+            }
             setTimeout(checkQR, 1000);
           }
         };
