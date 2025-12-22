@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -11,10 +11,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
-import { MessageSquare, Smartphone, QrCode } from "lucide-react";
+import { MessageSquare, QrCode } from "lucide-react";
 
 interface WhatsAppConnectionModalProps {
   open: boolean;
@@ -22,12 +19,9 @@ interface WhatsAppConnectionModalProps {
 }
 
 export default function WhatsAppConnectionModal({ open, onOpenChange }: WhatsAppConnectionModalProps) {
-  const [phoneNumber, setPhoneNumber] = useState("");
   const [showQR, setShowQR] = useState(false);
   const [qrCodeData, setQrCodeData] = useState<string>("");
   const [qrImageUrl, setQrImageUrl] = useState<string>("");
-  const [pairingCode, setPairingCode] = useState<string>("");
-  const [usePairingCode, setUsePairingCode] = useState(true);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -39,46 +33,6 @@ export default function WhatsAppConnectionModal({ open, onOpenChange }: WhatsApp
   const { data: whatsappStatus } = useQuery<WhatsAppStatus>({
     queryKey: ["/api/whatsapp/status"],
     enabled: open,
-  });
-
-  // 🚀 GERAR PAIRING CODE
-  const generatePairingMutation = useMutation({
-    mutationFn: async () => {
-      if (!phoneNumber.trim()) {
-        throw new Error("Número de telefone é obrigatório");
-      }
-      const response = await apiRequest("POST", "/api/whatsapp/pairing-code", {
-        phoneNumber: phoneNumber.trim(),
-      });
-      
-      if (response.status === 405) {
-        const data = await response.json();
-        throw new Error(data.message || "Bloqueio de datacenter");
-      }
-      
-      return response.json();
-    },
-    onSuccess: (data) => {
-      const code = data.pairingCode || '';
-      setPairingCode(code);
-      
-      toast({
-        title: "✅ Código Gerado!",
-        description: `Seu código: ${code}. Digite no WhatsApp para conectar!`,
-      });
-    },
-    onError: (error: any) => {
-      const isDatacenterBlock = error.message?.includes('bloqueou') || error.message?.includes('datacenter');
-      const isLimitExceeded = error.message?.includes('excedeu') || error.message?.includes('limite');
-      
-      toast({
-        title: isDatacenterBlock ? "⚠️ Ambiente Não Suportado" : isLimitExceeded ? "Limite Excedido" : "❌ Erro",
-        description: isDatacenterBlock 
-          ? "WhatsApp bloqueia conexões de servidores cloud. Execute localmente no seu computador para testar." 
-          : error.message || "Falha ao gerar código. Verifique o número e tente novamente.",
-        variant: "destructive",
-      });
-    },
   });
 
   // 🚀 GERAR QR CODE 
@@ -134,31 +88,6 @@ export default function WhatsAppConnectionModal({ open, onOpenChange }: WhatsApp
   //   return () => clearInterval(interval);
   // }, [open, whatsappStatus?.connected, queryClient, onOpenChange, toast]);
 
-  const connectMutation = useMutation({
-    mutationFn: async () => {
-      const response = await apiRequest("POST", "/api/whatsapp/connect", {
-        phoneNumber,
-      });
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/whatsapp/status"] });
-      toast({
-        title: "Conectado",
-        description: "WhatsApp conectado com sucesso!",
-      });
-      onOpenChange(false);
-      setShowQR(false);
-    },
-    onError: (error) => {
-      toast({
-        title: "Erro de Conexão",
-        description: "Falha ao conectar WhatsApp. Verifique o número.",
-        variant: "destructive",
-      });
-    },
-  });
-
   const disconnectMutation = useMutation({
     mutationFn: async () => {
       const response = await apiRequest("POST", "/api/whatsapp/disconnect");
@@ -181,28 +110,17 @@ export default function WhatsAppConnectionModal({ open, onOpenChange }: WhatsApp
     },
   });
 
-  const handleConnect = () => {
-    if (!phoneNumber.trim()) {
-      toast({
-        title: "Número Obrigatório",
-        description: "Digite seu número de WhatsApp",
-        variant: "destructive",
-      });
-      return;
-    }
-    connectMutation.mutate();
-  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="w-[95vw] max-w-md" data-testid="modal-whatsapp-connection">
         <DialogHeader>
           <DialogTitle className="flex items-center">
-            <MessageSquare className="h-5 w-5 mr-2 text-primary" />
-            Conexão WhatsApp
+            <QrCode className="h-5 w-5 mr-2 text-primary" />
+            Conectar WhatsApp com QR Code
           </DialogTitle>
           <DialogDescription>
-            Conecte sua conta do WhatsApp para enviar mensagens automatizadas
+            Escaneie o código QR com seu WhatsApp para conectar
           </DialogDescription>
         </DialogHeader>
 
@@ -231,130 +149,78 @@ export default function WhatsAppConnectionModal({ open, onOpenChange }: WhatsApp
 
           {!whatsappStatus?.connected ? (
             <>
-              {/* ⚠️ BLOQUEIO ATIVO NO REPLIT - MODO BLOQUEADO */}
-              {isReplitEnvironment ? (
-                <>
-                  <div className="bg-red-50 border border-red-200 p-3 rounded-lg">
-                    <p className="text-sm text-red-700">
-                      <strong>Ambiente cloud detectado.</strong> Execute localmente com <code className="bg-red-100 px-1 rounded text-xs">npm run dev</code> para conectar o WhatsApp.
-                    </p>
-                  </div>
-
-                  <Button
-                    variant="outline"
-                    onClick={() => onOpenChange(false)}
-                    className="w-full"
-                    data-testid="button-close-modal"
-                  >
-                    Fechar
-                  </Button>
-                </>
-              ) : (
-                <>
-                  {/* Phone Number Input - APENAS FORA DO REPLIT */}
-                  <div className="space-y-2">
-                    <Label htmlFor="phone">Número do WhatsApp</Label>
-                    <div className="flex space-x-2">
-                      <div className="flex items-center px-3 py-2 bg-muted rounded-md">
-                        <Smartphone className="h-4 w-4 text-muted-foreground" />
-                      </div>
-                      <Input
-                        id="phone"
-                        placeholder="+55 11 99999-8888"
-                        value={phoneNumber}
-                        onChange={(e) => setPhoneNumber(e.target.value)}
-                        data-testid="input-phone-number"
+              {/* QR Code Generation */}
+              <div className="text-center space-y-4">
+                {showQR && qrImageUrl ? (
+                  <div className="space-y-4">
+                    <div className="bg-white p-6 rounded-lg border-2 border-blue-200 mx-auto inline-block">
+                      <img 
+                        src={qrImageUrl} 
+                        alt="QR Code" 
+                        className="w-64 h-64"
+                        data-testid="img-qr-code"
                       />
                     </div>
-                    <p className="text-xs text-muted-foreground">
-                      Digite seu número com código do país (ex: +55 para Brasil, +258 para Moçambique)
-                    </p>
-                  </div>
-
-                  <Separator />
-
-                  {/* Pairing Code UI */}
-                  {pairingCode ? (
-                    <div className="text-center space-y-4 p-6 bg-gradient-to-br from-green-50 to-blue-50 rounded-xl border-2 border-green-200">
-                      <div className="text-center mb-4">
-                        <h3 className="text-lg font-bold text-green-700">✅ Código de Pareamento Gerado!</h3>
-                        <p className="text-sm text-gray-600">Digite este código no seu WhatsApp</p>
-                      </div>
+                    
+                    <div className="space-y-2">
+                      <h3 className="text-lg font-bold text-blue-700">📱 Escaneie o QR Code</h3>
+                      <p className="text-sm text-gray-600">Abra o WhatsApp no seu celular e escaneie este código</p>
                       
-                      <div className="bg-white rounded-lg p-6 mx-auto shadow-lg border-4 border-green-300">
-                        <div className="text-5xl font-bold text-green-600 tracking-[0.3em] font-mono">
-                          {pairingCode}
-                        </div>
-                      </div>
-                      
-                      <div className="space-y-2">
-                        <p className="font-bold text-green-700 text-sm sm:text-base">📱 Como Conectar:</p>
-                        <div className="text-xs sm:text-sm text-gray-700 space-y-1 text-left bg-white p-3 rounded">
-                          <p><strong>1.</strong> Abra o WhatsApp no seu celular</p>
-                          <p><strong>2.</strong> Vá em <strong>Configurações → Aparelhos conectados</strong></p>
-                          <p><strong>3.</strong> Toque em <strong>"Conectar um aparelho"</strong></p>
-                          <p><strong>4.</strong> Toque em <strong>"Conectar com número de telefone"</strong></p>
-                          <p><strong>5.</strong> Digite o código: <span className="font-bold text-green-600">{pairingCode}</span></p>
-                        </div>
-                        <p className="text-xs text-orange-600 font-medium mt-3">⚡ Aguardando conexão...</p>
+                      <div className="bg-blue-50 p-4 rounded-lg text-sm text-gray-700">
+                        <p className="font-medium mb-2">Como conectar:</p>
+                        <ol className="text-left space-y-1 text-xs">
+                          <li><strong>1.</strong> Abra WhatsApp no seu celular</li>
+                          <li><strong>2.</strong> Toque em <strong>⋮ (Menu) → Aparelhos conectados</strong></li>
+                          <li><strong>3.</strong> Toque em <strong>Conectar um aparelho</strong></li>
+                          <li><strong>4.</strong> Escaneie este QR Code com a câmera</li>
+                        </ol>
                       </div>
                       
                       <Button
-                        onClick={() => {
-                          setPairingCode('');
-                          generatePairingMutation.mutate();
-                        }}
+                        onClick={() => generateQRMutation.mutate()}
                         variant="outline"
                         className="w-full"
-                        data-testid="button-regenerate-code"
+                        data-testid="button-regenerate-qr"
                       >
-                        🔄 Gerar Novo Código
+                        🔄 Gerar Novo QR Code
                       </Button>
                     </div>
-                  ) : (
-                    <div className="text-center space-y-4 p-6 bg-gradient-to-br from-blue-50 to-green-50 rounded-xl border-2 border-blue-200">
-                      <div className="text-center mb-4">
-                        <h3 className="text-lg font-bold text-blue-700">⚡ Conectar WhatsApp</h3>
-                        <p className="text-sm text-gray-600">Use código de pareamento para conectar</p>
-                      </div>
-                      
-                      {generatePairingMutation.isPending ? (
-                        <div className="flex flex-col items-center space-y-3">
-                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                          <p className="font-medium text-blue-700">🚀 Gerando código...</p>
-                          <p className="text-sm text-gray-600">Aguarde alguns segundos...</p>
-                        </div>
-                      ) : (
-                        <>
-                          <Button
-                            onClick={() => generatePairingMutation.mutate()}
-                            disabled={!phoneNumber.trim()}
-                            className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3"
-                            data-testid="button-generate-pairing"
-                          >
-                            <Smartphone className="h-5 w-5 mr-2" />
-                            🔥 Gerar Código de Pareamento
-                          </Button>
-                          <p className="text-xs text-gray-500">
-                            💡 Digite seu número acima e clique para gerar o código
-                          </p>
-                        </>
-                      )}
-                    </div>
-                  )}
-
-                  <div className="flex justify-center">
-                    <Button
-                      variant="outline"
-                      onClick={() => onOpenChange(false)}
-                      className="w-full"
-                      data-testid="button-close-modal"
-                    >
-                      Fechar
-                    </Button>
                   </div>
-                </>
-              )}
+                ) : (
+                  <div className="space-y-4 p-6 bg-gradient-to-br from-blue-50 to-green-50 rounded-xl border-2 border-blue-200">
+                    <div>
+                      <h3 className="text-lg font-bold text-blue-700">🔥 Pronto para conectar?</h3>
+                      <p className="text-sm text-gray-600">Clique abaixo para gerar o QR Code</p>
+                    </div>
+                    
+                    {generateQRMutation.isPending ? (
+                      <div className="flex flex-col items-center space-y-3">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                        <p className="font-medium text-blue-700">Gerando QR Code...</p>
+                        <p className="text-sm text-gray-600">Aguarde alguns segundos...</p>
+                      </div>
+                    ) : (
+                      <Button
+                        onClick={() => generateQRMutation.mutate()}
+                        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3"
+                        data-testid="button-generate-qr"
+                      >
+                        <QrCode className="h-5 w-5 mr-2" />
+                        Gerar QR Code
+                      </Button>
+                    )}
+                  </div>
+                )}
+
+                <Button
+                  variant="outline"
+                  onClick={() => onOpenChange(false)}
+                  className="w-full"
+                  data-testid="button-close-modal"
+                >
+                  Fechar
+                </Button>
+              </div>
             </>
           ) : (
             /* ✅ WhatsApp Conectado */
