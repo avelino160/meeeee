@@ -227,9 +227,18 @@ export default function WhatsAppPreview({
   const renderMessageContent = (message: Message) => {
     if (message.type === 'bot' && message.mediaType === 'message') {
       return (
-        <p className="text-sm whitespace-pre-wrap break-words">
-          {message.displayContent || message.content}
-        </p>
+        <div className="flex items-baseline gap-1">
+          <p className="text-sm whitespace-pre-wrap break-words">
+            {message.displayContent || message.content}
+          </p>
+          {message.isTyping && (
+            <div className="flex gap-0.5 items-center">
+              <span className="text-sm text-gray-300 animate-bounce" style={{ animationDelay: '0ms' }}>.</span>
+              <span className="text-sm text-gray-300 animate-bounce" style={{ animationDelay: '150ms' }}>.</span>
+              <span className="text-sm text-gray-300 animate-bounce" style={{ animationDelay: '300ms' }}>.</span>
+            </div>
+          )}
+        </div>
       );
     }
 
@@ -267,16 +276,17 @@ export default function WhatsAppPreview({
         <div>
           {message.mediaUrl ? (
             <div className="space-y-2">
-              <div className={`relative w-full max-w-[200px] flex items-center gap-2 px-3 py-2 rounded ${isPlaying ? 'bg-purple-600/20' : ''}`}>
-                {isPlaying && (
-                  <div className="flex gap-1">
-                    <div className="w-1 h-4 bg-purple-400 rounded-sm animate-pulse" style={{ animationDelay: '0ms' }}></div>
-                    <div className="w-1 h-4 bg-purple-400 rounded-sm animate-pulse" style={{ animationDelay: '100ms' }}></div>
-                    <div className="w-1 h-4 bg-purple-400 rounded-sm animate-pulse" style={{ animationDelay: '200ms' }}></div>
-                  </div>
-                )}
-                <span className="text-xs text-gray-300">
-                  {isPlaying ? 'Reproduzindo...' : 'Áudio'}
+              <div className={`relative w-full max-w-[200px] flex items-center gap-1.5 px-3 py-2 rounded ${isPlaying ? 'bg-purple-600/30' : 'bg-purple-600/10'}`}>
+                {/* Animated waveform bars - like recording in real time */}
+                <div className="flex items-center gap-0.5 h-8">
+                  <div className="w-1 bg-purple-400 rounded-full" style={{ height: isPlaying ? '6px' : '2px', animation: isPlaying ? 'wave 0.6s ease-in-out infinite' : 'none', animationDelay: '0ms' }} />
+                  <div className="w-1 bg-purple-400 rounded-full" style={{ height: isPlaying ? '8px' : '2px', animation: isPlaying ? 'wave 0.6s ease-in-out infinite' : 'none', animationDelay: '100ms' }} />
+                  <div className="w-1 bg-purple-400 rounded-full" style={{ height: isPlaying ? '12px' : '2px', animation: isPlaying ? 'wave 0.6s ease-in-out infinite' : 'none', animationDelay: '200ms' }} />
+                  <div className="w-1 bg-purple-400 rounded-full" style={{ height: isPlaying ? '10px' : '2px', animation: isPlaying ? 'wave 0.6s ease-in-out infinite' : 'none', animationDelay: '300ms' }} />
+                  <div className="w-1 bg-purple-400 rounded-full" style={{ height: isPlaying ? '8px' : '2px', animation: isPlaying ? 'wave 0.6s ease-in-out infinite' : 'none', animationDelay: '400ms' }} />
+                </div>
+                <span className="text-xs text-gray-300 whitespace-nowrap">
+                  {isPlaying ? '▶' : ''}
                 </span>
               </div>
               <audio 
