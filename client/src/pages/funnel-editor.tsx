@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
@@ -29,7 +29,8 @@ import {
   Tag,
   CheckCircle,
   ArrowLeft,
-  X
+  X,
+  Loader
 } from "lucide-react";
 
 interface LocationData {
@@ -75,6 +76,9 @@ export default function FunnelEditor() {
   const [funnelStatus, setFunnelStatus] = useState("draft");
   const [triggerPhrases, setTriggerPhrases] = useState<string[]>([]);
   const [showPreview, setShowPreview] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
 
   const { data: funnel, isLoading } = useQuery<Funnel>({
     queryKey: [`/api/funnels/${funnelId}`],
@@ -240,6 +244,52 @@ export default function FunnelEditor() {
   const onDragStart = (event: React.DragEvent, nodeType: string) => {
     event.dataTransfer.setData('application/reactflow', nodeType);
     event.dataTransfer.effectAllowed = 'move';
+  };
+
+  const startAudioRecording = async () => {
+    if (!selectedNode || selectedNode.data.nodeType !== 'audio') return;
+    
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      audioChunksRef.current = [];
+      
+      const mediaRecorder = new MediaRecorder(stream);
+      mediaRecorderRef.current = mediaRecorder;
+      
+      mediaRecorder.ondataavailable = (event) => {
+        audioChunksRef.current.push(event.data);
+      };
+      
+      mediaRecorder.onstop = () => {
+        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+        const audioUrl = URL.createObjectURL(audioBlob);
+        updateNodeMediaUrl(audioUrl);
+        
+        // Stop all tracks
+        stream.getTracks().forEach(track => track.stop());
+        
+        toast({
+          title: "✅ Áudio Gravado",
+          description: "Sua gravação foi salva com sucesso!",
+        });
+      };
+      
+      mediaRecorder.start();
+      setIsRecording(true);
+    } catch (error) {
+      toast({
+        title: "❌ Erro",
+        description: "Não foi possível acessar o microfone",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const stopAudioRecording = () => {
+    if (mediaRecorderRef.current && isRecording) {
+      mediaRecorderRef.current.stop();
+      setIsRecording(false);
+    }
   };
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -560,6 +610,32 @@ export default function FunnelEditor() {
                 {/* Media Nodes (Image, Video, Audio, Document) */}
                 {['image', 'video', 'audio', 'document'].includes(selectedNode.data.nodeType || '') && (
                   <div className="space-y-3">
+                    {selectedNode.data.nodeType === 'audio' && (
+                      <div>
+                        <Label className="text-gray-300">Gravação ao Vivo</Label>
+                        <div className="mt-2 flex gap-2">
+                          {!isRecording ? (
+                            <Button
+                              onClick={startAudioRecording}
+                              className="flex-1 bg-purple-600 hover:bg-purple-700 text-white"
+                              data-testid="button-start-recording"
+                            >
+                              <Mic className="h-4 w-4 mr-2" />
+                              Iniciar Gravação
+                            </Button>
+                          ) : (
+                            <Button
+                              onClick={stopAudioRecording}
+                              className="flex-1 bg-red-600 hover:bg-red-700 text-white animate-pulse"
+                              data-testid="button-stop-recording"
+                            >
+                              <Loader className="h-4 w-4 mr-2 animate-spin" />
+                              Parando...
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                    )}
                     <div>
                       <Label htmlFor="media-url" className="text-gray-300">
                         URL do arquivo

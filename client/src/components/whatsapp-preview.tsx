@@ -40,6 +40,8 @@ interface Message {
   timestamp: Date;
   waitMinutes?: number;
   location?: LocationData;
+  displayContent?: string;
+  isTyping?: boolean;
 }
 
 export default function WhatsAppPreview({ 
@@ -51,9 +53,11 @@ export default function WhatsAppPreview({
 }: WhatsAppPreviewProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isSimulating, setIsSimulating] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
   const simulationIdRef = useRef<number>(0);
   const nodesRef = useRef(nodes);
   const edgesRef = useRef(edges);
+  const synthRef = useRef<SpeechSynthesisUtterance | null>(null);
   
   // Keep refs updated
   useEffect(() => {
@@ -75,6 +79,65 @@ export default function WhatsAppPreview({
     };
   }, [open]);
 
+  const simulateTyping = async (text: string, messageId: string) => {
+    // Simulate typing effect character by character
+    let displayedText = "";
+    const typingSpeed = 30; // ms per character
+    
+    for (let i = 0; i < text.length; i++) {
+      displayedText += text[i];
+      
+      setMessages(prev => 
+        prev.map(msg => 
+          msg.id === messageId 
+            ? { ...msg, displayContent: displayedText, isTyping: true }
+            : msg
+        )
+      );
+      
+      await new Promise(resolve => setTimeout(resolve, typingSpeed));
+    }
+    
+    // Mark typing as complete
+    setMessages(prev => 
+      prev.map(msg => 
+        msg.id === messageId 
+          ? { ...msg, isTyping: false }
+          : msg
+      )
+    );
+  };
+
+  const speakMessage = async (text: string) => {
+    // Use Web Speech API for realistic audio
+    if (!window.speechSynthesis) return;
+    
+    return new Promise<void>((resolve) => {
+      // Cancel any ongoing speech
+      window.speechSynthesis.cancel();
+      
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.rate = 1;
+      utterance.pitch = 1;
+      utterance.volume = 0.8;
+      utterance.lang = 'pt-BR';
+      
+      utterance.onend = () => {
+        setIsSpeaking(false);
+        resolve();
+      };
+      
+      utterance.onerror = () => {
+        setIsSpeaking(false);
+        resolve();
+      };
+      
+      setIsSpeaking(true);
+      synthRef.current = utterance;
+      window.speechSynthesis.speak(utterance);
+    });
+  };
+
   const simulateFunnel = async (simulationId: number) => {
     setIsSimulating(true);
     setMessages([]);
@@ -86,6 +149,7 @@ export default function WhatsAppPreview({
       id: "user-trigger",
       type: "user",
       content: triggerPhrase || "Oi",
+      displayContent: triggerPhrase || "Oi",
       timestamp: new Date(),
     };
 
@@ -132,6 +196,8 @@ export default function WhatsAppPreview({
         id: node.id,
         type: "bot",
         content: displayContent,
+        displayContent: "",
+        isTyping: true,
         mediaType: nodeType,
         mediaUrl: node.data.mediaUrl,
         timestamp: new Date(),
@@ -139,6 +205,22 @@ export default function WhatsAppPreview({
       };
 
       setMessages(prev => [...prev, botMessage]);
+
+      // Simulate typing for text messages only
+      if (nodeType === 'message') {
+        await simulateTyping(displayContent, node.id);
+        // Speak the message with realistic audio
+        await speakMessage(displayContent);
+      } else {
+        // For media, just remove the typing indicator
+        setMessages(prev => 
+          prev.map(msg => 
+            msg.id === node.id 
+              ? { ...msg, isTyping: false }
+              : msg
+          )
+        );
+      }
     }
 
     if (isActive()) {
@@ -176,6 +258,22 @@ export default function WhatsAppPreview({
   };
 
   const renderMessageContent = (message: Message) => {
+    if (message.type === 'bot' && message.mediaType === 'message') {
+      return (
+        <div className="flex items-end gap-2">
+          <p className="text-sm whitespace-pre-wrap break-words">
+            {message.displayContent || message.content}
+          </p>
+          {message.isTyping && isSpeaking && (
+            <div className="flex gap-1">
+              <div className="w-1.5 h-1.5 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+              <div className="w-1.5 h-1.5 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+            </div>
+          )}
+        </div>
+      );
+    }
+
     if (message.mediaType === 'image' && message.mediaUrl) {
       return (
         <div>
