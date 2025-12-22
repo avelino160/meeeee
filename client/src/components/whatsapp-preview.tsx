@@ -53,11 +53,10 @@ export default function WhatsAppPreview({
 }: WhatsAppPreviewProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isSimulating, setIsSimulating] = useState(false);
-  const [isSpeaking, setIsSpeaking] = useState(false);
+  const [playingAudioId, setPlayingAudioId] = useState<string | null>(null);
   const simulationIdRef = useRef<number>(0);
   const nodesRef = useRef(nodes);
   const edgesRef = useRef(edges);
-  const synthRef = useRef<SpeechSynthesisUtterance | null>(null);
   
   // Keep refs updated
   useEffect(() => {
@@ -106,36 +105,6 @@ export default function WhatsAppPreview({
           : msg
       )
     );
-  };
-
-  const speakMessage = async (text: string) => {
-    // Use Web Speech API for realistic audio
-    if (!window.speechSynthesis) return;
-    
-    return new Promise<void>((resolve) => {
-      // Cancel any ongoing speech
-      window.speechSynthesis.cancel();
-      
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.rate = 1;
-      utterance.pitch = 1;
-      utterance.volume = 0.8;
-      utterance.lang = 'pt-BR';
-      
-      utterance.onend = () => {
-        setIsSpeaking(false);
-        resolve();
-      };
-      
-      utterance.onerror = () => {
-        setIsSpeaking(false);
-        resolve();
-      };
-      
-      setIsSpeaking(true);
-      synthRef.current = utterance;
-      window.speechSynthesis.speak(utterance);
-    });
   };
 
   const simulateFunnel = async (simulationId: number) => {
@@ -209,8 +178,6 @@ export default function WhatsAppPreview({
       // Simulate typing for text messages only
       if (nodeType === 'message') {
         await simulateTyping(displayContent, node.id);
-        // Speak the message with realistic audio
-        await speakMessage(displayContent);
       } else {
         // For media, just remove the typing indicator
         setMessages(prev => 
@@ -260,17 +227,9 @@ export default function WhatsAppPreview({
   const renderMessageContent = (message: Message) => {
     if (message.type === 'bot' && message.mediaType === 'message') {
       return (
-        <div className="flex items-end gap-2">
-          <p className="text-sm whitespace-pre-wrap break-words">
-            {message.displayContent || message.content}
-          </p>
-          {message.isTyping && isSpeaking && (
-            <div className="flex gap-1">
-              <div className="w-1.5 h-1.5 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-              <div className="w-1.5 h-1.5 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-            </div>
-          )}
-        </div>
+        <p className="text-sm whitespace-pre-wrap break-words">
+          {message.displayContent || message.content}
+        </p>
       );
     }
 
@@ -303,14 +262,32 @@ export default function WhatsAppPreview({
     }
 
     if (message.mediaType === 'audio') {
+      const isPlaying = playingAudioId === message.id;
       return (
         <div>
           {message.mediaUrl ? (
-            <audio 
-              controls 
-              className="w-full max-w-[200px] h-8"
-              src={message.mediaUrl}
-            />
+            <div className="space-y-2">
+              <div className={`relative w-full max-w-[200px] flex items-center gap-2 px-3 py-2 rounded ${isPlaying ? 'bg-purple-600/20' : ''}`}>
+                {isPlaying && (
+                  <div className="flex gap-1">
+                    <div className="w-1 h-4 bg-purple-400 rounded-sm animate-pulse" style={{ animationDelay: '0ms' }}></div>
+                    <div className="w-1 h-4 bg-purple-400 rounded-sm animate-pulse" style={{ animationDelay: '100ms' }}></div>
+                    <div className="w-1 h-4 bg-purple-400 rounded-sm animate-pulse" style={{ animationDelay: '200ms' }}></div>
+                  </div>
+                )}
+                <span className="text-xs text-gray-300">
+                  {isPlaying ? 'Reproduzindo...' : 'Áudio'}
+                </span>
+              </div>
+              <audio 
+                controls 
+                className="w-full max-w-[200px] h-8"
+                src={message.mediaUrl}
+                onPlay={() => setPlayingAudioId(message.id)}
+                onPause={() => setPlayingAudioId(null)}
+                onEnded={() => setPlayingAudioId(null)}
+              />
+            </div>
           ) : (
             <div className="flex items-center gap-2 text-sm">
               <Mic className="h-4 w-4" />
