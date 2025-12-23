@@ -40,104 +40,90 @@ export class WhatsAppService {
   // 📱 INICIALIZAR SOCKET BAILEYS COM PAIRING CODE
   private async initializeSocket(phoneNumber?: string) {
     try {
+      // SEMPRE carrega do disk - isso garante credenciais limpas se foram apagadas
       const { state, saveCreds } = await useMultiFileAuthState('./server/wa_auth');
       
-      console.log('🔧 Estado de autenticação carregado, creds:', !!state.creds?.me);
+      console.log('🔧 Estado de autenticação carregado');
+      console.log('   - Tem credenciais?', !!state.creds?.me);
+      console.log('   - Credencial está registrada?', !!state.creds?.me?.id);
       
-      // Sempre criar um novo socket para QR generation
+      // CRUCIAL: Se não tem credenciais (ou estão vazias), o socket vai gerar QR
+      if (!state.creds?.me) {
+        console.log('🆕 Nenhuma credencial encontrada - vai gerar QR Code');
+      }
+      
+      // Criar socket NOVA com credenciais limpas
       this.sock = makeWASocket({
         auth: {
           creds: state.creds,
           keys: makeCacheableSignalKeyStore(state.keys, pino({ level: 'silent' }))
         },
         printQRInTerminal: false,
-        logger: pino({ level: 'silent' }),
+        logger: pino({ level: 'error' }),
         browser: Browsers.macOS('Desktop'),
         syncFullHistory: false,
-        generateHighQualityLinkPreview: true,
-        markOnlineOnConnect: false, // Não marcar como online para evitar timeout rápido
+        generateHighQualityLinkPreview: false,
+        markOnlineOnConnect: false,
       });
 
-      console.log('✅ Socket criado com sucesso');
+      console.log('✅ Socket criado com sucesso, aguardando events...');
       
-      // Garantir que o socket tenha tempo para emitir QR antes de qualquer validação
-      if (this.sock && !phoneNumber) {
-        console.log('⏳ Aguardando socket ficar pronto para emitir QR...');
-      }
-      
-      // Se tiver número de telefone, aguardar conexão e usar pairing code
-      if (phoneNumber && !state.creds?.registered) {
-        console.log('📱 Aguardando conexão para solicitar pairing code...');
-        
-        // Aguardar um pouco para a conexão estabilizar
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        
-        try {
-          console.log('📱 Solicitando pairing code para:', phoneNumber);
-          const code = await this.sock.requestPairingCode(phoneNumber);
-          this.pairingCode = code;
-          console.log('✅ Pairing code gerado:', code);
-        } catch (err) {
-          console.error('❌ Erro ao gerar pairing code:', err);
-          throw err;
-        }
-      }
-
-      // 🔗 LISTENER: Estado da conexão
+      // 🔗 LISTENER: Estado da conexão (deve capturar QR)
       this.sock.ev.on('connection.update', (update) => {
         const { connection, lastDisconnect, qr } = update;
         
-        console.log('🔔 Connection update:', { 
-          connection, 
-          hasQR: !!qr, 
-          hasLastDisconnect: !!lastDisconnect,
-          disconnectReason: (lastDisconnect?.error as Boom)?.output?.statusCode,
-          errorMessage: lastDisconnect?.error?.message,
-          fullUpdate: JSON.stringify(update)
+        const statusCode = (lastDisconnect?.error as Boom)?.output?.statusCode;
+        console.log('🔔 CONNECTION UPDATE:', { 
+          connection,
+          hasQR: !!qr,
+          statusCode,
         });
         
+        // Se tem QR, captura ele AGORA
         if (qr) {
-          // 🎯 QR CODE GERADO - CONVERTIR PARA IMAGEM
+          console.log('✨ QR CODE RECEBIDO! Convertendo para imagem...');
           this.qrCode = qr;
+          
           QRCode.toDataURL(qr, {
             width: 256,
             margin: 2,
             color: { dark: '#000000', light: '#FFFFFF' }
           }).then(dataURL => {
             this.qrImage = dataURL;
-          }).catch(err => console.error('Erro ao gerar QR image:', err));
-          
-          console.log('📱 QR Code gerado para conexão');
-          
-          // 🔄 Iniciar timer de renovação automática do QR (2 minutos)
-          this.startQRRefreshTimer();
+            console.log('✅ QR Image gerada! Size:', dataURL.length);
+          }).catch(err => {
+            console.error('❌ Erro ao converter QR para imagem:', err);
+          });
+        }
+
+        // Se datacenter está bloqueando (405), sinalizar para rejeição
+        if (statusCode === 405) {
+          this.isReady = false;
+          this.connectionStatus.connected = false;
+          this.connectionStatus.status = 'disconnected';
+          console.log('🛑 BLOQUEIO DATACENTER 405 DETECTADO!');
+          if ((this as any)._set405) {
+            (this as any)._set405();
+          }
         }
 
         if (connection === 'open') {
-          // ✅ CONECTADO COM SUCESSO
           this.isReady = true;
           this.connectionStatus.connected = true;
           this.connectionStatus.status = 'connected';
           this.connectionStatus.phoneNumber = this.sock?.user?.id?.split(':')[0] || '';
-          
-          // 🛑 Parar timer de renovação do QR quando conectado
           this.stopQRRefreshTimer();
-          
-          console.log('🎉 WhatsApp conectado com sucesso!');
-          
-          console.log('✅ WhatsApp conectado - status atualizado internamente');
+          console.log('🎉 CONECTADO COM SUCESSO!');
         } 
         else if (connection === 'close') {
-          // ❌ CONEXÃO FECHADA
           this.isReady = false;
           this.connectionStatus.connected = false;
           this.connectionStatus.status = 'disconnected';
-          
-          console.log('❌ WhatsApp desconectado - status atualizado internamente');
+          console.log('❌ Conexão fechada, código:', statusCode);
         }
       });
 
-      // 📨 LISTENER: Mensagens recebidas
+      // 📨 LISTENER: Mensagens
       this.sock.ev.on('messages.upsert', async (m) => {
         const msg = m.messages[0];
         if (!msg?.key?.fromMe && msg?.message && this.currentUserId) {
@@ -145,11 +131,11 @@ export class WhatsAppService {
         }
       });
 
-      // 💾 SALVAR CREDENCIAIS QUANDO ATUALIZADAS
+      // 💾 SALVAR CREDENCIAIS
       this.sock.ev.on('creds.update', saveCreds);
 
     } catch (error) {
-      console.error('❌ Erro ao inicializar socket WhatsApp:', error);
+      console.error('❌ Erro ao inicializar socket:', error);
       throw error;
     }
   }
@@ -344,44 +330,76 @@ export class WhatsAppService {
       
       return new Promise(async (resolve, reject) => {
         let timeout: NodeJS.Timeout | null = null;
+        let isResolved = false;
+        let blocked405 = false;
         
         try {
-          // Inicializar socket e garantir que listeners estão ativados
+          // Inicializar socket
           await this.initializeSocket();
           
           let attempts = 0;
           timeout = setTimeout(() => {
+            if (isResolved) return;
+            isResolved = true;
             this.isGeneratingQR = false;
-            const err = new Error(`QR Code não gerado após 25 segundos. Socket status: ${this.sock ? 'ativo' : 'nulo'}`);
+            
+            if (blocked405) {
+              const err = new Error('WhatsApp bloqueou a conexão - ambiente cloud detectado');
+              (err as any).statusCode = 405;
+              (err as any).error = 'datacenter_blocked';
+              return reject(err);
+            }
+            
+            const err = new Error('QR Code não gerado após 25 segundos');
+            (err as any).error = 'qr_timeout';
             console.error('❌', err.message);
             reject(err);
           }, 25000);
 
           const checkQR = () => {
+            if (isResolved) return;
             attempts++;
+            
+            if (blocked405) {
+              if (timeout) clearTimeout(timeout);
+              isResolved = true;
+              this.isGeneratingQR = false;
+              const err = new Error('WhatsApp bloqueou a conexão - ambiente cloud detectado');
+              (err as any).statusCode = 405;
+              (err as any).error = 'datacenter_blocked';
+              return reject(err);
+            }
             
             if (this.qrCode) {
               if (timeout) clearTimeout(timeout);
+              isResolved = true;
               this.isGeneratingQR = false;
-              console.log('✅ QR Code gerado com sucesso na tentativa', attempts);
+              console.log('✅ QR Code gerado com sucesso!');
               resolve(this.qrCode);
               return;
             }
             
-            if (attempts === 1 || attempts % 3 === 0) {
+            if (attempts === 1 || attempts % 6 === 0) {
               console.log(`🔄 Tentativa ${attempts}: Aguardando QR Code...`);
             }
             
-            setTimeout(checkQR, 500); // Verificar a cada 500ms
+            setTimeout(checkQR, 500);
           };
+          
+          // Armazenar referência para usar no listener
+          (this as any)._qrCheckFn = checkQR;
+          (this as any)._set405 = () => { blocked405 = true; };
           
           checkQR();
           
         } catch (err) {
           if (timeout) clearTimeout(timeout);
-          this.isGeneratingQR = false;
-          console.error('❌ Erro ao inicializar socket:', err);
-          reject(err);
+          if (!isResolved) {
+            isResolved = true;
+            this.isGeneratingQR = false;
+            console.error('❌ Erro ao inicializar socket:', err);
+            reject(err);
+          }
         }
       });
 

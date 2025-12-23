@@ -62,12 +62,16 @@ export default function WhatsAppConnectionModal({ open, onOpenChange }: WhatsApp
       });
     },
     onError: (error: any) => {
-      const isDatacenterBlock = error.status === 405 || error.message?.includes('cloud') || error.message?.includes('datacenter');
+      // Detectar bloqueio de datacenter (405)
+      const isDatacenterBlock = error.status === 405 || 
+                                error.message?.includes('cloud') || 
+                                error.message?.includes('datacenter') ||
+                                error.message?.includes('cloud');
       
       if (isDatacenterBlock) {
         toast({
-          title: "⚠️ Ambiente Cloud Detectado",
-          description: "WhatsApp bloqueia conexões de servidores cloud. Para testar, execute o projeto localmente: npm run dev",
+          title: "🛑 Bloqueio WhatsApp - Ambiente Cloud",
+          description: "O WhatsApp bloqueia conexões de datacenters (Replit, Heroku, etc) por segurança. Para testar, execute localmente: npm run dev",
           variant: "destructive",
         });
       } else {
@@ -77,6 +81,7 @@ export default function WhatsAppConnectionModal({ open, onOpenChange }: WhatsApp
           variant: "destructive",
         });
       }
+      console.error('QR Generation Error:', error);
     },
   });
 

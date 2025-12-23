@@ -174,6 +174,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ qrCode: qrCodeData, qrImage: qrImageURL });
     } catch (error: any) {
       console.error("❌ Error generating QR code:", error?.message || error);
+      
+      // Se é erro 405 do WhatsApp, retornar como 405
+      if (error?.statusCode === 405 || error?.error === 'datacenter_blocked') {
+        return res.status(405).json({ 
+          message: error?.message || "WhatsApp bloqueou a conexão",
+          error: "datacenter_blocked",
+          details: "O ambiente está sendo bloqueado pelo WhatsApp. Execute localmente."
+        });
+      }
+      
       res.status(500).json({ 
         message: error?.message || "Failed to generate QR code",
         error: error?.error || "qr_generation_failed"
