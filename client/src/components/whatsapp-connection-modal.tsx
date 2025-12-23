@@ -41,9 +41,11 @@ export default function WhatsAppConnectionModal({ open, onOpenChange }: WhatsApp
       const response = await apiRequest("POST", "/api/whatsapp/qr");
       if (!response.ok) {
         const data = await response.json();
-        const error = new Error(data.message || "Falha ao gerar QR Code");
-        (error as any).status = response.status;
-        (error as any).details = data.details;
+        const error: any = new Error(data.message || "Falha ao gerar QR Code");
+        error.status = response.status;
+        error.details = data.details;
+        error.error = data.error;
+        console.log('❌ QR Generation Failed:', { status: response.status, message: data.message, error: data.error });
         throw error;
       }
       return response.json();
@@ -62,26 +64,27 @@ export default function WhatsAppConnectionModal({ open, onOpenChange }: WhatsApp
       });
     },
     onError: (error: any) => {
+      console.log('🔍 Error object:', { status: error?.status, message: error?.message, error: error?.error });
+      
       // Detectar bloqueio de datacenter (405)
-      const isDatacenterBlock = error.status === 405 || 
-                                error.message?.includes('cloud') || 
-                                error.message?.includes('datacenter') ||
-                                error.message?.includes('cloud');
+      const isDatacenterBlock = error?.status === 405 || 
+                                error?.error === 'datacenter_blocked' ||
+                                error?.message?.includes('cloud') || 
+                                error?.message?.includes('datacenter');
       
       if (isDatacenterBlock) {
         toast({
           title: "🛑 Bloqueio WhatsApp - Ambiente Cloud",
-          description: "O WhatsApp bloqueia conexões de datacenters (Replit, Heroku, etc) por segurança. Para testar, execute localmente: npm run dev",
+          description: "O WhatsApp bloqueia conexões de datacenters (Replit, Heroku, Render, etc) por segurança. Para testar, execute localmente: npm run dev",
           variant: "destructive",
         });
       } else {
         toast({
           title: "❌ Erro ao Gerar QR Code",
-          description: error.message || "Falha ao gerar QR Code. Tente novamente.",
+          description: error?.message || "Falha ao gerar QR Code. Tente novamente.",
           variant: "destructive",
         });
       }
-      console.error('QR Generation Error:', error);
     },
   });
 
