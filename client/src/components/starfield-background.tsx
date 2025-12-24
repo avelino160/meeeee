@@ -2,12 +2,13 @@ import { useEffect, useRef } from 'react';
 
 export default function StarfieldBackground() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const isAnimatingRef = useRef(true);
 
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext('2d', { alpha: true });
     if (!ctx) return;
 
     let animationFrameId: number;
@@ -26,21 +27,21 @@ export default function StarfieldBackground() {
 
     const createStars = () => {
       stars = [];
-      const numStars = 200;
+      const numStars = 80;
       
       for (let i = 0; i < numStars; i++) {
         stars.push({
           x: Math.random() * canvas.width,
           y: Math.random() * canvas.height,
           z: Math.random() * canvas.width,
-          size: Math.random() * 2,
-          speed: Math.random() * 0.5 + 0.1
+          size: Math.random() * 1.5,
+          speed: Math.random() * 0.8 + 0.2
         });
       }
     };
 
     const drawStars = () => {
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.15)';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
       stars.forEach((star) => {
@@ -52,11 +53,11 @@ export default function StarfieldBackground() {
           star.x = Math.random() * canvas.width;
           star.y = Math.random() * canvas.height;
         } else {
-          const size = (1 - star.z / canvas.width) * star.size * 3;
-          const brightness = 1 - star.z / canvas.width;
+          const size = (1 - star.z / canvas.width) * star.size * 2.5;
+          const brightness = Math.max(0.1, 1 - star.z / canvas.width);
           
           ctx.beginPath();
-          ctx.fillStyle = `rgba(255, 255, 255, ${brightness})`;
+          ctx.fillStyle = `rgba(255, 255, 255, ${brightness * 0.8})`;
           ctx.arc(x, y, size, 0, Math.PI * 2);
           ctx.fill();
         }
@@ -71,8 +72,14 @@ export default function StarfieldBackground() {
     };
 
     const animate = () => {
-      drawStars();
+      if (isAnimatingRef.current) {
+        drawStars();
+      }
       animationFrameId = requestAnimationFrame(animate);
+    };
+
+    const handleVisibilityChange = () => {
+      isAnimatingRef.current = !document.hidden;
     };
 
     resizeCanvas();
@@ -84,9 +91,12 @@ export default function StarfieldBackground() {
       createStars();
     });
 
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
     return () => {
       cancelAnimationFrame(animationFrameId);
       window.removeEventListener('resize', resizeCanvas);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, []);
 
@@ -95,7 +105,8 @@ export default function StarfieldBackground() {
       ref={canvasRef}
       className="fixed inset-0 pointer-events-none z-0"
       style={{ 
-        background: 'linear-gradient(to bottom, #0a0e27 0%, #1a1b3d 50%, #0f1428 100%)'
+        background: 'linear-gradient(to bottom, #0a0e27 0%, #1a1b3d 50%, #0f1428 100%)',
+        willChange: 'contents'
       }}
     />
   );
