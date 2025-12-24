@@ -88,7 +88,7 @@ export default function Dashboard() {
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
             <div className="flex-1">
               <h1 className="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-bold" data-testid="text-dashboard-title">
-                Olá, {user?.firstName || 'Usuário'}! 👋
+                Olá, {user?.firstName || 'Usuário'}!
               </h1>
               <p className="text-sm sm:text-base lg:text-lg text-muted-foreground mt-1">
                 Sua central de vendas automáticas no WhatsApp
