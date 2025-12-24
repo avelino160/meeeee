@@ -226,10 +226,10 @@ export default function Campaigns() {
   };
 
   return (
-    <div className="flex h-screen bg-background">
+    <div className="flex h-screen bg-[#1a1a1a]">
       <Sidebar />
       
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col overflow-hidden bg-gradient-to-br from-[#1a1a1a] via-[#1f1f1f] to-[#252525]">
         {/* Header */}
         <header className="bg-gradient-to-r from-[#252525] to-[#1a1a1a] border-b border-[#404040] pl-14 pr-4 lg:px-6 py-4 shadow-lg">
           <div className="flex items-center justify-between">

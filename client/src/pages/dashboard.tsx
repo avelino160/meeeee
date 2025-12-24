@@ -84,19 +84,19 @@ export default function Dashboard() {
       <Sidebar />
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Header */}
-        <header className="bg-gradient-to-r from-[#252525] to-[#1a1a1a] border-b border-[#404040] pl-14 pr-4 lg:pl-6 lg:pr-6 py-3 sm:py-4 lg:py-5 pt-[16px] pb-[16px] shadow-lg">
+        <header className="bg-card border-b border-border pl-14 pr-4 lg:pl-6 lg:pr-6 py-3 sm:py-4 lg:py-5 pt-[16px] pb-[16px]">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
             <div className="flex-1">
-              <h1 className="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-bold text-white" data-testid="text-dashboard-title">
+              <h1 className="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-bold" data-testid="text-dashboard-title">
                 Olá, {user?.firstName || 'Usuário'}!
               </h1>
-              <p className="text-sm sm:text-base lg:text-lg text-gray-400 mt-1">
+              <p className="text-sm sm:text-base lg:text-lg text-muted-foreground mt-1">
                 Sua central de vendas automáticas no WhatsApp
               </p>
             </div>
             
             <div className="flex items-center gap-2 flex-wrap">
-              <div className="flex items-center space-x-2 px-3 sm:px-4 py-2 rounded-full sm:text-sm font-medium bg-red-900/30 text-red-400 border border-red-700/50 text-justify text-[12px] pl-[8px] pr-[8px] pt-[4px] pb-[4px]">
+              <div className="flex items-center space-x-2 px-3 sm:px-4 py-2 rounded-full sm:text-sm font-medium bg-red-100 text-red-700 border border-red-300 text-justify text-[12px] pl-[8px] pr-[8px] pt-[4px] pb-[4px]">
                 {whatsappStatus?.connected ? (
                   <>
                     <Wifi className="h-4 w-4" />
@@ -109,7 +109,7 @@ export default function Dashboard() {
                     <Button
                       size="sm"
                       variant="outline"
-                      className="ml-2 h-7 text-xs px-3 border-purple-500/50 text-gray-300 hover:border-purple-400 hover:bg-purple-900/20"
+                      className="ml-2 h-7 text-xs px-3"
                       onClick={() => setShowWhatsAppModal(true)}
                       data-testid="button-connect-whatsapp"
                     >
@@ -123,7 +123,7 @@ export default function Dashboard() {
                 <Button 
                   variant="outline"
                   size="sm"
-                  className="h-8 text-sm border-purple-500/50 text-gray-300 hover:border-purple-400 hover:bg-purple-900/20"
+                  className="h-8 text-sm"
                   onClick={() => setShowWhatsAppModal(true)}
                   data-testid="button-whatsapp-settings"
                 >
@@ -136,7 +136,7 @@ export default function Dashboard() {
         </header>
 
         {/* Main Content */}
-        <main className="flex-1 p-2 sm:p-4 lg:p-6 overflow-auto">
+        <main className="flex-1 p-2 sm:p-4 lg:p-6 overflow-auto bg-gradient-to-br from-[#1a1a1a] via-[#1f1f1f] to-[#252525]">
           {/* Stats Cards */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 lg:gap-6 mb-4 sm:mb-6 lg:mb-8">
             <Card>
