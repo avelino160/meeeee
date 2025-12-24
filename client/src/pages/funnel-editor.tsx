@@ -533,6 +533,345 @@ export default function FunnelEditor() {
               onNodeSelect={handleNodeSelect}
             />
           </div>
+
+          {/* Right Sidebar - Node Editor (appears only when editing) */}
+          {selectedNode && (
+            <div className="w-72 lg:w-80 flex-col bg-[#252525] border-l border-[#333] overflow-hidden flex">
+              <div className="p-3 lg:p-4 border-b border-[#333]">
+                <h3 className="text-lg font-semibold text-white mb-1">
+                  Editar Nó
+                </h3>
+                <p className="text-xs text-gray-400">
+                  {selectedNode.data.label || 'Configurações'}
+                </p>
+              </div>
+
+              <div className="flex-1 overflow-y-auto p-3 lg:p-4 space-y-4">
+
+                {/* Text Message Node */}
+                {selectedNode.data.nodeType === 'message' && (
+                <div className="space-y-3">
+                  <div>
+                    <Label htmlFor="message-content" className="text-gray-300">
+                      Mensagem
+                    </Label>
+                    <Textarea
+                      id="message-content"
+                      value={selectedNode.data.content || ''}
+                      onChange={(e) => updateNodeContent(e.target.value)}
+                      placeholder="Digite a mensagem..."
+                      className="mt-2 bg-[#1a1a1a] border-gray-700 text-white"
+                      rows={5}
+                      data-testid="input-message-content"
+                    />
+                  </div>
+                </div>
+              )}
+
+                {/* Media Nodes (Image, Video, Audio, Document) */}
+                {['image', 'video', 'audio', 'document'].includes(selectedNode.data.nodeType || '') && (
+                <div className="space-y-3">
+                  <div>
+                    <Label htmlFor="media-url" className="text-gray-300">
+                      URL do arquivo
+                    </Label>
+                    <Input
+                      id="media-url"
+                      type="text"
+                      value={selectedNode.data.mediaUrl || ''}
+                      onChange={(e) => updateNodeMediaUrl(e.target.value)}
+                      placeholder={`URL do ${selectedNode.data.nodeType}...`}
+                      className="mt-2 bg-[#1a1a1a] border-gray-700 text-white"
+                      data-testid="input-media-url"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="media-file" className="text-gray-300">
+                      Ou faça upload
+                    </Label>
+                    <Input
+                      id="media-file"
+                      type="file"
+                      accept={
+                        selectedNode.data.nodeType === 'image' ? 'image/*' :
+                        selectedNode.data.nodeType === 'video' ? 'video/*' :
+                        selectedNode.data.nodeType === 'audio' ? 'audio/*' :
+                        '*/*'
+                      }
+                      onChange={handleFileUpload}
+                      className="mt-2 bg-[#1a1a1a] border-gray-700 text-white file:bg-purple-600 file:text-white file:border-0 file:px-4 file:py-2 file:rounded file:mr-4"
+                      data-testid="input-media-file"
+                    />
+                  </div>
+                  {selectedNode.data.mediaUrl && (
+                    <div>
+                      <Label className="text-gray-300">Preview</Label>
+                      <div className="mt-2 border border-gray-700 rounded overflow-hidden bg-[#1a1a1a] p-2">
+                        {selectedNode.data.nodeType === 'image' && (
+                          <img 
+                            src={selectedNode.data.mediaUrl} 
+                            alt="Preview" 
+                            className="w-full h-auto max-h-48 object-contain"
+                            loading="lazy"
+                          />
+                        )}
+                        {selectedNode.data.nodeType === 'video' && (
+                          <div className="flex items-center gap-3 p-3 bg-[#2a2a2a] rounded w-full">
+                            <Video className="h-10 w-10 text-purple-500 flex-shrink-0" />
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm text-gray-300">Vídeo anexado</p>
+                              <p className="text-xs text-gray-500 truncate">
+                                {selectedNode.data.mediaUrl?.startsWith('video:') 
+                                  ? selectedNode.data.mediaUrl.replace('video:', '')
+                                  : 'Arquivo de vídeo'}
+                              </p>
+                            </div>
+                          </div>
+                        )}
+                        {selectedNode.data.nodeType === 'audio' && (
+                          <div className="flex flex-col gap-2">
+                            <div className="flex items-center gap-3 p-2 bg-[#2a2a2a] rounded">
+                              <Mic className="h-8 w-8 text-purple-500 flex-shrink-0" />
+                              <p className="text-sm text-gray-300">Áudio anexado</p>
+                            </div>
+                            <audio 
+                              src={selectedNode.data.mediaUrl}
+                              controls
+                              preload="metadata"
+                              className="w-full"
+                              data-testid="audio-preview"
+                            />
+                          </div>
+                        )}
+                        {selectedNode.data.nodeType === 'document' && (
+                          <div className="flex items-center gap-3 p-3 bg-[#2a2a2a] rounded">
+                            <FileText className="h-10 w-10 text-purple-500 flex-shrink-0" />
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm text-gray-300">Documento anexado</p>
+                              <p className="text-xs text-gray-500 truncate mb-1">
+                                {selectedNode.data.mediaUrl?.startsWith('doc:') 
+                                  ? selectedNode.data.mediaUrl.split('|')[0].replace('doc:', '')
+                                  : selectedNode.data.mediaUrl?.startsWith('data:') 
+                                    ? 'Arquivo carregado'
+                                    : selectedNode.data.mediaUrl}
+                              </p>
+                              {selectedNode.data.mediaUrl?.includes('|loading') ? (
+                                <p className="text-xs text-yellow-500">Carregando...</p>
+                              ) : (
+                                <Button
+                                  variant="link"
+                                  size="sm"
+                                  className="text-xs text-purple-400 hover:text-purple-300 p-0 h-auto"
+                                  onClick={() => {
+                                    const mediaUrl = selectedNode.data.mediaUrl;
+                                    if (!mediaUrl) return;
+                                    
+                                    let dataUrl = mediaUrl;
+                                    let fileName = 'documento';
+                                    
+                                    if (mediaUrl.startsWith('doc:')) {
+                                      const parts = mediaUrl.split('|');
+                                      fileName = parts[0].replace('doc:', '');
+                                      dataUrl = parts[1] || '';
+                                    }
+                                    
+                                    if (dataUrl && dataUrl !== 'loading') {
+                                      // Create a link and trigger download
+                                      const link = document.createElement('a');
+                                      link.href = dataUrl;
+                                      link.download = fileName;
+                                      link.target = '_blank';
+                                      document.body.appendChild(link);
+                                      link.click();
+                                      document.body.removeChild(link);
+                                    }
+                                  }}
+                                  data-testid="button-open-document"
+                                >
+                                  Abrir documento
+                                </Button>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+                {/* Location Node */}
+                {selectedNode.data.nodeType === 'location' && (
+                  <div className="space-y-3">
+                    <LocationPicker
+                      value={selectedNode.data.location}
+                      onChange={updateNodeLocation}
+                    />
+                  </div>
+                )}
+
+                {/* Delay Node */}
+                {selectedNode.data.nodeType === 'delay' && (
+                  <div className="space-y-3">
+                    <div>
+                      <Label htmlFor="delay-minutes" className="text-gray-300">
+                        Tempo de espera (minutos)
+                      </Label>
+                      <Input
+                        id="delay-minutes"
+                        type="number"
+                        min="1"
+                        value={selectedNode.data.delayMinutes || 5}
+                        onChange={(e) => updateNodeDelay(parseInt(e.target.value) || 5)}
+                        className="mt-2 bg-[#1a1a1a] border-gray-700 text-white"
+                        data-testid="input-delay-minutes"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* Condition Node */}
+                {selectedNode.data.nodeType === 'condition' && (
+                  <div className="space-y-3">
+                    <div>
+                      <Label htmlFor="condition-content" className="text-gray-300">
+                        Condição
+                      </Label>
+                      <Textarea
+                        id="condition-content"
+                        value={selectedNode.data.content || ''}
+                        onChange={(e) => updateNodeContent(e.target.value)}
+                        placeholder="Descreva a condição..."
+                        className="mt-2 bg-[#1a1a1a] border-gray-700 text-white"
+                        rows={3}
+                        data-testid="input-condition-content"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* Question Node */}
+                {selectedNode.data.nodeType === 'question' && (
+                  <div className="space-y-3">
+                    <div>
+                      <Label htmlFor="question-content" className="text-gray-300">
+                        Pergunta
+                      </Label>
+                      <Textarea
+                        id="question-content"
+                        value={selectedNode.data.content || ''}
+                        onChange={(e) => updateNodeContent(e.target.value)}
+                        placeholder="Digite a pergunta..."
+                        className="mt-2 bg-[#1a1a1a] border-gray-700 text-white"
+                        rows={3}
+                        data-testid="input-question-content"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* Tag Node */}
+                {selectedNode.data.nodeType === 'tag' && (
+                  <div className="space-y-3">
+                    <div>
+                      <Label htmlFor="tag-content" className="text-gray-300">
+                        Tag
+                      </Label>
+                      <Input
+                        id="tag-content"
+                        type="text"
+                        value={selectedNode.data.content || ''}
+                        onChange={(e) => updateNodeContent(e.target.value)}
+                        placeholder="Nome da tag..."
+                        className="mt-2 bg-[#1a1a1a] border-gray-700 text-white"
+                        data-testid="input-tag-content"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* Trigger Node - Single Phrase */}
+                {selectedNode.data.nodeType === 'trigger' && (
+                  <div className="space-y-3">
+                    <div>
+                      <Label className="text-gray-300">
+                        Frase Gatilho
+                      </Label>
+                      <p className="text-xs text-gray-500 mt-1 mb-3">
+                        Palavra ou frase que inicia o funil
+                      </p>
+                      <div className="flex gap-2">
+                        <Input
+                          value={triggerPhrases[0] || ''}
+                          onChange={(e) => {
+                            setTriggerPhrases([e.target.value]);
+                          }}
+                          placeholder="Digite a frase gatilho..."
+                          className="bg-[#1a1a1a] border-gray-700 text-white flex-1"
+                          data-testid="input-trigger-phrase"
+                        />
+                        {triggerPhrases[0] && (
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            onClick={() => setTriggerPhrases([])}
+                            className="border-gray-600 text-gray-300 hover:bg-red-900"
+                            data-testid="button-clear-trigger-phrase"
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Verify Node */}
+                {selectedNode.data.nodeType === 'verify' && (
+                  <div className="space-y-3">
+                    <div>
+                      <Label htmlFor="verify-content" className="text-gray-300">
+                        Verificação
+                      </Label>
+                      <Textarea
+                        id="verify-content"
+                        value={selectedNode.data.content || ''}
+                        onChange={(e) => updateNodeContent(e.target.value)}
+                        placeholder="O que verificar..."
+                        className="mt-2 bg-[#1a1a1a] border-gray-700 text-white"
+                        rows={3}
+                        data-testid="input-verify-content"
+                      />
+                    </div>
+                  </div>
+                )}
+
+              </div>
+              
+              {/* Action buttons - always visible at bottom */}
+              <div className="pt-3 mt-3 border-t border-gray-700 space-y-2 flex-shrink-0 p-3 lg:p-4">
+                {selectedNode.id !== 'start' && selectedNode.data.nodeType !== 'trigger' && (
+                  <Button
+                    variant="outline"
+                    className="w-full border-red-600 text-red-400 hover:bg-red-900/50"
+                    onClick={deleteNode}
+                    data-testid="button-delete-node"
+                  >
+                    <X className="h-4 w-4 mr-2" />
+                    Excluir Elemento
+                  </Button>
+                )}
+                <Button
+                  variant="outline"
+                  className="w-full border-gray-600 text-gray-300 hover:bg-gray-800"
+                  onClick={() => setSelectedNode(null)}
+                  data-testid="button-close-editor"
+                >
+                  Fechar
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
