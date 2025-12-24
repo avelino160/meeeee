@@ -876,7 +876,7 @@ export default function FunnelEditor() {
           {/* Mobile Node Editor Drawer */}
           {selectedNode && (
             <Drawer open={!!selectedNode} onOpenChange={(open) => !open && setSelectedNode(null)}>
-              <DrawerContent className="md:hidden bg-[#252525] border-[#333] max-h-[90vh] flex flex-col">
+              <DrawerContent className="md:hidden bg-[#252525] border-[#333] max-h-[90vh] flex flex-col pointer-events-auto">
                 <DrawerHeader className="border-b border-[#333] flex-shrink-0">
                   <DrawerTitle className="text-white">
                     Editar Nó
