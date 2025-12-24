@@ -14,6 +14,7 @@ import {
   ChevronRight,
   Menu,
   CreditCard,
+  Plane,
 } from "lucide-react";
 
 export default function Sidebar() {
@@ -43,9 +44,12 @@ export default function Sidebar() {
       <>
         <div className="p-4 sm:p-6 border-b border-border flex items-center justify-between">
           {!showMinimized && (
-            <div>
-              <h1 className="text-xl sm:text-2xl font-bold text-primary" data-testid="text-brand">RanZap</h1>
-              <p className="text-xs sm:text-sm text-muted-foreground">{t('whatsapp_automation')}</p>
+            <div className="flex items-center gap-2.5">
+              <Plane className="h-8 w-8 sm:h-10 sm:w-10 text-purple-500" />
+              <div>
+                <h1 className="text-xl sm:text-2xl font-bold text-primary" data-testid="text-brand">Pilot Zap</h1>
+                <p className="text-xs sm:text-sm text-muted-foreground">{t('whatsapp_automation')}</p>
+              </div>
             </div>
           )}
           <Button
