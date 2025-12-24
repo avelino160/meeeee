@@ -103,7 +103,7 @@ export default function Plans() {
         <main className="flex-1 overflow-y-auto">
           {/* Header */}
           <div className="bg-gradient-to-r from-primary/10 via-primary/5 to-background border-b border-border">
-            <div className="max-w-7xl mx-auto pl-14 pr-4 lg:px-8 py-12 text-center">
+            <div className="max-w-7xl mx-auto lg:px-8 py-12 text-center pl-[48px] pr-[48px]">
               <h1 className="text-4xl font-bold text-foreground mb-3" data-testid="text-page-title">
                 Escolha o Plano Ideal
               </h1>
