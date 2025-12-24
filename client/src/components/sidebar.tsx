@@ -110,7 +110,7 @@ export default function Sidebar() {
       </Sheet>
 
       {/* Desktop Sidebar */}
-      <div className={`hidden lg:flex bg-card border-r border-border flex-col transition-all duration-300 ${isMinimized ? 'w-16' : 'w-64'}`}>
+      <div className={`hidden lg:flex bg-card flex-col transition-all duration-300 ${isMinimized ? 'w-16' : 'w-64'}`}>
         <SidebarContent isMobile={false} />
       </div>
     </>
