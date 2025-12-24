@@ -145,12 +145,12 @@ export default function WhatsAppConnection() {
             {/* Plan Limits Card */}
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center justify-between">
+                <CardTitle className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-4">
                   <span className="flex items-center">
                     <Crown className="h-5 w-5 mr-2 text-primary" />
                     Contas WhatsApp
                   </span>
-                  <Badge variant="outline" className="text-base px-3 py-1">
+                  <Badge variant="outline" className="text-xs sm:text-sm px-2 sm:px-3 py-0.5 sm:py-1 whitespace-nowrap">
                     {connectedAccounts} de {maxAccounts} conectadas
                   </Badge>
                 </CardTitle>
