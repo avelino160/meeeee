@@ -316,13 +316,6 @@ function FunnelCanvasInner({ data, onDataChange, onNodeSelect }: FunnelCanvasPro
       verify: 'Verificar',
     };
     
-    if (nodeType === 'delay' && nodeData) {
-      const value = nodeData.delayValue || 5;
-      const unit = nodeData.delayUnit || 'minuto';
-      const unitText = value === 1 ? unit : unit + '(s)';
-      return `Esperar ${value} ${unitText}`;
-    }
-    
     return labels[nodeType] || nodeType;
   };
 

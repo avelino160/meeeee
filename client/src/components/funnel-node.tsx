@@ -29,6 +29,8 @@ interface FunnelNodeData {
   content: string;
   icon?: string;
   delayMinutes?: number;
+  delayValue?: number;
+  delayUnit?: 'segundo' | 'minuto' | 'hora';
   mediaUrl?: string;
   location?: LocationData;
 }
@@ -113,7 +115,7 @@ export default function FunnelNode({ data, selected }: NodeProps<FunnelNodeData>
         {data.nodeType === 'delay' && (
           <div className="bg-muted rounded p-2 mb-2">
             <p className="text-xs text-muted-foreground">
-              Aguardar {data.delayMinutes || 5} minutos
+              Aguardar {data.delayValue || 5} {data.delayUnit || 'minuto'}(s)
             </p>
           </div>
         )}
