@@ -535,10 +535,10 @@ export default function FunnelEditor() {
 
           {/* Right Sidebar - Node Editor */}
           {selectedNode && (
-            <div className="w-full md:w-72 lg:w-80 fixed md:relative bottom-0 left-0 right-0 md:bottom-auto md:left-auto md:right-auto max-h-[60vh] md:max-h-full bg-[#252525] border-t md:border-t-0 md:border-l border-[#333] p-3 lg:p-4 overflow-y-auto z-20 flex flex-col">
-              <div className="space-y-4 flex-1 overflow-y-auto min-h-0">
+            <div className="w-full sm:w-80 md:w-72 lg:w-80 fixed sm:relative bottom-0 left-0 right-0 sm:bottom-auto sm:left-auto sm:right-auto max-h-[50vh] sm:max-h-[calc(100vh-120px)] bg-[#252525] border-t sm:border-t-0 sm:border-l border-[#333] p-2 sm:p-3 lg:p-4 overflow-y-auto z-20 flex flex-col">
+              <div className="space-y-3 flex-1 overflow-y-auto min-h-0">
                 <div>
-                  <h3 className="text-lg font-semibold text-white mb-2">
+                  <h3 className="text-base sm:text-lg font-semibold text-white mb-1">
                     Editar Nó
                   </h3>
                   <p className="text-xs text-gray-400">
