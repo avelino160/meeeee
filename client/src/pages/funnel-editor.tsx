@@ -14,6 +14,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerClose } from "@/components/ui/drawer";
 import { 
   Save, 
   Eye, 
@@ -533,23 +534,23 @@ export default function FunnelEditor() {
             />
           </div>
 
-          {/* Right Sidebar - Node Editor */}
-          {selectedNode && (
-            <div className="w-full sm:w-80 md:w-72 lg:w-80 fixed sm:relative bottom-0 left-0 right-0 sm:bottom-auto sm:left-auto sm:right-auto max-h-[50vh] sm:max-h-[calc(100vh-120px)] bg-[#252525] border-t sm:border-t-0 sm:border-l border-[#333] p-2 sm:p-3 lg:p-4 overflow-y-auto z-20 flex flex-col">
-              <div className="space-y-3 flex-1 overflow-y-auto min-h-0">
-                <div>
-                  <h3 className="text-base sm:text-lg font-semibold text-white mb-1">
+          {/* Desktop Sidebar - Node Editor */}
+          <div className="hidden md:flex w-72 lg:w-80 flex-col bg-[#252525] border-l border-[#333] overflow-hidden">
+            {selectedNode && (
+              <>
+                <div className="p-3 lg:p-4 border-b border-[#333]">
+                  <h3 className="text-lg font-semibold text-white mb-1">
                     Editar Nó
                   </h3>
                   <p className="text-xs text-gray-400">
                     {selectedNode.data.label || 'Configurações'}
                   </p>
                 </div>
-                
-                <Separator className="bg-gray-700" />
 
-                {/* Text Message Node */}
-                {selectedNode.data.nodeType === 'message' && (
+                <div className="flex-1 overflow-y-auto p-3 lg:p-4 space-y-4">
+
+                  {/* Text Message Node */}
+                  {selectedNode.data.nodeType === 'message' && (
                   <div className="space-y-3">
                     <div>
                       <Label htmlFor="message-content" className="text-gray-300">
@@ -568,8 +569,8 @@ export default function FunnelEditor() {
                   </div>
                 )}
 
-                {/* Media Nodes (Image, Video, Audio, Document) */}
-                {['image', 'video', 'audio', 'document'].includes(selectedNode.data.nodeType || '') && (
+                  {/* Media Nodes (Image, Video, Audio, Document) */}
+                  {['image', 'video', 'audio', 'document'].includes(selectedNode.data.nodeType || '') && (
                   <div className="space-y-3">
                     <div>
                       <Label htmlFor="media-url" className="text-gray-300">
