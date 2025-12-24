@@ -47,6 +47,8 @@ interface FunnelNode {
     content?: string;
     mediaUrl?: string;
     delayMinutes?: number;
+    delayValue?: number;
+    delayUnit?: 'segundo' | 'minuto' | 'hora';
     nodeType?: string;
     icon?: string;
     location?: LocationData;
@@ -173,17 +175,17 @@ export default function FunnelEditor() {
     setSelectedNode({ ...selectedNode, data: { ...selectedNode.data, content } });
   };
 
-  const updateNodeDelay = (delayMinutes: number) => {
+  const updateNodeDelay = (delayValue: number, delayUnit: 'segundo' | 'minuto' | 'hora' = 'minuto') => {
     if (!selectedNode) return;
     
     const updatedNodes = funnelData.nodes.map(node => 
       node.id === selectedNode.id 
-        ? { ...node, data: { ...node.data, delayMinutes } }
+        ? { ...node, data: { ...node.data, delayValue, delayUnit } }
         : node
     );
     
     setFunnelData({ ...funnelData, nodes: updatedNodes });
-    setSelectedNode({ ...selectedNode, data: { ...selectedNode.data, delayMinutes } });
+    setSelectedNode({ ...selectedNode, data: { ...selectedNode.data, delayValue, delayUnit } });
   };
 
   const updateNodeMediaUrl = (mediaUrl: string) => {
@@ -710,18 +712,30 @@ export default function FunnelEditor() {
                 {selectedNode.data.nodeType === 'delay' && (
                   <div className="space-y-3">
                     <div>
-                      <Label htmlFor="delay-minutes" className="text-gray-300">
-                        Tempo de espera (minutos)
+                      <Label htmlFor="delay-value" className="text-gray-300">
+                        Tempo de espera
                       </Label>
-                      <Input
-                        id="delay-minutes"
-                        type="number"
-                        min="1"
-                        value={selectedNode.data.delayMinutes || 5}
-                        onChange={(e) => updateNodeDelay(parseInt(e.target.value) || 5)}
-                        className="mt-2 bg-[#1a1a1a] border-gray-700 text-white"
-                        data-testid="input-delay-minutes"
-                      />
+                      <div className="flex gap-2 mt-2">
+                        <Input
+                          id="delay-value"
+                          type="number"
+                          min="1"
+                          value={selectedNode.data.delayValue || 5}
+                          onChange={(e) => updateNodeDelay(parseInt(e.target.value) || 5, selectedNode.data.delayUnit || 'minuto')}
+                          className="flex-1 bg-[#1a1a1a] border-gray-700 text-white"
+                          data-testid="input-delay-value"
+                        />
+                        <Select value={selectedNode.data.delayUnit || 'minuto'} onValueChange={(value: any) => updateNodeDelay(selectedNode.data.delayValue || 5, value)}>
+                          <SelectTrigger className="w-40 bg-[#1a1a1a] border-gray-700 text-white" data-testid="select-delay-unit">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="segundo">Segundo(s)</SelectItem>
+                            <SelectItem value="minuto">Minuto(s)</SelectItem>
+                            <SelectItem value="hora">Hora(s)</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
                     </div>
                   </div>
                 )}
