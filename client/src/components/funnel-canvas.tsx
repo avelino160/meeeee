@@ -137,12 +137,17 @@ function FunnelCanvasInner({ data, onDataChange, onNodeSelect }: FunnelCanvasPro
         .map(node => {
           const dataNode = data.nodes.find(n => n.id === node.id);
           if (dataNode) {
+            const updatedData = {
+              ...dataNode.data,
+              nodeType: dataNode.data.nodeType || dataNode.type,
+            };
+            // Update label for delay nodes to show current values
+            if (updatedData.nodeType === 'delay') {
+              updatedData.label = getNodeLabel('delay', updatedData);
+            }
             return {
               ...node,
-              data: {
-                ...dataNode.data,
-                nodeType: dataNode.data.nodeType || dataNode.type,
-              }
+              data: updatedData
             };
           }
           return node;
@@ -261,17 +266,22 @@ function FunnelCanvasInner({ data, onDataChange, onNodeSelect }: FunnelCanvasPro
       });
 
       const newNodeId = `${nodeType}_${Date.now()}`;
+      const nodeData = {
+        label: '',
+        nodeType,
+        content: getDefaultContent(nodeType),
+        icon: getNodeIcon(nodeType),
+        delayMinutes: nodeType === 'delay' ? 5 : 0,
+        delayValue: nodeType === 'delay' ? 5 : undefined,
+        delayUnit: nodeType === 'delay' ? 'minuto' : undefined,
+      };
+      nodeData.label = getNodeLabel(nodeType, nodeData);
+
       const newNode: Node = {
         id: newNodeId,
         type: 'funnelNode',
         position,
-        data: { 
-          label: getNodeLabel(nodeType),
-          nodeType,
-          content: getDefaultContent(nodeType),
-          icon: getNodeIcon(nodeType),
-          delayMinutes: nodeType === 'delay' ? 5 : 0,
-        },
+        data: nodeData,
       };
 
       setNodes(currentNodes => {
@@ -291,7 +301,7 @@ function FunnelCanvasInner({ data, onDataChange, onNodeSelect }: FunnelCanvasPro
     event.dataTransfer.dropEffect = 'move';
   }, []);
 
-  const getNodeLabel = (nodeType: string): string => {
+  const getNodeLabel = (nodeType: string, nodeData?: any): string => {
     const labels: Record<string, string> = {
       message: 'Mensagem Texto',
       image: 'Imagem',
@@ -305,6 +315,14 @@ function FunnelCanvasInner({ data, onDataChange, onNodeSelect }: FunnelCanvasPro
       tag: 'Tag',
       verify: 'Verificar',
     };
+    
+    if (nodeType === 'delay' && nodeData) {
+      const value = nodeData.delayValue || 5;
+      const unit = nodeData.delayUnit || 'minuto';
+      const unitText = value === 1 ? unit : unit + '(s)';
+      return `Esperar ${value} ${unitText}`;
+    }
+    
     return labels[nodeType] || nodeType;
   };
 
