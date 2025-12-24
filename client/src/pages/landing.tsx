@@ -10,7 +10,7 @@ export default function Landing() {
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <MessageSquare className="h-8 w-8 text-primary" />
-            <h1 className="text-2xl font-bold text-primary">RanZap</h1>
+            <h1 className="text-2xl font-bold text-primary">Pilot Zap</h1>
           </div>
           <Button asChild data-testid="button-login">
             <a href="/login">Entrar</a>
@@ -161,7 +161,7 @@ export default function Landing() {
       {/* Footer */}
       <footer className="border-t border-border py-8 px-4">
         <div className="container mx-auto text-center text-muted-foreground">
-          <p>&copy; 2024 RanZap. Todos os direitos reservados.</p>
+          <p>&copy; 2024 Pilot Zap. Todos os direitos reservados.</p>
         </div>
       </footer>
     </div>

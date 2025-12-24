@@ -233,20 +233,20 @@ export default function Settings() {
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <a 
-                          href="mailto:suporte@ranzap.com"
+                          href="mailto:suporte@pilotzap.com"
                           className="flex items-start space-x-3 p-3 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
                           data-testid="link-email-support"
                         >
                           <Mail className="h-5 w-5 text-primary mt-0.5" />
                           <div>
                             <p className="font-medium">Email</p>
-                            <p className="text-sm text-muted-foreground">suporte@ranzap.com</p>
+                            <p className="text-sm text-muted-foreground">suporte@pilotzap.com</p>
                             <p className="text-xs text-muted-foreground mt-1">Resposta em até 48h (Free) ou 24h (Pro+)</p>
                           </div>
                         </a>
                         <Separator />
                         <a 
-                          href="https://wa.me/258864014350?text=Olá, preciso de ajuda com a plataforma RanZap"
+                          href="https://wa.me/258864014350?text=Olá, preciso de ajuda com a plataforma Pilot Zap"
                           target="_blank"
                           rel="noopener noreferrer"
                           className="flex items-start space-x-3 p-3 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"

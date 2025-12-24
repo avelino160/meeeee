@@ -23,7 +23,7 @@ export default function BlockedPage() {
         <CardContent className="space-y-6">
           <div className="bg-muted/50 rounded-lg p-4">
             <p className="text-sm text-muted-foreground text-center">
-              Para continuar a usar o RanZap e todas as suas funcionalidades, 
+              Para continuar a usar o Pilot Zap e todas as suas funcionalidades, 
               por favor renove o seu plano.
             </p>
           </div>

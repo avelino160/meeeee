@@ -16,8 +16,8 @@ interface SettingsContextType {
 }
 
 const defaultSettings: Settings = {
-  companyName: "RanZap",
-  companyEmail: "contato@ranzap.com",
+  companyName: "Pilot Zap",
+  companyEmail: "contato@pilotzap.com",
   timezone: "Africa/Maputo",
   language: "pt-BR",
 };

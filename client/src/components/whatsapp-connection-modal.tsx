@@ -239,7 +239,7 @@ export default function WhatsAppConnectionModal({ open, onOpenChange }: WhatsApp
                 <h3 className="text-lg font-bold text-green-700">✅ WhatsApp Conectado!</h3>
               </div>
               <div className="space-y-2">
-                <p className="font-medium text-green-800">🎉 RanZap está funcionando!</p>
+                <p className="font-medium text-green-800">🎉 Pilot Zap está funcionando!</p>
                 <p className="text-sm text-green-700">
                   Seu funil de vendas automático está ativo e pronto para receber clientes.
                 </p>
