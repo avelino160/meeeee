@@ -225,9 +225,9 @@ export default function WhatsAppConnectionModal({ open, onOpenChange }: WhatsApp
                     </div>
                   </div>
                 ) : (
-                  <div className="space-y-4 p-6 bg-gradient-to-br from-blue-50 to-green-50 rounded-xl border-2 border-blue-200">
+                  <div className="space-y-4 p-6 bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl border-2 border-purple-300">
                     <div>
-                      <h3 className="text-lg font-bold text-blue-700">🔥 Pronto para conectar?</h3>
+                      <h3 className="text-lg font-bold text-purple-700">🔥 Pronto para conectar?</h3>
                       <p className="text-sm text-gray-600">Clique abaixo para gerar o QR Code</p>
                     </div>
                     
