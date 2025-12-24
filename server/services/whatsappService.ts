@@ -9,9 +9,18 @@ import makeWASocket, {
 } from '@whiskeysockets/baileys';
 import { Boom } from '@hapi/boom';
 import QRCode from 'qrcode';
-import pino from 'pino';
 import { storage } from '../storage';
 import { getPlanLimits, type PlanType } from '@shared/plan-limits';
+
+// Logger silencioso para Baileys
+const silentLogger = {
+  level: 'silent',
+  trace: () => {},
+  debug: () => {},
+  info: () => {},
+  warn: () => {},
+  error: () => {},
+};
 
 interface WhatsAppConnection {
   connected: boolean;
@@ -56,10 +65,10 @@ export class WhatsAppService {
       this.sock = makeWASocket({
         auth: {
           creds: state.creds,
-          keys: makeCacheableSignalKeyStore(state.keys, pino({ level: 'silent' }))
+          keys: makeCacheableSignalKeyStore(state.keys, silentLogger as any)
         },
         printQRInTerminal: false,
-        logger: pino({ level: 'error' }),
+        logger: silentLogger as any,
         browser: Browsers.macOS('Desktop'),
         syncFullHistory: false,
         generateHighQualityLinkPreview: false,
