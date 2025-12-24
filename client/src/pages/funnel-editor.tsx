@@ -876,7 +876,7 @@ export default function FunnelEditor() {
           {/* Mobile Node Editor Drawer */}
           {selectedNode && (
             <Drawer open={!!selectedNode} onOpenChange={(open) => !open && setSelectedNode(null)}>
-              <DrawerContent className="md:hidden bg-[#252525] border-[#333] max-h-[90vh] flex flex-col pointer-events-auto">
+              <DrawerContent className="md:hidden bg-[#252525] border-[#333]">
                 <DrawerHeader className="border-b border-[#333] flex-shrink-0">
                   <DrawerTitle className="text-white">
                     Editar Nó
@@ -886,7 +886,7 @@ export default function FunnelEditor() {
                   </p>
                 </DrawerHeader>
 
-                <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                <div className="flex-1 overflow-y-auto p-4 space-y-4 max-h-[calc(100vh-200px)]">
 
                   {/* Text Message Node */}
                   {selectedNode.data.nodeType === 'message' && (
