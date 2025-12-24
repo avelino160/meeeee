@@ -69,6 +69,7 @@ export default function Campaigns() {
       toast({
         title: "Campanha Criada",
         description: "Sua campanha foi criada com sucesso!",
+        duration: 2000,
       });
       setShowCreateDialog(false);
       resetForm();
@@ -78,6 +79,7 @@ export default function Campaigns() {
         title: "Erro",
         description: "Falha ao criar campanha. Tente novamente.",
         variant: "destructive",
+        duration: 2000,
       });
     },
   });
@@ -92,6 +94,7 @@ export default function Campaigns() {
       toast({
         title: "Campanha Atualizada",
         description: "As alterações foram salvas com sucesso!",
+        duration: 2000,
       });
       setEditingCampaign(null);
     },
@@ -100,6 +103,7 @@ export default function Campaigns() {
         title: "Erro",
         description: "Falha ao atualizar campanha.",
         variant: "destructive",
+        duration: 2000,
       });
     },
   });
@@ -113,6 +117,7 @@ export default function Campaigns() {
       toast({
         title: "Campanha Excluída",
         description: "A campanha foi removida com sucesso!",
+        duration: 2000,
       });
     },
     onError: () => {
@@ -120,6 +125,7 @@ export default function Campaigns() {
         title: "Erro",
         description: "Falha ao excluir campanha.",
         variant: "destructive",
+        duration: 2000,
       });
     },
   });
@@ -140,6 +146,7 @@ export default function Campaigns() {
         title: "Nome Obrigatório",
         description: "Digite um nome para a campanha",
         variant: "destructive",
+        duration: 2000,
       });
       return;
     }
@@ -149,6 +156,7 @@ export default function Campaigns() {
         title: "Frase Gatilho Obrigatória",
         description: "Digite uma frase gatilho para a campanha",
         variant: "destructive",
+        duration: 2000,
       });
       return;
     }

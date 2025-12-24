@@ -61,6 +61,7 @@ export default function WhatsAppConnectionModal({ open, onOpenChange }: WhatsApp
       toast({
         title: "🔥 QR Code Gerado!",
         description: "📱 Escaneie com seu WhatsApp para conectar!",
+        duration: 2000,
       });
     },
     onError: (error: any) => {
@@ -77,12 +78,14 @@ export default function WhatsAppConnectionModal({ open, onOpenChange }: WhatsApp
           title: "🛑 Bloqueio WhatsApp - Ambiente Cloud",
           description: "O WhatsApp bloqueia conexões de datacenters (Replit, Heroku, Render, etc) por segurança. Para testar, execute localmente: npm run dev",
           variant: "destructive",
+          duration: 2000,
         });
       } else {
         toast({
           title: "❌ Erro ao Gerar QR Code",
           description: error?.message || "Falha ao gerar QR Code. Tente novamente.",
           variant: "destructive",
+          duration: 2000,
         });
       }
     },
@@ -122,6 +125,7 @@ export default function WhatsAppConnectionModal({ open, onOpenChange }: WhatsApp
       toast({
         title: "Desconectado",
         description: "WhatsApp desconectado com sucesso!",
+        duration: 2000,
       });
       setShowQR(false);
     },
@@ -130,6 +134,7 @@ export default function WhatsAppConnectionModal({ open, onOpenChange }: WhatsApp
         title: "Erro",
         description: "Falha ao desconectar WhatsApp.",
         variant: "destructive",
+        duration: 2000,
       });
     },
   });

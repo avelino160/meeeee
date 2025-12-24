@@ -96,6 +96,7 @@ export default function Settings() {
       toast({
         title: "Configurações salvas",
         description: "A página será recarregada para aplicar as alterações.",
+        duration: 2000,
       });
 
       setTimeout(() => {
@@ -106,6 +107,7 @@ export default function Settings() {
         title: "Erro ao salvar",
         description: "Não foi possível salvar as configurações. Tente novamente.",
         variant: "destructive",
+        duration: 2000,
       });
       setIsSaving(false);
     }

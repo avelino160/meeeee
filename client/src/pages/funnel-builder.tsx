@@ -58,6 +58,7 @@ export default function FunnelBuilder() {
       toast({
         title: "Funil Criado",
         description: "Seu funil foi criado com sucesso!",
+        duration: 2000,
       });
       queryClient.invalidateQueries({ queryKey: ["/api/funnels"] });
       queryClient.invalidateQueries({ queryKey: ["/api/analytics/dashboard"] });
@@ -69,6 +70,7 @@ export default function FunnelBuilder() {
         title: "Limite Excedido",
         description: error.message || "Falha ao criar funil. Tente novamente.",
         variant: "destructive",
+        duration: 2000,
       });
     },
   });
@@ -82,6 +84,7 @@ export default function FunnelBuilder() {
       toast({
         title: "Funil Removido",
         description: "Funil removido com sucesso!",
+        duration: 2000,
       });
       queryClient.invalidateQueries({ queryKey: ["/api/funnels"] });
       queryClient.invalidateQueries({ queryKey: ["/api/analytics/dashboard"] });
@@ -91,6 +94,7 @@ export default function FunnelBuilder() {
         title: "Erro",
         description: "Falha ao remover funil.",
         variant: "destructive",
+        duration: 2000,
       });
     },
   });
@@ -118,6 +122,7 @@ export default function FunnelBuilder() {
         title: "Erro",
         description: "Falha ao atualizar status do funil.",
         variant: "destructive",
+        duration: 2000,
       });
     },
     onSettled: () => {
@@ -135,6 +140,7 @@ export default function FunnelBuilder() {
       toast({
         title: "Funil importado!",
         description: `${data.imported} funil foi adicionado com sucesso.`,
+        duration: 2000,
       });
       queryClient.invalidateQueries({ queryKey: ["/api/funnels"] });
       queryClient.invalidateQueries({ queryKey: ["/api/analytics/dashboard"] });
@@ -144,6 +150,7 @@ export default function FunnelBuilder() {
         title: "Erro ao importar",
         description: error.message || "Não foi possível importar o funil. Verifique o formato do arquivo.",
         variant: "destructive",
+        duration: 2000,
       });
     },
   });
@@ -166,6 +173,7 @@ export default function FunnelBuilder() {
           title: "Arquivo inválido",
           description: "O arquivo não está em formato JSON válido.",
           variant: "destructive",
+          duration: 2000,
         });
       }
     };
@@ -182,6 +190,7 @@ export default function FunnelBuilder() {
         title: "Nenhum funil",
         description: "Não há funil para exportar.",
         variant: "destructive",
+        duration: 2000,
       });
       return;
     }
@@ -213,6 +222,7 @@ export default function FunnelBuilder() {
         title: "Selecione funis",
         description: "Selecione pelo menos um funil para exportar.",
         variant: "destructive",
+        duration: 2000,
       });
       return;
     }
@@ -239,6 +249,7 @@ export default function FunnelBuilder() {
     toast({
       title: "Funil exportado!",
       description: `${selectedFunnels.length} funil(s) exportado(s) com sucesso.`,
+      duration: 2000,
     });
     setIsExportDialogOpen(false);
   };
@@ -249,6 +260,7 @@ export default function FunnelBuilder() {
         title: "Nome Obrigatório",
         description: "Digite um nome para o funil",
         variant: "destructive",
+        duration: 2000,
       });
       return;
     }

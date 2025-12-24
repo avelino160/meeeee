@@ -44,6 +44,7 @@ export default function Plans() {
     toast({
       title: "Redirecionando para checkout",
       description: `Você será redirecionado para completar a assinatura do plano ${planName}.`,
+      duration: 2000,
     });
   };
 

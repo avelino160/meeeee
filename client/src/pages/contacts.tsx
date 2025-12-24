@@ -82,6 +82,7 @@ export default function Contacts() {
       toast({
         title: "Contato Criado",
         description: "Novo contato adicionado com sucesso!",
+        duration: 2000,
       });
       setShowCreateDialog(false);
       resetForm();
@@ -91,6 +92,7 @@ export default function Contacts() {
         title: "Limite Excedido",
         description: error.message || "Falha ao criar contato. Tente novamente.",
         variant: "destructive",
+        duration: 2000,
       });
     },
   });
@@ -106,6 +108,7 @@ export default function Contacts() {
       toast({
         title: "Contato Atualizado",
         description: "As alterações foram salvas com sucesso!",
+        duration: 2000,
       });
       setEditingContact(null);
     },
@@ -114,6 +117,7 @@ export default function Contacts() {
         title: "Erro",
         description: "Falha ao atualizar contato.",
         variant: "destructive",
+        duration: 2000,
       });
     },
   });
@@ -128,6 +132,7 @@ export default function Contacts() {
       toast({
         title: "Contato Excluído",
         description: "O contato foi removido com sucesso!",
+        duration: 2000,
       });
     },
     onError: () => {
@@ -135,6 +140,7 @@ export default function Contacts() {
         title: "Erro",
         description: "Falha ao excluir contato.",
         variant: "destructive",
+        duration: 2000,
       });
     },
   });
@@ -148,6 +154,7 @@ export default function Contacts() {
       toast({
         title: "Contatos importados!",
         description: `${data.imported} contato(s) importado(s) com sucesso.`,
+        duration: 2000,
       });
       queryClient.invalidateQueries({ queryKey: ["/api/contacts"] });
       queryClient.invalidateQueries({ queryKey: ["/api/analytics/dashboard"] });
@@ -157,6 +164,7 @@ export default function Contacts() {
         title: "Erro ao importar",
         description: error.message || "Não foi possível importar os contatos. Verifique o formato do arquivo.",
         variant: "destructive",
+        duration: 2000,
       });
     },
   });
@@ -179,6 +187,7 @@ export default function Contacts() {
           title: "Arquivo inválido",
           description: "O arquivo não está em formato JSON válido.",
           variant: "destructive",
+          duration: 2000,
         });
       }
     };
@@ -223,6 +232,7 @@ export default function Contacts() {
         title: "Número Obrigatório",
         description: "Digite o número de WhatsApp do contato",
         variant: "destructive",
+        duration: 2000,
       });
       return;
     }
@@ -298,6 +308,7 @@ export default function Contacts() {
         title: "Nenhum contato",
         description: "Não há contatos para exportar.",
         variant: "destructive",
+        duration: 2000,
       });
       return;
     }
@@ -329,6 +340,7 @@ export default function Contacts() {
         title: "Selecione contatos",
         description: "Selecione pelo menos um contato para exportar.",
         variant: "destructive",
+        duration: 2000,
       });
       return;
     }
@@ -356,6 +368,7 @@ export default function Contacts() {
     toast({
       title: "Contatos exportados!",
       description: `${selectedContacts.length} contato(s) exportado(s) com sucesso.`,
+      duration: 2000,
     });
     setShowExportDialog(false);
   };

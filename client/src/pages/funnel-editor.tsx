@@ -110,6 +110,7 @@ export default function FunnelEditor() {
       toast({
         title: "✅ Funil Salvo",
         description: "Seu funil foi atualizado com sucesso!",
+        duration: 2000,
       });
       queryClient.invalidateQueries({ queryKey: ["/api/funnels"] });
       queryClient.invalidateQueries({ queryKey: ["/api/funnels", funnelId] });
@@ -120,6 +121,7 @@ export default function FunnelEditor() {
         title: "❌ Erro",
         description: "Falha ao salvar funil. Tente novamente.",
         variant: "destructive",
+        duration: 2000,
       });
     },
   });
@@ -138,6 +140,7 @@ export default function FunnelEditor() {
         title: "Funil Vazio",
         description: "Adicione alguns elementos ao funil antes de visualizar",
         variant: "destructive",
+        duration: 2000,
       });
       return;
     }
@@ -150,6 +153,7 @@ export default function FunnelEditor() {
         title: "Nome Obrigatório",
         description: "Digite um nome para o funil",
         variant: "destructive",
+        duration: 2000,
       });
       return;
     }
@@ -256,6 +260,7 @@ export default function FunnelEditor() {
         title: "Arquivo muito grande",
         description: `O tamanho máximo para ${nodeType} é ${maxSizeMB}MB`,
         variant: "destructive",
+        duration: 2000,
       });
       return;
     }
@@ -266,6 +271,7 @@ export default function FunnelEditor() {
       toast({
         title: "✅ Vídeo Adicionado",
         description: `${file.name} foi anexado ao nó`,
+        duration: 2000,
       });
       return;
     }
@@ -293,6 +299,7 @@ export default function FunnelEditor() {
         toast({
           title: "✅ Documento Adicionado",
           description: `${file.name} foi anexado ao nó`,
+          duration: 2000,
         });
       };
       reader.onerror = () => {
@@ -300,6 +307,7 @@ export default function FunnelEditor() {
           title: "❌ Erro",
           description: "Falha ao carregar o documento",
           variant: "destructive",
+          duration: 2000,
         });
       };
       reader.readAsDataURL(file);
@@ -314,6 +322,7 @@ export default function FunnelEditor() {
       toast({
         title: "✅ Arquivo Carregado",
         description: `${file.name} foi adicionado ao nó`,
+        duration: 2000,
       });
     };
     reader.onerror = () => {
@@ -321,6 +330,7 @@ export default function FunnelEditor() {
         title: "❌ Erro",
         description: "Falha ao carregar o arquivo",
         variant: "destructive",
+        duration: 2000,
       });
     };
     reader.readAsDataURL(file);

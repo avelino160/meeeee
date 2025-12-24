@@ -84,6 +84,7 @@ export default function Templates() {
       toast({
         title: "Template Criado",
         description: "Novo template adicionado com sucesso!",
+        duration: 2000,
       });
       setShowCreateDialog(false);
       resetForm();
@@ -93,6 +94,7 @@ export default function Templates() {
         title: "Erro",
         description: "Falha ao criar template. Tente novamente.",
         variant: "destructive",
+        duration: 2000,
       });
     },
   });
@@ -107,6 +109,7 @@ export default function Templates() {
       toast({
         title: "Template Atualizado",
         description: "As alterações foram salvas com sucesso!",
+        duration: 2000,
       });
       setEditingTemplate(null);
     },
@@ -115,6 +118,7 @@ export default function Templates() {
         title: "Erro",
         description: "Falha ao atualizar template.",
         variant: "destructive",
+        duration: 2000,
       });
     },
   });
@@ -128,6 +132,7 @@ export default function Templates() {
       toast({
         title: "Template Excluído",
         description: "O template foi removido com sucesso!",
+        duration: 2000,
       });
     },
     onError: () => {
@@ -135,6 +140,7 @@ export default function Templates() {
         title: "Erro",
         description: "Falha ao excluir template.",
         variant: "destructive",
+        duration: 2000,
       });
     },
   });
@@ -173,6 +179,7 @@ export default function Templates() {
         title: "Nome Obrigatório",
         description: "Digite um nome para o template",
         variant: "destructive",
+        duration: 2000,
       });
       return;
     }
@@ -182,6 +189,7 @@ export default function Templates() {
         title: "Conteúdo Obrigatório",
         description: "Digite o conteúdo do template",
         variant: "destructive",
+        duration: 2000,
       });
       return;
     }
@@ -221,12 +229,14 @@ export default function Templates() {
       toast({
         title: "Copiado!",
         description: "Conteúdo do template copiado para a área de transferência",
+        duration: 2000,
       });
     } catch (error) {
       toast({
         title: "Erro",
         description: "Falha ao copiar template",
         variant: "destructive",
+        duration: 2000,
       });
     }
   };

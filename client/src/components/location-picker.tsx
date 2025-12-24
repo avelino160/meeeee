@@ -34,6 +34,7 @@ export default function LocationPicker({ value, onChange }: LocationPickerProps)
         title: "Digite um endereço",
         description: "Informe um endereço para buscar",
         variant: "destructive",
+        duration: 2000,
       });
       return;
     }
@@ -58,6 +59,7 @@ export default function LocationPicker({ value, onChange }: LocationPickerProps)
           title: "Nenhum resultado",
           description: "Não encontramos esse endereço. Tente outro termo.",
           variant: "destructive",
+          duration: 2000,
         });
       }
       
@@ -67,6 +69,7 @@ export default function LocationPicker({ value, onChange }: LocationPickerProps)
         title: "Erro na busca",
         description: "Não foi possível buscar o endereço. Tente novamente.",
         variant: "destructive",
+        duration: 2000,
       });
     } finally {
       setIsSearching(false);
@@ -86,6 +89,7 @@ export default function LocationPicker({ value, onChange }: LocationPickerProps)
     toast({
       title: "Localização selecionada",
       description: result.display_name.substring(0, 50) + '...',
+      duration: 2000,
     });
   };
 
