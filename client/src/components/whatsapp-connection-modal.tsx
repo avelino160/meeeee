@@ -25,11 +25,6 @@ export default function WhatsAppConnectionModal({ open, onOpenChange }: WhatsApp
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Detectar se está rodando no Replit (ou outro ambiente cloud)
-  const isReplitEnvironment = window.location.hostname.includes('.replit.') || 
-                               window.location.hostname.includes('replit.dev') ||
-                               window.location.hostname.includes('repl.co');
-
   const { data: whatsappStatus } = useQuery<WhatsAppStatus>({
     queryKey: ["/api/whatsapp/status"],
     enabled: open,
@@ -67,27 +62,12 @@ export default function WhatsAppConnectionModal({ open, onOpenChange }: WhatsApp
     onError: (error: any) => {
       console.log('🔍 Error object:', { status: error?.status, message: error?.message, error: error?.error });
       
-      // Detectar bloqueio de datacenter (405)
-      const isDatacenterBlock = error?.status === 405 || 
-                                error?.error === 'datacenter_blocked' ||
-                                error?.message?.includes('cloud') || 
-                                error?.message?.includes('datacenter');
-      
-      if (isDatacenterBlock) {
-        toast({
-          title: "🛑 Bloqueio WhatsApp - Ambiente Cloud",
-          description: "O WhatsApp bloqueia conexões de datacenters (Replit, Heroku, Render, etc) por segurança. Para testar, execute localmente: npm run dev",
-          variant: "destructive",
-          duration: 2000,
-        });
-      } else {
-        toast({
-          title: "❌ Erro ao Gerar QR Code",
-          description: error?.message || "Falha ao gerar QR Code. Tente novamente.",
-          variant: "destructive",
-          duration: 2000,
-        });
-      }
+      toast({
+        title: "❌ Erro ao Gerar QR Code",
+        description: error?.message || "Falha ao gerar QR Code. Tente novamente.",
+        variant: "destructive",
+        duration: 2000,
+      });
     },
   });
 
@@ -178,15 +158,6 @@ export default function WhatsAppConnectionModal({ open, onOpenChange }: WhatsApp
 
           {!whatsappStatus?.connected ? (
             <>
-              {/* Cloud Environment Warning */}
-              {isReplitEnvironment && (
-                <div className="bg-yellow-50 border-2 border-yellow-200 p-4 rounded-lg">
-                  <p className="text-sm text-yellow-800">
-                    <strong>💻 Ambiente Cloud Detectado:</strong> O WhatsApp bloqueia conexões de servidores cloud por segurança. Para gerar o QR Code, você precisa executar este projeto <strong>localmente</strong> no seu computador.
-                  </p>
-                </div>
-              )}
-
               {/* QR Code Generation */}
               <div className="text-center space-y-4">
                 {showQR && qrImageUrl ? (

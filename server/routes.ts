@@ -23,24 +23,6 @@ const DEMO_USER = {
   email: "demo@ranzap.com",
 };
 
-// Guard: Detectar ambientes de datacenter (Replit, etc.)
-function isDatacenterEnvironment(req: any): boolean {
-  const hostname = req.hostname || req.get('host') || '';
-  const forwardedHost = req.get('x-forwarded-host') || '';
-  
-  const datacenterHosts = [
-    '.replit.',
-    'replit.dev',
-    '.repl.co',
-    '.glitch.me',
-    '.herokuapp.com',
-    '.render.com',
-  ];
-  
-  return datacenterHosts.some(dc => 
-    hostname.includes(dc) || forwardedHost.includes(dc)
-  );
-}
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Funnel JSON route
@@ -153,15 +135,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.post('/api/whatsapp/qr', async (req, res) => {
-    // 🛡️ GUARD: Bloquear tentativas em ambientes de datacenter
-    if (isDatacenterEnvironment(req)) {
-      return res.status(405).json({
-        message: "WhatsApp bloqueia conexões de servidores cloud. Execute o projeto localmente ou use VPS com IP residencial.",
-        error: "datacenter_blocked",
-        details: "O WhatsApp detecta e bloqueia conexões de datacenters (Replit, Heroku, etc.) por segurança. Consulte WHATSAPP_CONNECTION.md para soluções."
-      });
-    }
-
     try {
       console.log('📱 Starting QR code generation...');
       const userId = DEFAULT_USER_ID;
@@ -175,15 +148,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error: any) {
       console.error("❌ Error generating QR code:", error?.message || error);
       
-      // Se é erro 405 do WhatsApp, retornar como 405
-      if (error?.statusCode === 405 || error?.error === 'datacenter_blocked') {
-        return res.status(405).json({ 
-          message: error?.message || "WhatsApp bloqueou a conexão",
-          error: "datacenter_blocked",
-          details: "O ambiente está sendo bloqueado pelo WhatsApp. Execute localmente."
-        });
-      }
-      
       res.status(500).json({ 
         message: error?.message || "Failed to generate QR code",
         error: error?.error || "qr_generation_failed"
@@ -192,15 +156,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.post('/api/whatsapp/pairing-code', async (req, res) => {
-    // 🛡️ GUARD: Bloquear tentativas em ambientes de datacenter
-    if (isDatacenterEnvironment(req)) {
-      return res.status(405).json({
-        message: "WhatsApp bloqueia conexões de servidores cloud. Execute o projeto localmente ou use VPS com IP residencial.",
-        error: "datacenter_blocked",
-        details: "O WhatsApp detecta e bloqueia conexões de datacenters (Replit, Heroku, etc.) por segurança. Consulte WHATSAPP_CONNECTION.md para soluções."
-      });
-    }
-
     try {
       const userId = DEFAULT_USER_ID;
       const { phoneNumber } = req.body;
@@ -216,16 +171,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ pairingCode });
     } catch (error: any) {
       console.error("Error generating pairing code:", error);
-      
-      // Identificar erro 405 do WhatsApp (bloqueio de datacenter)
-      if (error.output?.statusCode === 405 || error.message?.includes('Connection Failure') || error.message?.includes('Connection Closed')) {
-        return res.status(405).json({ 
-          message: "WhatsApp bloqueou a conexão deste ambiente. Execute o projeto localmente ou use VPS com IP residencial.",
-          error: "datacenter_blocked",
-          details: "O WhatsApp detectou que esta conexão vem de um datacenter e bloqueou por segurança. Consulte WHATSAPP_CONNECTION.md para soluções."
-        });
-      }
-      
       res.status(500).json({ message: "Failed to generate pairing code" });
     }
   });
