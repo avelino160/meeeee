@@ -240,7 +240,7 @@ export default function WhatsAppConnectionModal({ open, onOpenChange }: WhatsApp
                     ) : (
                       <Button
                         onClick={() => generateQRMutation.mutate()}
-                        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3"
+                        className="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3"
                         data-testid="button-generate-qr"
                       >
                         <QrCode className="h-5 w-5 mr-2" />
