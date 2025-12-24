@@ -534,9 +534,9 @@ export default function FunnelEditor() {
             />
           </div>
 
-          {/* Right Sidebar - Node Editor (appears only when editing) */}
+          {/* Right Sidebar - Node Editor (appears only when editing) - Desktop */}
           {selectedNode && (
-            <div className="w-72 lg:w-80 flex-col bg-[#252525] border-l border-[#333] overflow-hidden flex">
+            <div className="hidden md:flex w-72 lg:w-80 flex-col bg-[#252525] border-l border-[#333] overflow-hidden">
               <div className="p-3 lg:p-4 border-b border-[#333]">
                 <h3 className="text-lg font-semibold text-white mb-1">
                   Editar Nó
@@ -871,6 +871,254 @@ export default function FunnelEditor() {
                 </Button>
               </div>
             </div>
+          )}
+
+          {/* Mobile Node Editor Drawer */}
+          {selectedNode && (
+            <Drawer open={!!selectedNode} onOpenChange={(open) => !open && setSelectedNode(null)}>
+              <DrawerContent className="md:hidden bg-[#252525] border-[#333]">
+                <DrawerHeader className="border-b border-[#333]">
+                  <DrawerTitle className="text-white">
+                    Editar Nó
+                  </DrawerTitle>
+                  <p className="text-xs text-gray-400 mt-1">
+                    {selectedNode.data.label || 'Configurações'}
+                  </p>
+                </DrawerHeader>
+
+                <div className="flex-1 overflow-y-auto p-4 space-y-4 max-h-[calc(100vh-200px)]">
+
+                  {/* Text Message Node */}
+                  {selectedNode.data.nodeType === 'message' && (
+                  <div className="space-y-3">
+                    <div>
+                      <Label htmlFor="message-content-mobile" className="text-gray-300">
+                        Mensagem
+                      </Label>
+                      <Textarea
+                        id="message-content-mobile"
+                        value={selectedNode.data.content || ''}
+                        onChange={(e) => updateNodeContent(e.target.value)}
+                        placeholder="Digite a mensagem..."
+                        className="mt-2 bg-[#1a1a1a] border-gray-700 text-white"
+                        rows={5}
+                        data-testid="input-message-content"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                  {/* Media Nodes (Image, Video, Audio, Document) */}
+                  {['image', 'video', 'audio', 'document'].includes(selectedNode.data.nodeType || '') && (
+                  <div className="space-y-3">
+                    <div>
+                      <Label htmlFor="media-url-mobile" className="text-gray-300">
+                        URL do arquivo
+                      </Label>
+                      <Input
+                        id="media-url-mobile"
+                        type="text"
+                        value={selectedNode.data.mediaUrl || ''}
+                        onChange={(e) => updateNodeMediaUrl(e.target.value)}
+                        placeholder={`URL do ${selectedNode.data.nodeType}...`}
+                        className="mt-2 bg-[#1a1a1a] border-gray-700 text-white"
+                        data-testid="input-media-url"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="media-file-mobile" className="text-gray-300">
+                        Ou faça upload
+                      </Label>
+                      <Input
+                        id="media-file-mobile"
+                        type="file"
+                        accept={
+                          selectedNode.data.nodeType === 'image' ? 'image/*' :
+                          selectedNode.data.nodeType === 'video' ? 'video/*' :
+                          selectedNode.data.nodeType === 'audio' ? 'audio/*' :
+                          '*/*'
+                        }
+                        onChange={handleFileUpload}
+                        className="mt-2 bg-[#1a1a1a] border-gray-700 text-white file:bg-purple-600 file:text-white file:border-0 file:px-4 file:py-2 file:rounded file:mr-4"
+                        data-testid="input-media-file"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                  {/* Location Node */}
+                  {selectedNode.data.nodeType === 'location' && (
+                    <div className="space-y-3">
+                      <LocationPicker
+                        value={selectedNode.data.location}
+                        onChange={updateNodeLocation}
+                      />
+                    </div>
+                  )}
+
+                  {/* Delay Node */}
+                  {selectedNode.data.nodeType === 'delay' && (
+                    <div className="space-y-3">
+                      <div>
+                        <Label htmlFor="delay-minutes-mobile" className="text-gray-300">
+                          Tempo de espera (minutos)
+                        </Label>
+                        <Input
+                          id="delay-minutes-mobile"
+                          type="number"
+                          min="1"
+                          value={selectedNode.data.delayMinutes || 5}
+                          onChange={(e) => updateNodeDelay(parseInt(e.target.value) || 5)}
+                          className="mt-2 bg-[#1a1a1a] border-gray-700 text-white"
+                          data-testid="input-delay-minutes"
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Condition Node */}
+                  {selectedNode.data.nodeType === 'condition' && (
+                    <div className="space-y-3">
+                      <div>
+                        <Label htmlFor="condition-content-mobile" className="text-gray-300">
+                          Condição
+                        </Label>
+                        <Textarea
+                          id="condition-content-mobile"
+                          value={selectedNode.data.content || ''}
+                          onChange={(e) => updateNodeContent(e.target.value)}
+                          placeholder="Descreva a condição..."
+                          className="mt-2 bg-[#1a1a1a] border-gray-700 text-white"
+                          rows={3}
+                          data-testid="input-condition-content"
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Question Node */}
+                  {selectedNode.data.nodeType === 'question' && (
+                    <div className="space-y-3">
+                      <div>
+                        <Label htmlFor="question-content-mobile" className="text-gray-300">
+                          Pergunta
+                        </Label>
+                        <Textarea
+                          id="question-content-mobile"
+                          value={selectedNode.data.content || ''}
+                          onChange={(e) => updateNodeContent(e.target.value)}
+                          placeholder="Digite a pergunta..."
+                          className="mt-2 bg-[#1a1a1a] border-gray-700 text-white"
+                          rows={3}
+                          data-testid="input-question-content"
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Tag Node */}
+                  {selectedNode.data.nodeType === 'tag' && (
+                    <div className="space-y-3">
+                      <div>
+                        <Label htmlFor="tag-content-mobile" className="text-gray-300">
+                          Tag
+                        </Label>
+                        <Input
+                          id="tag-content-mobile"
+                          type="text"
+                          value={selectedNode.data.content || ''}
+                          onChange={(e) => updateNodeContent(e.target.value)}
+                          placeholder="Nome da tag..."
+                          className="mt-2 bg-[#1a1a1a] border-gray-700 text-white"
+                          data-testid="input-tag-content"
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Trigger Node - Single Phrase */}
+                  {selectedNode.data.nodeType === 'trigger' && (
+                    <div className="space-y-3">
+                      <div>
+                        <Label className="text-gray-300">
+                          Frase Gatilho
+                        </Label>
+                        <p className="text-xs text-gray-500 mt-1 mb-3">
+                          Palavra ou frase que inicia o funil
+                        </p>
+                        <div className="flex gap-2">
+                          <Input
+                            value={triggerPhrases[0] || ''}
+                            onChange={(e) => {
+                              setTriggerPhrases([e.target.value]);
+                            }}
+                            placeholder="Digite a frase gatilho..."
+                            className="bg-[#1a1a1a] border-gray-700 text-white flex-1"
+                            data-testid="input-trigger-phrase"
+                          />
+                          {triggerPhrases[0] && (
+                            <Button
+                              variant="outline"
+                              size="icon"
+                              onClick={() => setTriggerPhrases([])}
+                              className="border-gray-600 text-gray-300 hover:bg-red-900"
+                              data-testid="button-clear-trigger-phrase"
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Verify Node */}
+                  {selectedNode.data.nodeType === 'verify' && (
+                    <div className="space-y-3">
+                      <div>
+                        <Label htmlFor="verify-content-mobile" className="text-gray-300">
+                          Verificação
+                        </Label>
+                        <Textarea
+                          id="verify-content-mobile"
+                          value={selectedNode.data.content || ''}
+                          onChange={(e) => updateNodeContent(e.target.value)}
+                          placeholder="O que verificar..."
+                          className="mt-2 bg-[#1a1a1a] border-gray-700 text-white"
+                          rows={3}
+                          data-testid="input-verify-content"
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                </div>
+
+                {/* Action buttons */}
+                <div className="border-t border-gray-700 space-y-2 p-4 flex-shrink-0">
+                  {selectedNode.id !== 'start' && selectedNode.data.nodeType !== 'trigger' && (
+                    <Button
+                      variant="outline"
+                      className="w-full border-red-600 text-red-400 hover:bg-red-900/50"
+                      onClick={deleteNode}
+                      data-testid="button-delete-node"
+                    >
+                      <X className="h-4 w-4 mr-2" />
+                      Excluir Elemento
+                    </Button>
+                  )}
+                  <DrawerClose asChild>
+                    <Button
+                      variant="outline"
+                      className="w-full border-gray-600 text-gray-300 hover:bg-gray-800"
+                      data-testid="button-close-editor"
+                    >
+                      Fechar
+                    </Button>
+                  </DrawerClose>
+                </div>
+              </DrawerContent>
+            </Drawer>
           )}
         </div>
       </div>
