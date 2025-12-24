@@ -357,9 +357,6 @@ export default function FunnelBuilder() {
                         <h3 className="text-lg font-bold text-foreground uppercase" data-testid={`text-funnel-name-${funnel.id}`}>
                           {funnel.name}
                         </h3>
-                        <p className="text-xs text-muted-foreground mt-1">
-                          {getActiveFunnelsCount(funnel)} gatilho(s)
-                        </p>
                       </div>
 
                       <div className="space-y-2">
