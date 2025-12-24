@@ -96,16 +96,6 @@ export class WhatsAppService {
           });
         }
 
-        // Se datacenter está bloqueando (405), sinalizar para rejeição
-        if (statusCode === 405) {
-          this.isReady = false;
-          this.connectionStatus.connected = false;
-          this.connectionStatus.status = 'disconnected';
-          console.log('🛑 BLOQUEIO DATACENTER 405 DETECTADO!');
-          if ((this as any)._set405) {
-            (this as any)._set405();
-          }
-        }
 
         if (connection === 'open') {
           this.isReady = true;
@@ -331,7 +321,6 @@ export class WhatsAppService {
       return new Promise(async (resolve, reject) => {
         let timeout: NodeJS.Timeout | null = null;
         let isResolved = false;
-        let blocked405 = false;
         
         try {
           // Inicializar socket
@@ -343,13 +332,6 @@ export class WhatsAppService {
             isResolved = true;
             this.isGeneratingQR = false;
             
-            if (blocked405) {
-              const err = new Error('WhatsApp bloqueou a conexão - ambiente cloud detectado');
-              (err as any).statusCode = 405;
-              (err as any).error = 'datacenter_blocked';
-              return reject(err);
-            }
-            
             const err = new Error('QR Code não gerado após 25 segundos');
             (err as any).error = 'qr_timeout';
             console.error('❌', err.message);
@@ -359,16 +341,6 @@ export class WhatsAppService {
           const checkQR = () => {
             if (isResolved) return;
             attempts++;
-            
-            if (blocked405) {
-              if (timeout) clearTimeout(timeout);
-              isResolved = true;
-              this.isGeneratingQR = false;
-              const err = new Error('WhatsApp bloqueou a conexão - ambiente cloud detectado');
-              (err as any).statusCode = 405;
-              (err as any).error = 'datacenter_blocked';
-              return reject(err);
-            }
             
             if (this.qrCode) {
               if (timeout) clearTimeout(timeout);
@@ -385,10 +357,6 @@ export class WhatsAppService {
             
             setTimeout(checkQR, 500);
           };
-          
-          // Armazenar referência para usar no listener
-          (this as any)._qrCheckFn = checkQR;
-          (this as any)._set405 = () => { blocked405 = true; };
           
           checkQR();
           
