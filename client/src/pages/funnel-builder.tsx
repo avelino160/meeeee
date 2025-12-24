@@ -272,14 +272,14 @@ export default function FunnelBuilder() {
   };
 
   return (
-    <div className="flex h-screen bg-[#1a1a1a]">
+    <div className="flex h-screen bg-background">
       <Sidebar />
       <div className="flex-1 flex flex-col overflow-hidden">
-        <header className="bg-gradient-to-r from-[#252525] to-[#1a1a1a] border-b border-[#404040] pl-14 pr-4 lg:px-6 pt-[16px] pb-[16px] shadow-lg">
+        <header className="bg-card border-b border-border pl-14 pr-4 lg:px-6 pt-[16px] pb-[16px]">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 mb-2">
             <div>
-              <h2 className="text-xl sm:text-2xl font-bold text-white" data-testid="text-page-title">Funil de venda</h2>
-              <p className="text-xs sm:text-sm text-gray-400 mt-1 hidden sm:block">
+              <h2 className="text-xl sm:text-2xl font-bold text-foreground" data-testid="text-page-title">Funil de venda</h2>
+              <p className="text-xs sm:text-sm text-muted-foreground mt-1 hidden sm:block">
                 Crie fluxos de mensagens automatizados para aumentar suas conversões
               </p>
             </div>
@@ -328,7 +328,7 @@ export default function FunnelBuilder() {
           </div>
         </header>
 
-        <main className="flex-1 overflow-y-auto p-3 sm:p-6 bg-gradient-to-br from-[#1a1a1a] via-[#1f1f1f] to-[#252525]">
+        <main className="flex-1 overflow-y-auto p-3 sm:p-6">
           {isLoading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {[1, 2, 3].map((i) => (

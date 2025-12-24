@@ -352,20 +352,20 @@ export default function FunnelEditor() {
       <Sidebar />
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Top Header */}
-        <header className="bg-gradient-to-r from-[#252525] to-[#1a1a1a] border-b border-[#404040] px-3 sm:px-6 py-3 sm:py-4 shadow-lg">
+        <header className="bg-card border-b border-border px-3 sm:px-6 py-3 sm:py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2 sm:space-x-4">
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={() => setLocation("/funnel-builder")}
-                className="text-gray-400 hover:text-purple-400 transition-colors"
+                className="text-gray-400 hover:text-white"
                 data-testid="button-back"
               >
                 <ArrowLeft className="h-5 w-5" />
               </Button>
               <div>
-                <h2 className="text-base sm:text-xl font-bold text-white" data-testid="text-page-title">
+                <h2 className="text-base sm:text-xl font-semibold text-white" data-testid="text-page-title">
                   Editor de Funil
                 </h2>
                 <p className="text-xs sm:text-sm text-gray-400 hidden sm:block">
@@ -378,7 +378,7 @@ export default function FunnelEditor() {
                 variant="outline"
                 size="sm"
                 onClick={handlePreviewFunnel}
-                className="border-purple-500/50 text-gray-300 hover:border-purple-400 hover:bg-purple-900/20 transition-all"
+                className="border-gray-600 text-gray-300 hover:bg-gray-800"
                 data-testid="button-preview-funnel"
               >
                 <Eye className="h-4 w-4 sm:mr-2" />
@@ -388,7 +388,7 @@ export default function FunnelEditor() {
                 size="sm"
                 onClick={handleSaveFunnel}
                 disabled={saveFunnelMutation.isPending}
-                className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-500 hover:to-purple-600 text-white border-0 shadow-lg hover:shadow-purple-500/50 transition-all"
+                className="bg-purple-600 hover:bg-purple-700 text-white"
                 data-testid="button-save-funnel"
               >
                 <Save className="h-4 w-4 sm:mr-2" />
@@ -532,9 +532,9 @@ export default function FunnelEditor() {
 
           {/* Right Sidebar - Node Editor (appears only when editing) - Desktop */}
           {selectedNode && (
-            <div className="hidden md:flex w-72 lg:w-80 flex-col bg-gradient-to-b from-[#252525] to-[#1f1f1f] border-l border-[#404040] overflow-hidden shadow-xl">
-              <div className="p-3 lg:p-4 border-b border-[#404040] bg-gradient-to-r from-purple-900/20 to-transparent">
-                <h3 className="text-lg font-bold text-white mb-1">
+            <div className="hidden md:flex w-72 lg:w-80 flex-col bg-[#252525] border-l border-[#333] overflow-hidden">
+              <div className="p-3 lg:p-4 border-b border-[#333]">
+                <h3 className="text-lg font-semibold text-white mb-1">
                   Editar Nó
                 </h3>
                 <p className="text-xs text-gray-400">
@@ -845,11 +845,11 @@ export default function FunnelEditor() {
               </div>
               
               {/* Action buttons - always visible at bottom */}
-              <div className="pt-3 mt-3 border-t border-[#404040] space-y-2 flex-shrink-0 p-3 lg:p-4 bg-gradient-to-t from-[#1a1a1a] to-transparent">
+              <div className="pt-3 mt-3 border-t border-gray-700 space-y-2 flex-shrink-0 p-3 lg:p-4">
                 {selectedNode.id !== 'start' && selectedNode.data.nodeType !== 'trigger' && (
                   <Button
                     variant="outline"
-                    className="w-full border-red-600/60 text-red-400 hover:border-red-500 hover:bg-red-900/30 transition-all"
+                    className="w-full border-red-600 text-red-400 hover:bg-red-900/50"
                     onClick={deleteNode}
                     data-testid="button-delete-node"
                   >
@@ -859,7 +859,7 @@ export default function FunnelEditor() {
                 )}
                 <Button
                   variant="outline"
-                  className="w-full border-purple-500/50 text-gray-300 hover:border-purple-400 hover:bg-purple-900/20 transition-all"
+                  className="w-full border-gray-600 text-gray-300 hover:bg-gray-800"
                   onClick={() => setSelectedNode(null)}
                   data-testid="button-close-editor"
                 >

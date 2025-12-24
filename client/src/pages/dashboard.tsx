@@ -136,7 +136,7 @@ export default function Dashboard() {
         </header>
 
         {/* Main Content */}
-        <main className="flex-1 p-2 sm:p-4 lg:p-6 overflow-auto bg-gradient-to-br from-[#1a1a1a] via-[#1f1f1f] to-[#252525]">
+        <main className="flex-1 p-2 sm:p-4 lg:p-6 overflow-auto">
           {/* Stats Cards */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 lg:gap-6 mb-4 sm:mb-6 lg:mb-8">
             <Card>

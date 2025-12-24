@@ -226,16 +226,16 @@ export default function Campaigns() {
   };
 
   return (
-    <div className="flex h-screen bg-[#1a1a1a]">
+    <div className="flex h-screen bg-background">
       <Sidebar />
       
-      <div className="flex-1 flex flex-col overflow-hidden bg-gradient-to-br from-[#1a1a1a] via-[#1f1f1f] to-[#252525]">
+      <div className="flex-1 flex flex-col overflow-hidden">
         {/* Header */}
-        <header className="bg-gradient-to-r from-[#252525] to-[#1a1a1a] border-b border-[#404040] pl-14 pr-4 lg:px-6 py-4 shadow-lg">
+        <header className="bg-card border-b border-border pl-14 pr-4 lg:px-6 py-4">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-white" data-testid="text-page-title">Campanhas</h1>
-              <p className="text-sm text-gray-400">Gerencie suas campanhas de automação</p>
+              <h1 className="text-2xl font-semibold" data-testid="text-page-title">Campanhas</h1>
+              <p className="text-sm text-muted-foreground">Gerencie suas campanhas de automação</p>
             </div>
             <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
               <DialogTrigger asChild>

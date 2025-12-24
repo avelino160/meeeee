@@ -114,20 +114,20 @@ export default function Settings() {
   };
 
   return (
-    <div className="flex h-screen bg-[#1a1a1a]">
+    <div className="flex h-screen bg-background">
       <Sidebar />
       <div className="flex-1 flex flex-col overflow-hidden">
-        <main className="flex-1 overflow-y-auto bg-gradient-to-br from-[#1a1a1a] via-[#1f1f1f] to-[#252525]">
+        <main className="flex-1 overflow-y-auto">
           {/* Header */}
-          <div className="bg-gradient-to-r from-[#252525] to-[#1a1a1a] border-b border-[#404040] shadow-lg">
+          <div className="bg-card border-b border-border">
             <div className="max-w-7xl mx-auto pl-14 pr-4 lg:px-8 pt-[16px] pb-[16px]">
               <div className="flex items-center justify-between">
                 <div>
-                  <h1 className="text-3xl font-bold text-white flex items-center" data-testid="text-page-title">
-                    <SettingsIcon className="h-8 w-8 mr-3 text-purple-500" />
+                  <h1 className="text-3xl font-bold text-foreground flex items-center" data-testid="text-page-title">
+                    <SettingsIcon className="h-8 w-8 mr-3 text-primary" />
                     Configurações
                   </h1>
-                  <p className="text-gray-400 mt-1">
+                  <p className="text-muted-foreground mt-1">
                     Gerencie as configurações do sistema e preferências
                   </p>
                 </div>
@@ -135,7 +135,7 @@ export default function Settings() {
                   <Button
                     onClick={handleSaveSettings}
                     disabled={isSaving}
-                    className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-500 hover:to-purple-600 text-white border-0 shadow-lg hover:shadow-purple-500/50 transition-all"
+                    className="bg-primary hover:bg-primary/90"
                     data-testid="button-save-settings"
                   >
                     {isSaving ? (

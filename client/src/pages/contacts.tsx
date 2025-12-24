@@ -374,15 +374,15 @@ export default function Contacts() {
   };
 
   return (
-    <div className="flex h-screen bg-[#1a1a1a]">
+    <div className="flex h-screen bg-background">
       <Sidebar />
-      <div className="flex-1 flex flex-col overflow-hidden bg-gradient-to-br from-[#1a1a1a] via-[#1f1f1f] to-[#252525]">
+      <div className="flex-1 flex flex-col overflow-hidden">
         {/* Header */}
-        <header className="bg-gradient-to-r from-[#252525] to-[#1a1a1a] border-b border-[#404040] pl-14 pr-4 lg:px-6 py-3 sm:py-4 pt-[16px] pb-[16px] shadow-lg">
+        <header className="bg-card border-b border-border pl-14 pr-4 lg:px-6 py-3 sm:py-4 pt-[16px] pb-[16px]">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
             <div className="w-full sm:w-auto">
-              <h1 className="sm:text-2xl font-bold text-[20px] text-white" data-testid="text-page-title">Contatos</h1>
-              <p className="text-xs sm:text-sm text-gray-400 hidden sm:block">Gerencie sua lista de contatos</p>
+              <h1 className="sm:text-2xl font-semibold text-[20px]" data-testid="text-page-title">Contatos</h1>
+              <p className="text-xs sm:text-sm text-muted-foreground hidden sm:block">Gerencie sua lista de contatos</p>
             </div>
             <div className="flex space-x-2 w-full sm:w-auto">
               <input
