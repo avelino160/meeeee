@@ -140,11 +140,9 @@ function FunnelCanvasInner({ data, onDataChange, onNodeSelect }: FunnelCanvasPro
             const updatedData = {
               ...dataNode.data,
               nodeType: dataNode.data.nodeType || dataNode.type,
+              delayValue: dataNode.data.delayValue,
+              delayUnit: dataNode.data.delayUnit,
             };
-            // Update label for delay nodes to show current values
-            if (updatedData.nodeType === 'delay') {
-              updatedData.label = getNodeLabel('delay', updatedData);
-            }
             return {
               ...node,
               data: updatedData
@@ -160,7 +158,7 @@ function FunnelCanvasInner({ data, onDataChange, onNodeSelect }: FunnelCanvasPro
         nodeIds.has(edge.source) && nodeIds.has(edge.target)
       );
     });
-  }, [data.nodes]);
+  }, [data]);
 
   React.useEffect(() => {
     const phrasesText = data.triggerPhrases && data.triggerPhrases.length > 0
