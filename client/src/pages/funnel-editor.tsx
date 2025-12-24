@@ -221,7 +221,7 @@ export default function FunnelEditor() {
         title: "Ação não permitida",
         description: "Este elemento não pode ser excluído",
         variant: "destructive",
-        duration: 3000,
+        duration: 2000,
       });
       return;
     }
@@ -237,7 +237,7 @@ export default function FunnelEditor() {
     toast({
       title: "Elemento Removido",
       description: "O elemento foi excluído do funil",
-      duration: 5000,
+      duration: 2000,
     });
   };
 
