@@ -198,7 +198,7 @@ export default function WhatsAppConnectionModal({ open, onOpenChange }: WhatsApp
                 ) : (
                   <div className="space-y-4 p-6 bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl border-2 border-purple-300">
                     <div>
-                      <h3 className="text-lg font-bold text-purple-700">🔥 Pronto para conectar?</h3>
+                      <h3 className="text-lg font-bold text-purple-700">Pronto para conectar?</h3>
                       <p className="text-sm text-gray-600">Clique abaixo para gerar o QR Code</p>
                     </div>
                     
@@ -233,12 +233,11 @@ export default function WhatsAppConnectionModal({ open, onOpenChange }: WhatsApp
             </>
           ) : (
             /* ✅ WhatsApp Conectado */
-            <div className="space-y-4 text-center p-6 bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl border-2 border-green-300">
+            (<div className="space-y-4 text-center p-6 bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl border-2 border-green-300">
               <div className="flex items-center justify-center space-x-3 mb-4">
                 <div className="w-4 h-4 bg-green-500 rounded-full animate-pulse"></div>
                 <h3 className="text-lg font-bold text-green-700">✅ WhatsApp Conectado!</h3>
               </div>
-              
               <div className="space-y-2">
                 <p className="font-medium text-green-800">🎉 RanZap está funcionando!</p>
                 <p className="text-sm text-green-700">
@@ -267,7 +266,7 @@ export default function WhatsAppConnectionModal({ open, onOpenChange }: WhatsApp
                   {disconnectMutation.isPending ? "Desconectando..." : "🔴 Desconectar"}
                 </Button>
               </div>
-            </div>
+            </div>)
           )}
         </div>
       </DialogContent>
