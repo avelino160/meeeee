@@ -351,7 +351,6 @@ export default function FunnelEditor() {
   return (
     <div className="flex h-screen bg-[#1a1a1a]">
       <Sidebar />
-      
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Top Header */}
         <header className="bg-[#252525] border-b border-[#333] px-3 sm:px-6 py-3 sm:py-4">
@@ -471,9 +470,7 @@ export default function FunnelEditor() {
               
               {/* Logic Elements */}
               <div>
-                <h3 className="hidden sm:block text-xs font-bold text-purple-400 uppercase tracking-widest mb-4 pl-1">
-                  ⚙️ Lógica
-                </h3>
+                <h3 className="hidden sm:block text-xs font-bold text-purple-400 uppercase tracking-widest mb-4 pl-1">Lógica</h3>
                 <div className="space-y-2.5">
                   <div 
                     className="p-3.5 sm:p-3 lg:p-3.5 bg-gradient-to-br from-[#2d2d2d] to-[#252525] rounded-lg cursor-grab hover:from-[#3a3a3a] hover:to-[#2d2d2d] active:from-purple-900/30 active:to-purple-800/20 transition-all duration-200 flex items-center border border-[#404040] hover:border-purple-500/50 active:cursor-grabbing shadow-md hover:shadow-lg hover:shadow-purple-500/10" 
@@ -1122,7 +1119,6 @@ export default function FunnelEditor() {
           )}
         </div>
       </div>
-
       <WhatsAppPreview
         open={showPreview}
         onOpenChange={setShowPreview}
