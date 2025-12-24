@@ -106,9 +106,31 @@ export default function Dashboard() {
                   <>
                     <WifiOff className="h-4 w-4" />
                     <span>Desconectado</span>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="ml-2 h-7 text-xs px-3"
+                      onClick={() => setShowWhatsAppModal(true)}
+                      data-testid="button-connect-whatsapp"
+                    >
+                      Conectar
+                    </Button>
                   </>
                 )}
               </div>
+              
+              {whatsappStatus?.connected && (
+                <Button 
+                  variant="outline"
+                  size="sm"
+                  className="h-8 text-sm"
+                  onClick={() => setShowWhatsAppModal(true)}
+                  data-testid="button-whatsapp-settings"
+                >
+                  <MessageSquare className="h-4 w-4 mr-2" />
+                  WhatsApp
+                </Button>
+              )}
             </div>
           </div>
         </header>
