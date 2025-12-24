@@ -871,9 +871,10 @@ export default function FunnelEditor() {
                   Fechar
                 </Button>
               </div>
-            </div>
+              </>
           )}
         </div>
+      </div>
       </div>
 
       <WhatsAppPreview
