@@ -231,11 +231,11 @@ export default function Campaigns() {
       
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Header */}
-        <header className="bg-card border-b border-border pl-14 pr-4 lg:px-6 py-4">
+        <header className="bg-gradient-to-r from-[#252525] to-[#1a1a1a] border-b border-[#404040] pl-14 pr-4 lg:px-6 py-4 shadow-lg">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-semibold" data-testid="text-page-title">Campanhas</h1>
-              <p className="text-sm text-muted-foreground">Gerencie suas campanhas de automação</p>
+              <h1 className="text-2xl font-bold text-white" data-testid="text-page-title">Campanhas</h1>
+              <p className="text-sm text-gray-400">Gerencie suas campanhas de automação</p>
             </div>
             <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
               <DialogTrigger asChild>

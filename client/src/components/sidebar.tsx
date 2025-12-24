@@ -42,13 +42,13 @@ export default function Sidebar() {
     
     return (
       <>
-        <div className="p-4 sm:p-6 border-b border-border flex items-center justify-between">
+        <div className="p-4 sm:p-6 border-b border-[#404040] bg-gradient-to-b from-[#2d2d2d] to-[#252525] flex items-center justify-between shadow-md">
           {!showMinimized && (
             <div className="flex items-center gap-2.5">
-              <Plane className="h-8 w-8 sm:h-10 sm:w-10 text-purple-500" />
+              <Plane className="h-8 w-8 sm:h-10 sm:w-10 text-purple-500 drop-shadow-lg" />
               <div>
-                <h1 className="text-xl sm:text-2xl font-bold text-primary" data-testid="text-brand">Pilot Zap</h1>
-                <p className="text-xs sm:text-sm text-muted-foreground">{t('whatsapp_automation')}</p>
+                <h1 className="text-xl sm:text-2xl font-bold text-white" data-testid="text-brand">Pilot Zap</h1>
+                <p className="text-xs sm:text-sm text-gray-400">{t('whatsapp_automation')}</p>
               </div>
             </div>
           )}
@@ -72,7 +72,7 @@ export default function Sidebar() {
                 <Button
                   onClick={() => setIsMobileMenuOpen(false)}
                   variant={isActive ? "secondary" : "ghost"}
-                  className={`w-full ${showMinimized ? 'justify-center px-2' : 'justify-start'} ${isActive ? 'bg-secondary text-secondary-foreground' : ''}`}
+                  className={`w-full ${showMinimized ? 'justify-center px-2' : 'justify-start'} ${isActive ? 'bg-gradient-to-r from-purple-900/60 to-purple-800/40 text-purple-300 border border-purple-700/50 hover:from-purple-900/80 hover:to-purple-800/60' : 'text-gray-400 hover:text-gray-200 hover:bg-[#2a2a2a]'} transition-all`}
                   data-testid={`button-nav-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
                   title={showMinimized ? item.label : undefined}
                 >
@@ -110,7 +110,7 @@ export default function Sidebar() {
       </Sheet>
 
       {/* Desktop Sidebar */}
-      <div className={`hidden lg:flex bg-card border-r border-border flex-col transition-all duration-300 ${isMinimized ? 'w-16' : 'w-64'}`}>
+      <div className={`hidden lg:flex bg-gradient-to-b from-[#2d2d2d] to-[#252525] border-r border-[#404040] flex-col transition-all duration-300 ${isMinimized ? 'w-16' : 'w-64'}`}>
         <SidebarContent isMobile={false} />
       </div>
     </>
