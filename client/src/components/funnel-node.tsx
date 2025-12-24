@@ -227,9 +227,9 @@ export default function FunnelNode({ data, selected }: NodeProps<FunnelNodeData>
           </div>
         ) : (
           <>
-            {(data.delayMinutes ?? 0) > 0 && (
+            {(data.delayValue ?? 0) > 0 && (
               <div className="text-xs text-muted-foreground">
-                Delay: {data.delayMinutes}min
+                Delay: {data.delayValue}{data.delayUnit === 'segundo' ? 's' : data.delayUnit === 'minuto' ? 'min' : 'h'}
               </div>
             )}
             <Handle
