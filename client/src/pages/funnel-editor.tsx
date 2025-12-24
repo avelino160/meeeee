@@ -408,7 +408,7 @@ export default function FunnelEditor() {
               {/* Message Types */}
               <div>
                 <h3 className="hidden sm:block text-xs font-bold text-purple-400 uppercase tracking-widest mb-4 pl-1">
-                  📨 Mensagens
+                  Mensagens
                 </h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                   <div 
