@@ -42,6 +42,28 @@ export default function Sidebar() {
     
     return (
       <>
+        <div className="p-4 sm:p-6 border-b border-border flex items-center justify-between">
+          {!showMinimized && (
+            <div className="flex items-center gap-2.5">
+              <Plane className="h-8 w-8 sm:h-10 sm:w-10 text-purple-500" />
+              <div>
+                <h1 className="text-xl sm:text-2xl font-bold text-primary" data-testid="text-brand">Pilot Zap</h1>
+                <p className="text-xs sm:text-sm text-muted-foreground">{t('whatsapp_automation')}</p>
+              </div>
+            </div>
+          )}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setIsMinimized(!isMinimized)}
+            className={`hidden lg:flex ${showMinimized ? 'mx-auto' : ''}`}
+            data-testid="button-toggle-sidebar"
+          >
+            {showMinimized ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+          </Button>
+        </div>
+        
+        
         <nav className="flex-1 p-4 space-y-1">
           {menuItems.map((item) => {
             const isActive = location === item.href;
@@ -88,7 +110,7 @@ export default function Sidebar() {
       </Sheet>
 
       {/* Desktop Sidebar */}
-      <div className={`hidden lg:flex bg-card flex-col transition-all duration-300 ${isMinimized ? 'w-16' : 'w-64'}`}>
+      <div className={`hidden lg:flex bg-card border-r border-border flex-col transition-all duration-300 ${isMinimized ? 'w-16' : 'w-64'}`}>
         <SidebarContent isMobile={false} />
       </div>
     </>
