@@ -162,20 +162,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/whatsapp/qr', async (req, res) => {
     try {
-      console.log('📱 Starting QR code generation...');
-      const userId = DEFAULT_USER_ID;
-      const qrCodeData = await whatsappService.getQRCode(userId);
+      console.log('📱 Starting QR code generation from Green API...');
       
-      // 🔒 SEGURANÇA: QR gerado pelo Baileys no servidor, frontend renderiza
-      const qrImageURL = whatsappService.qrCodeImage;
+      const idInstance = process.env.GREEN_API_ID_INSTANCE || "7105442726";
+      const apiToken = process.env.GREEN_API_TOKEN_INSTANCE || "60800edd5b5841c991ee97cba8e4e8e7f55983bee177449681";
       
-      console.log('✅ QR Code generated successfully, image URL length:', qrImageURL?.length || 0);
-      res.json({ qrCode: qrCodeData, qrImage: qrImageURL });
+      if (!idInstance || !apiToken) {
+        return res.status(400).json({ 
+          message: "Green API credentials not configured",
+          error: "missing_credentials"
+        });
+      }
+      
+      const axios = require('axios');
+      const qrUrl = `https://api.green-api.com/waInstance${idInstance}/qr/${apiToken}`;
+      
+      const response = await axios.get(qrUrl);
+      
+      if (response.data && response.data.qrCode) {
+        console.log('✅ QR Code generated successfully');
+        res.json({ 
+          qrCode: response.data.qrCode,
+          idInstance,
+          apiToken 
+        });
+      } else {
+        throw new Error("No QR code in response");
+      }
     } catch (error: any) {
       console.error("❌ Error generating QR code:", error?.message || error);
       
       res.status(500).json({ 
-        message: error?.message || "Failed to generate QR code",
+        message: error?.message || "Failed to generate QR code from Green API",
         error: error?.error || "qr_generation_failed"
       });
     }

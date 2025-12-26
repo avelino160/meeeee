@@ -35,35 +35,29 @@ export default function WhatsAppConnectionModal({ open, onOpenChange }: WhatsApp
     enabled: open,
   });
 
-  // 🎯 GERAR QR CODE DIRETO DA GREEN API
+  // 🎯 GERAR QR CODE DA GREEN API VIA BACKEND
   const generateQRMutation = useMutation({
     mutationFn: async () => {
-      // Usando credenciais do environment
-      const id = import.meta.env.VITE_GREEN_API_ID_INSTANCE || "7105442726";
-      const token = import.meta.env.VITE_GREEN_API_TOKEN_INSTANCE || "60800edd5b5841c991ee97cba8e4e8e7f55983bee177449681";
+      const response = await apiRequest("POST", "/api/whatsapp/qr");
       
-      try {
-        const response = await fetch(`https://api.green-api.com/waInstance${id}/qr/${token}`);
-        if (!response.ok) {
-          throw new Error("Falha ao gerar QR Code");
-        }
+      if (!response.ok) {
         const data = await response.json();
-        
-        if (data.qrCode) {
-          setQrCodeImage(data.qrCode);
-          setShowQR(true);
-          setIdInstance(id);
-          setApiToken(token);
-          
-          toast({
-            title: "✅ QR Code Gerado!",
-            description: "Escaneie com seu WhatsApp para conectar",
-            duration: 2000,
-          });
-        }
-      } catch (error) {
-        throw new Error("Não foi possível gerar o QR Code. Verifique suas credenciais.");
+        throw new Error(data.message || "Falha ao gerar QR Code");
       }
+      
+      return response.json();
+    },
+    onSuccess: (data) => {
+      setQrCodeImage(data.qrCode);
+      setShowQR(true);
+      setIdInstance(data.idInstance);
+      setApiToken(data.apiToken);
+      
+      toast({
+        title: "✅ QR Code Gerado!",
+        description: "Escaneie com seu WhatsApp para conectar",
+        duration: 2000,
+      });
     },
     onError: (error: any) => {
       toast({
