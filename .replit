@@ -40,3 +40,9 @@ author = "agent"
 task = "shell.exec"
 args = "npm run dev"
 waitForPort = 5000
+
+[userenv]
+
+[userenv.shared]
+GREEN_API_ID_INSTANCE = "7105442726"
+GREEN_API_TOKEN_INSTANCE = "60800edd5b5841c991ee97cba8e4e8e7f55983bee177449681"

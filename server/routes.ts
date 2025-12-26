@@ -20,7 +20,7 @@ const DEMO_USER = {
   id: DEFAULT_USER_ID,
   firstName: "Usuário",
   lastName: "Demo",
-  email: "demo@ranzap.com",
+  email: "demo@pilotzap.com",
 };
 
 
@@ -649,7 +649,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  const ADMIN_SECRET = process.env.ADMIN_SECRET || 'ranzap-admin-2024';
+  const ADMIN_SECRET = process.env.ADMIN_SECRET || 'pilotzap-admin-2024';
   
   const verifyAdminAuth = (req: any, res: any): boolean => {
     const authHeader = req.headers['x-admin-secret'];

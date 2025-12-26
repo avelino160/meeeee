@@ -1,12 +1,19 @@
-# RanZap - WhatsApp Marketing Automation Platform
+# PilotZap - WhatsApp Marketing Automation Platform
 
 ## Overview
 
-RanZap is a comprehensive WhatsApp marketing automation platform that enables users to create and manage automated message campaigns, build conversation funnels, and handle bulk message dispatching. The application provides a visual funnel builder, contact management, message templates, and analytics dashboard for WhatsApp marketing campaigns.
+PilotZap is a comprehensive WhatsApp marketing automation platform that enables users to create and manage automated message campaigns, build conversation funnels, and handle bulk message dispatching. The application provides a visual funnel builder, contact management, message templates, and analytics dashboard for WhatsApp marketing campaigns.
 
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
+
+## Recent Changes (Dec 26, 2025)
+
+- **API Migration**: Switched from OneMsg.io to Green API for WhatsApp integration
+- **Project Rename**: RanZap → PilotZap
+- **Green API Setup**: Added idInstance (7105442726) and apiToken via environment variables
+- **Connection Modal**: Replaced QR Code with form-based credential entry for Green API
 
 ## System Architecture
 

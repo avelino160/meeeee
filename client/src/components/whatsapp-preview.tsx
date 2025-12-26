@@ -404,7 +404,7 @@ export default function WhatsAppPreview({
             </Avatar>
             <div className="flex-1 min-w-0">
               <DialogTitle className="text-white text-sm font-medium truncate">
-                RanZap
+                PilotZap
               </DialogTitle>
               <p className="text-[10px] text-[#8696a0]">online</p>
             </div>
