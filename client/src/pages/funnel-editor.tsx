@@ -402,69 +402,69 @@ export default function FunnelEditor() {
         </header>
 
         {/* Main Content */}
-        <div className="flex-1 flex overflow-hidden">
-          {/* Left Toolbox - visible on all screen sizes */}
-          <div className="flex flex-col w-20 sm:w-32 md:w-56 lg:w-72 bg-gradient-to-b from-[#1f1f1f] to-[#252525] border-r border-[#404040] p-2 sm:p-4 lg:p-5 overflow-y-auto flex-shrink-0">
-            <div className="space-y-8">
+        <div className="flex-1 flex overflow-hidden relative">
+          {/* Left Toolbox - Responsive adjustments */}
+          <div className="flex flex-col w-16 sm:w-32 md:w-56 lg:w-72 bg-gradient-to-b from-[#1f1f1f] to-[#252525] border-r border-[#404040] p-1.5 sm:p-4 lg:p-5 overflow-y-auto flex-shrink-0 z-20">
+            <div className="space-y-4 sm:space-y-8">
               {/* Message Types */}
               <div>
                 <h3 className="hidden sm:block text-xs font-bold text-purple-400 uppercase tracking-widest mb-4 pl-1">
                   Mensagens
                 </h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 sm:gap-2.5">
                   <div 
-                    className="p-3 sm:p-3 lg:p-3.5 bg-gradient-to-br from-[#2d2d2d] to-[#252525] rounded-lg cursor-grab hover:from-[#3a3a3a] hover:to-[#2d2d2d] active:from-purple-900/30 active:to-purple-800/20 transition-all duration-200 border border-[#404040] hover:border-purple-500/50 active:cursor-grabbing overflow-hidden flex flex-col items-center shadow-md hover:shadow-lg hover:shadow-purple-500/10" 
+                    className="p-2 sm:p-3.5 bg-gradient-to-br from-[#2d2d2d] to-[#252525] rounded-lg cursor-grab hover:from-[#3a3a3a] hover:to-[#2d2d2d] active:from-purple-900/30 active:to-purple-800/20 transition-all duration-200 border border-[#404040] hover:border-purple-500/50 active:cursor-grabbing overflow-hidden flex flex-col items-center shadow-md" 
                     data-testid="tool-text"
                     draggable
                     onDragStart={(e) => onDragStart(e, 'message')}
                   >
-                    <MessageSquare className="h-6 w-6 text-purple-400 mb-1.5 flex-shrink-0 drop-shadow-lg" />
-                    <p className="text-xs font-semibold text-gray-200 text-center truncate w-full">Texto</p>
+                    <MessageSquare className="h-5 w-5 sm:h-6 sm:w-6 text-purple-400 mb-1 sm:mb-1.5 flex-shrink-0" />
+                    <p className="text-[10px] sm:text-xs font-semibold text-gray-200 text-center truncate w-full">Texto</p>
                   </div>
                   <div 
-                    className="p-3 sm:p-3 lg:p-3.5 bg-gradient-to-br from-[#2d2d2d] to-[#252525] rounded-lg cursor-grab hover:from-[#3a3a3a] hover:to-[#2d2d2d] active:from-purple-900/30 active:to-purple-800/20 transition-all duration-200 border border-[#404040] hover:border-purple-500/50 active:cursor-grabbing overflow-hidden flex flex-col items-center shadow-md hover:shadow-lg hover:shadow-purple-500/10" 
+                    className="p-2 sm:p-3.5 bg-gradient-to-br from-[#2d2d2d] to-[#252525] rounded-lg cursor-grab hover:from-[#3a3a3a] hover:to-[#2d2d2d] active:from-purple-900/30 active:to-purple-800/20 transition-all duration-200 border border-[#404040] hover:border-purple-500/50 active:cursor-grabbing overflow-hidden flex flex-col items-center shadow-md" 
                     data-testid="tool-image"
                     draggable
                     onDragStart={(e) => onDragStart(e, 'image')}
                   >
-                    <Image className="h-6 w-6 text-purple-400 mb-1.5 flex-shrink-0 drop-shadow-lg" />
-                    <p className="text-xs font-semibold text-gray-200 text-center truncate w-full">Imagem</p>
+                    <Image className="h-5 w-5 sm:h-6 sm:w-6 text-purple-400 mb-1 sm:mb-1.5 flex-shrink-0" />
+                    <p className="text-[10px] sm:text-xs font-semibold text-gray-200 text-center truncate w-full">Imagem</p>
                   </div>
                   <div 
-                    className="p-3 sm:p-3 lg:p-3.5 bg-gradient-to-br from-[#2d2d2d] to-[#252525] rounded-lg cursor-grab hover:from-[#3a3a3a] hover:to-[#2d2d2d] active:from-purple-900/30 active:to-purple-800/20 transition-all duration-200 border border-[#404040] hover:border-purple-500/50 active:cursor-grabbing overflow-hidden flex flex-col items-center shadow-md hover:shadow-lg hover:shadow-purple-500/10" 
+                    className="p-2 sm:p-3.5 bg-gradient-to-br from-[#2d2d2d] to-[#252525] rounded-lg cursor-grab hover:from-[#3a3a3a] hover:to-[#2d2d2d] active:from-purple-900/30 active:to-purple-800/20 transition-all duration-200 border border-[#404040] hover:border-purple-500/50 active:cursor-grabbing overflow-hidden flex flex-col items-center shadow-md" 
                     data-testid="tool-video"
                     draggable
                     onDragStart={(e) => onDragStart(e, 'video')}
                   >
-                    <Video className="h-6 w-6 text-purple-400 mb-1.5 flex-shrink-0 drop-shadow-lg" />
-                    <p className="text-xs font-semibold text-gray-200 text-center truncate w-full">Vídeo</p>
+                    <Video className="h-5 w-5 sm:h-6 sm:w-6 text-purple-400 mb-1 sm:mb-1.5 flex-shrink-0" />
+                    <p className="text-[10px] sm:text-xs font-semibold text-gray-200 text-center truncate w-full">Vídeo</p>
                   </div>
                   <div 
-                    className="p-3 sm:p-3 lg:p-3.5 bg-gradient-to-br from-[#2d2d2d] to-[#252525] rounded-lg cursor-grab hover:from-[#3a3a3a] hover:to-[#2d2d2d] active:from-purple-900/30 active:to-purple-800/20 transition-all duration-200 border border-[#404040] hover:border-purple-500/50 active:cursor-grabbing overflow-hidden flex flex-col items-center shadow-md hover:shadow-lg hover:shadow-purple-500/10" 
+                    className="p-2 sm:p-3.5 bg-gradient-to-br from-[#2d2d2d] to-[#252525] rounded-lg cursor-grab hover:from-[#3a3a3a] hover:to-[#2d2d2d] active:from-purple-900/30 active:to-purple-800/20 transition-all duration-200 border border-[#404040] hover:border-purple-500/50 active:cursor-grabbing overflow-hidden flex flex-col items-center shadow-md" 
                     data-testid="tool-audio"
                     draggable
                     onDragStart={(e) => onDragStart(e, 'audio')}
                   >
-                    <Mic className="h-6 w-6 text-purple-400 mb-1.5 flex-shrink-0 drop-shadow-lg" />
-                    <p className="text-xs font-semibold text-gray-200 text-center truncate w-full">Áudio</p>
+                    <Mic className="h-5 w-5 sm:h-6 sm:w-6 text-purple-400 mb-1 sm:mb-1.5 flex-shrink-0" />
+                    <p className="text-[10px] sm:text-xs font-semibold text-gray-200 text-center truncate w-full">Áudio</p>
                   </div>
                   <div 
-                    className="p-3 sm:p-3 lg:p-3.5 bg-gradient-to-br from-[#2d2d2d] to-[#252525] rounded-lg cursor-grab hover:from-[#3a3a3a] hover:to-[#2d2d2d] active:from-purple-900/30 active:to-purple-800/20 transition-all duration-200 border border-[#404040] hover:border-purple-500/50 active:cursor-grabbing overflow-hidden flex flex-col items-center shadow-md hover:shadow-lg hover:shadow-purple-500/10" 
+                    className="p-2 sm:p-3.5 bg-gradient-to-br from-[#2d2d2d] to-[#252525] rounded-lg cursor-grab hover:from-[#3a3a3a] hover:to-[#2d2d2d] active:from-purple-900/30 active:to-purple-800/20 transition-all duration-200 border border-[#404040] hover:border-purple-500/50 active:cursor-grabbing overflow-hidden flex flex-col items-center shadow-md" 
                     data-testid="tool-document"
                     draggable
                     onDragStart={(e) => onDragStart(e, 'document')}
                   >
-                    <FileText className="h-6 w-6 text-purple-400 mb-1.5 flex-shrink-0 drop-shadow-lg" />
-                    <p className="text-xs font-semibold text-gray-200 text-center truncate w-full">Doc</p>
+                    <FileText className="h-5 w-5 sm:h-6 sm:w-6 text-purple-400 mb-1 sm:mb-1.5 flex-shrink-0" />
+                    <p className="text-[10px] sm:text-xs font-semibold text-gray-200 text-center truncate w-full">Doc</p>
                   </div>
                   <div 
-                    className="p-3 sm:p-3 lg:p-3.5 bg-gradient-to-br from-[#2d2d2d] to-[#252525] rounded-lg cursor-grab hover:from-[#3a3a3a] hover:to-[#2d2d2d] active:from-purple-900/30 active:to-purple-800/20 transition-all duration-200 border border-[#404040] hover:border-purple-500/50 active:cursor-grabbing overflow-hidden flex flex-col items-center shadow-md hover:shadow-lg hover:shadow-purple-500/10" 
+                    className="p-2 sm:p-3.5 bg-gradient-to-br from-[#2d2d2d] to-[#252525] rounded-lg cursor-grab hover:from-[#3a3a3a] hover:to-[#2d2d2d] active:from-purple-900/30 active:to-purple-800/20 transition-all duration-200 border border-[#404040] hover:border-purple-500/50 active:cursor-grabbing overflow-hidden flex flex-col items-center shadow-md" 
                     data-testid="tool-location"
                     draggable
                     onDragStart={(e) => onDragStart(e, 'location')}
                   >
-                    <MapPin className="h-6 w-6 text-purple-400 mb-1.5 flex-shrink-0 drop-shadow-lg" />
-                    <p className="text-xs font-semibold text-gray-200 text-center truncate w-full">Local</p>
+                    <MapPin className="h-5 w-5 sm:h-6 sm:w-6 text-purple-400 mb-1 sm:mb-1.5 flex-shrink-0" />
+                    <p className="text-[10px] sm:text-xs font-semibold text-gray-200 text-center truncate w-full">Local</p>
                   </div>
                 </div>
               </div>
@@ -472,51 +472,24 @@ export default function FunnelEditor() {
               {/* Logic Elements */}
               <div>
                 <h3 className="hidden sm:block text-xs font-bold text-purple-400 uppercase tracking-widest mb-4 pl-1">Lógica</h3>
-                <div className="space-y-2.5">
+                <div className="space-y-1.5 sm:space-y-2.5">
                   <div 
-                    className="p-3.5 sm:p-3 lg:p-3.5 bg-gradient-to-br from-[#2d2d2d] to-[#252525] rounded-lg cursor-grab hover:from-[#3a3a3a] hover:to-[#2d2d2d] active:from-purple-900/30 active:to-purple-800/20 transition-all duration-200 flex items-center border border-[#404040] hover:border-purple-500/50 active:cursor-grabbing shadow-md hover:shadow-lg hover:shadow-purple-500/10" 
+                    className="p-2 sm:p-3.5 bg-gradient-to-br from-[#2d2d2d] to-[#252525] rounded-lg cursor-grab hover:from-[#3a3a3a] hover:to-[#2d2d2d] active:from-purple-900/30 active:to-purple-800/20 transition-all duration-200 flex items-center justify-center sm:justify-start border border-[#404040] hover:border-purple-500/50 active:cursor-grabbing shadow-md" 
                     data-testid="tool-condition"
                     draggable
                     onDragStart={(e) => onDragStart(e, 'condition')}
                   >
-                    <GitBranch className="h-4 w-4 text-purple-400 mr-2.5 flex-shrink-0 drop-shadow-lg" />
-                    <span className="text-sm font-semibold text-gray-200 hidden md:inline">Condição</span>
+                    <GitBranch className="h-5 w-5 sm:h-4 sm:w-4 text-purple-400 sm:mr-2.5 flex-shrink-0" />
+                    <span className="text-xs sm:text-sm font-semibold text-gray-200 hidden sm:inline">Condição</span>
                   </div>
                   <div 
-                    className="p-3.5 sm:p-3 lg:p-3.5 bg-gradient-to-br from-[#2d2d2d] to-[#252525] rounded-lg cursor-grab hover:from-[#3a3a3a] hover:to-[#2d2d2d] active:from-purple-900/30 active:to-purple-800/20 transition-all duration-200 flex items-center border border-[#404040] hover:border-purple-500/50 active:cursor-grabbing shadow-md hover:shadow-lg hover:shadow-purple-500/10" 
+                    className="p-2 sm:p-3.5 bg-gradient-to-br from-[#2d2d2d] to-[#252525] rounded-lg cursor-grab hover:from-[#3a3a3a] hover:to-[#2d2d2d] active:from-purple-900/30 active:to-purple-800/20 transition-all duration-200 flex items-center justify-center sm:justify-start border border-[#404040] hover:border-purple-500/50 active:cursor-grabbing shadow-md" 
                     data-testid="tool-delay"
                     draggable
                     onDragStart={(e) => onDragStart(e, 'delay')}
                   >
-                    <Clock className="h-4 w-4 text-purple-400 mr-2.5 flex-shrink-0 drop-shadow-lg" />
-                    <span className="text-sm font-semibold text-gray-200 hidden md:inline">Esperar</span>
-                  </div>
-                  <div 
-                    className="p-3.5 sm:p-3 lg:p-3.5 bg-gradient-to-br from-[#2d2d2d] to-[#252525] rounded-lg cursor-grab hover:from-[#3a3a3a] hover:to-[#2d2d2d] active:from-purple-900/30 active:to-purple-800/20 transition-all duration-200 flex items-center border border-[#404040] hover:border-purple-500/50 active:cursor-grabbing shadow-md hover:shadow-lg hover:shadow-purple-500/10" 
-                    data-testid="tool-question"
-                    draggable
-                    onDragStart={(e) => onDragStart(e, 'question')}
-                  >
-                    <HelpCircle className="h-4 w-4 text-purple-400 mr-2.5 flex-shrink-0 drop-shadow-lg" />
-                    <span className="text-sm font-semibold text-gray-200 hidden md:inline">Pergunta</span>
-                  </div>
-                  <div 
-                    className="p-3.5 sm:p-3 lg:p-3.5 bg-gradient-to-br from-[#2d2d2d] to-[#252525] rounded-lg cursor-grab hover:from-[#3a3a3a] hover:to-[#2d2d2d] active:from-purple-900/30 active:to-purple-800/20 transition-all duration-200 flex items-center border border-[#404040] hover:border-purple-500/50 active:cursor-grabbing shadow-md hover:shadow-lg hover:shadow-purple-500/10" 
-                    data-testid="tool-tag"
-                    draggable
-                    onDragStart={(e) => onDragStart(e, 'tag')}
-                  >
-                    <Tag className="h-4 w-4 text-purple-400 mr-2.5 flex-shrink-0 drop-shadow-lg" />
-                    <span className="text-sm font-semibold text-gray-200 hidden md:inline">Tag</span>
-                  </div>
-                  <div 
-                    className="p-3.5 sm:p-3 lg:p-3.5 bg-gradient-to-br from-[#2d2d2d] to-[#252525] rounded-lg cursor-grab hover:from-[#3a3a3a] hover:to-[#2d2d2d] active:from-purple-900/30 active:to-purple-800/20 transition-all duration-200 flex items-center border border-[#404040] hover:border-purple-500/50 active:cursor-grabbing shadow-md hover:shadow-lg hover:shadow-purple-500/10" 
-                    data-testid="tool-verify"
-                    draggable
-                    onDragStart={(e) => onDragStart(e, 'verify')}
-                  >
-                    <CheckCircle className="h-4 w-4 text-purple-400 mr-2.5 flex-shrink-0 drop-shadow-lg" />
-                    <span className="text-sm font-semibold text-gray-200 hidden md:inline">Verificar</span>
+                    <Clock className="h-5 w-5 sm:h-4 sm:w-4 text-purple-400 sm:mr-2.5 flex-shrink-0" />
+                    <span className="text-xs sm:text-sm font-semibold text-gray-200 hidden sm:inline">Esperar</span>
                   </div>
                 </div>
               </div>
@@ -524,7 +497,7 @@ export default function FunnelEditor() {
           </div>
           
           {/* Canvas Area */}
-          <div className="flex-1 relative bg-[#1a1a1a]">
+          <div className="flex-1 relative bg-[#1a1a1a] z-10">
             <FunnelCanvas
               data={{ ...funnelData, triggerPhrases: triggerPhrases }}
               onDataChange={handleFunnelDataChange}
@@ -532,7 +505,71 @@ export default function FunnelEditor() {
             />
           </div>
 
-          {/* Right Sidebar - Node Editor (appears only when editing) - Desktop */}
+          {/* Node Editor Overlay for Mobile */}
+          {selectedNode && (
+            <div className="md:hidden fixed inset-x-0 bottom-0 top-1/2 bg-[#252525] border-t border-[#404040] z-50 rounded-t-2xl shadow-2xl flex flex-col animate-in slide-in-from-bottom duration-300">
+              <div className="w-12 h-1.5 bg-[#404040] rounded-full mx-auto my-3 flex-shrink-0" />
+              <div className="flex-1 overflow-y-auto px-4 pb-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-bold text-white flex items-center">
+                    <span className="w-8 h-8 rounded-lg bg-purple-600/20 flex items-center justify-center mr-2">
+                      <MessageSquare className="h-4 w-4 text-purple-400" />
+                    </span>
+                    Editar Elemento
+                  </h3>
+                  <Button variant="ghost" size="icon" onClick={() => setSelectedNode(null)} className="text-gray-400">
+                    <X className="h-5 w-5" />
+                  </Button>
+                </div>
+                {/* Simplified mobile editor content - similar to desktop logic but optimized */}
+                <div className="space-y-4">
+                  {['message', 'question', 'condition'].includes(selectedNode.data.nodeType || '') && (
+                    <div className="space-y-2">
+                      <Label className="text-gray-300 text-xs uppercase tracking-widest font-bold">Conteúdo</Label>
+                      <Textarea 
+                        value={selectedNode.data.content || ""} 
+                        onChange={(e) => updateNodeContent(e.target.value)}
+                        placeholder="Digite o texto aqui..."
+                        className="bg-[#1a1a1a] border-[#404040] text-gray-200 min-h-[120px] focus:border-purple-500"
+                      />
+                    </div>
+                  )}
+                  {selectedNode.data.nodeType === 'delay' && (
+                    <div className="space-y-4 p-4 bg-[#1a1a1a] rounded-xl border border-[#404040]">
+                      <Label className="text-gray-300 text-xs uppercase tracking-widest font-bold">Tempo de Espera</Label>
+                      <div className="flex gap-2">
+                        <Input 
+                          type="number" 
+                          value={selectedNode.data.delayValue || 5} 
+                          onChange={(e) => updateNodeDelay(parseInt(e.target.value) || 0, selectedNode.data.delayUnit)}
+                          className="bg-[#252525] border-[#404040] text-white w-20"
+                        />
+                        <Select value={selectedNode.data.delayUnit || 'minuto'} onValueChange={(value: any) => updateNodeDelay(selectedNode.data.delayValue || 5, value)}>
+                          <SelectTrigger className="bg-[#252525] border-[#404040] text-white">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent className="bg-[#252525] border-[#404040] text-white">
+                            <SelectItem value="segundo">Segundos</SelectItem>
+                            <SelectItem value="minuto">Minutos</SelectItem>
+                            <SelectItem value="hora">Horas</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  )}
+                  <Button 
+                    variant="destructive" 
+                    className="w-full mt-4" 
+                    onClick={deleteNode}
+                  >
+                    Excluir Elemento
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Right Sidebar - Node Editor - Desktop only */}
           {selectedNode && (
             <div className="hidden md:flex w-72 lg:w-80 flex-col bg-[#252525] border-l border-[#333] overflow-hidden">
               <div className="p-3 lg:p-4 border-b border-[#333]">

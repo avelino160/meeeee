@@ -364,15 +364,15 @@ function FunnelCanvasInner({ data, onDataChange, onNodeSelect }: FunnelCanvasPro
         onDragOver={onDragOver}
         nodeTypes={nodeTypes}
         fitView
-        fitViewOptions={{ padding: 0.2 }}
+        fitViewOptions={{ padding: 0.1 }}
         className="bg-background"
         connectionMode={ConnectionMode.Loose}
-        connectionRadius={30}
+        connectionRadius={20}
         deleteKeyCode={['Backspace', 'Delete']}
         proOptions={{ hideAttribution: true }}
         defaultEdgeOptions={defaultEdgeOptions}
         snapToGrid={true}
-        snapGrid={[15, 15]}
+        snapGrid={[10, 10]}
         panOnScroll={false}
         selectionOnDrag={false}
         panOnDrag={[0, 1, 2]}
@@ -381,7 +381,10 @@ function FunnelCanvasInner({ data, onDataChange, onNodeSelect }: FunnelCanvasPro
         minZoom={0.1}
         maxZoom={2}
       >
-        <Controls className="bg-card border-border" />
+        <Controls 
+          className="bg-card border-border scale-75 sm:scale-100 origin-bottom-left" 
+          showInteractive={false}
+        />
         <Background 
           variant={BackgroundVariant.Dots} 
           gap={20} 

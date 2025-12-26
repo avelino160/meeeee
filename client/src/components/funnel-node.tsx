@@ -67,7 +67,7 @@ export default function FunnelNode({ data, selected }: NodeProps<FunnelNodeData>
   return (
     <div 
       className={`
-        funnel-node relative bg-card border-2 rounded-lg p-4 shadow-lg min-w-[200px] max-w-[250px]
+        funnel-node relative bg-card border-2 rounded-lg p-2.5 sm:p-4 shadow-lg min-w-[140px] sm:min-w-[200px] max-w-[180px] sm:max-w-[250px]
         ${getBorderColor()} ${getBackgroundColor()}
       `}
       data-testid={`funnel-node-${data.nodeType}`}
@@ -77,19 +77,19 @@ export default function FunnelNode({ data, selected }: NodeProps<FunnelNodeData>
         <Handle
           type="target"
           position={Position.Top}
-          className="!w-4 !h-4 !bg-purple-500 !border-2 !border-purple-300 hover:!bg-purple-400 transition-colors"
+          className="!w-3 !h-3 sm:!w-4 sm:!h-4 !bg-purple-500 !border-2 !border-purple-300 hover:!bg-purple-400 transition-colors"
           data-testid="handle-input"
         />
       )}
 
       {/* Node Header */}
-      <div className="flex items-center justify-between mb-2">
-        <div className="flex items-center">
-          <IconComponent className="h-4 w-4 text-primary mr-2" />
-          <span className="text-sm font-semibold text-foreground">{data.label}</span>
+      <div className="flex items-center justify-between mb-1.5 sm:mb-2">
+        <div className="flex items-center overflow-hidden">
+          <IconComponent className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary mr-1.5 sm:mr-2 flex-shrink-0" />
+          <span className="text-[10px] sm:text-sm font-semibold text-foreground truncate">{data.label}</span>
         </div>
         <button 
-          className="text-muted-foreground hover:text-foreground p-1 rounded"
+          className="text-muted-foreground hover:text-foreground p-1 rounded hidden sm:block"
           data-testid="button-edit-node"
         >
           <Edit3 className="h-3 w-3" />
@@ -97,25 +97,25 @@ export default function FunnelNode({ data, selected }: NodeProps<FunnelNodeData>
       </div>
 
       {/* Node Content */}
-      <div className="mb-3">
+      <div className="mb-2 sm:mb-3">
         {data.nodeType === 'trigger' && (
-          <p className="text-xs text-muted-foreground mb-2">
+          <p className="text-[9px] sm:text-xs text-muted-foreground mb-1 sm:mb-2 line-clamp-2">
             {data.content}
           </p>
         )}
         
         {data.nodeType === 'message' && (
-          <div className="bg-muted rounded p-2 mb-2">
-            <p className="text-xs text-muted-foreground line-clamp-3">
-              {data.content || 'Clique para editar mensagem...'}
+          <div className="bg-muted rounded p-1.5 sm:p-2 mb-1 sm:mb-2">
+            <p className="text-[9px] sm:text-xs text-muted-foreground line-clamp-2 sm:line-clamp-3 leading-tight">
+              {data.content || 'Editar...'}
             </p>
           </div>
         )}
 
         {data.nodeType === 'delay' && (
-          <div className="bg-muted rounded p-2 mb-2">
-            <p className="text-xs text-muted-foreground">
-              Aguardar {data.delayValue || 5} {data.delayUnit || 'minuto'}(s)
+          <div className="bg-muted rounded p-1.5 sm:p-2 mb-1 sm:mb-2">
+            <p className="text-[9px] sm:text-xs text-muted-foreground">
+              {data.delayValue || 5} {data.delayUnit === 'segundo' ? 'seg' : data.delayUnit === 'minuto' ? 'min' : 'h'}
             </p>
           </div>
         )}
@@ -201,41 +201,37 @@ export default function FunnelNode({ data, selected }: NodeProps<FunnelNodeData>
       {/* Node Footer */}
       <div className="flex justify-between items-center">
         {data.nodeType === 'condition' ? (
-          <div className="flex space-x-4 w-full justify-around">
-            <div className="text-center">
+          <div className="flex space-x-2 sm:space-x-4 w-full justify-around">
+            <div className="text-center relative">
               <Handle
                 type="source"
                 position={Position.Bottom}
                 id="yes"
-                className="!w-4 !h-4 !bg-green-500 !border-2 !border-green-300 hover:!bg-green-400 transition-colors"
-                style={{ left: '25%' }}
+                className="!w-3 !h-3 sm:!w-4 sm:!h-4 !bg-green-500 !border-2 !border-green-300 hover:!bg-green-400 transition-colors"
+                style={{ left: '50%', transform: 'translateX(-50%)' }}
                 data-testid="handle-output-yes"
               />
-              <span className="text-xs text-muted-foreground">Sim</span>
+              <span className="text-[8px] sm:text-xs text-muted-foreground mt-2 block">Sim</span>
             </div>
-            <div className="text-center">
+            <div className="text-center relative">
               <Handle
                 type="source"
                 position={Position.Bottom}
                 id="no"
-                className="!w-4 !h-4 !bg-red-500 !border-2 !border-red-300 hover:!bg-red-400 transition-colors"
-                style={{ left: '75%' }}
+                className="!w-3 !h-3 sm:!w-4 sm:!h-4 !bg-red-500 !border-2 !border-red-300 hover:!bg-red-400 transition-colors"
+                style={{ left: '50%', transform: 'translateX(-50%)' }}
                 data-testid="handle-output-no"
               />
-              <span className="text-xs text-muted-foreground">Não</span>
+              <span className="text-[8px] sm:text-xs text-muted-foreground mt-2 block">Não</span>
             </div>
           </div>
         ) : (
           <>
-            {(data.delayValue ?? 0) > 0 && (
-              <div className="text-xs text-muted-foreground">
-                Delay: {data.delayValue}{data.delayUnit === 'segundo' ? 's' : data.delayUnit === 'minuto' ? 'min' : 'h'}
-              </div>
-            )}
+            <div className="flex-1" />
             <Handle
               type="source"
               position={Position.Bottom}
-              className="!w-4 !h-4 !bg-purple-500 !border-2 !border-purple-300 hover:!bg-purple-400 transition-colors"
+              className="!w-3 !h-3 sm:!w-4 sm:!h-4 !bg-purple-500 !border-2 !border-purple-300 hover:!bg-purple-400 transition-colors"
               data-testid="handle-output"
             />
           </>
