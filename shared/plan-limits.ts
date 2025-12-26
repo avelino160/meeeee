@@ -1,4 +1,4 @@
-export type PlanType = "free" | "basic" | "pro" | "enterprise";
+export type PlanType = "business";
 
 export interface PlanLimits {
   maxWhatsappAccounts: number;
@@ -11,36 +11,9 @@ export interface PlanLimits {
 }
 
 export const PLAN_LIMITS: Record<PlanType, PlanLimits> = {
-  free: {
-    maxWhatsappAccounts: 1,
-    maxMessagesPerHour: 50,
-    maxFunnels: 3,
-    maxContacts: 500,
-    hasAdvancedReports: false,
-    hasPrioritySupport: false,
-    hasDedicatedManager: false,
-  },
-  basic: {
-    maxWhatsappAccounts: 2,
-    maxMessagesPerHour: 100,
-    maxFunnels: 10,
-    maxContacts: 2000,
-    hasAdvancedReports: false,
-    hasPrioritySupport: false,
-    hasDedicatedManager: false,
-  },
-  pro: {
-    maxWhatsappAccounts: 3,
-    maxMessagesPerHour: 200,
-    maxFunnels: -1, // Unlimited
-    maxContacts: 5000,
-    hasAdvancedReports: false,
-    hasPrioritySupport: true,
-    hasDedicatedManager: false,
-  },
-  enterprise: {
-    maxWhatsappAccounts: 5,
-    maxMessagesPerHour: 1000,
+  business: {
+    maxWhatsappAccounts: -1, // Unlimited
+    maxMessagesPerHour: -1, // Unlimited
     maxFunnels: -1, // Unlimited
     maxContacts: -1, // Unlimited
     hasAdvancedReports: true,
@@ -50,7 +23,7 @@ export const PLAN_LIMITS: Record<PlanType, PlanLimits> = {
 };
 
 export function getPlanLimits(planType: PlanType): PlanLimits {
-  return PLAN_LIMITS[planType] || PLAN_LIMITS.basic;
+  return PLAN_LIMITS.business;
 }
 
 export function isWithinLimit(current: number, limit: number): boolean {
