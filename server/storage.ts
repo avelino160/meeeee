@@ -79,11 +79,13 @@ export interface IStorage {
 
 export class DatabaseStorage implements IStorage {
   async getUser(id: string): Promise<User | undefined> {
+    if (!db) return undefined;
     const [user] = await db.select().from(users).where(eq(users.id, id));
     return user;
   }
 
   async upsertUser(userData: UpsertUser): Promise<User> {
+    if (!db) throw new Error("Database not initialized");
     const [user] = await db.insert(users).values(userData).onConflictDoUpdate({
       target: users.id,
       set: { ...userData, updatedAt: new Date() }
@@ -92,28 +94,33 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getWhatsappConnection(userId: string): Promise<WhatsappConnection | undefined> {
+    if (!db) return undefined;
     const [conn] = await db.select().from(whatsappConnections).where(eq(whatsappConnections.userId, userId));
     return conn;
   }
 
   async getAllWhatsappConnections(userId: string): Promise<WhatsappConnection[]> {
+    if (!db) return [];
     return await db.select().from(whatsappConnections)
       .where(eq(whatsappConnections.userId, userId))
       .orderBy(desc(whatsappConnections.createdAt));
   }
 
   async getConnectedAccountsCount(userId: string): Promise<number> {
+    if (!db) return 0;
     const conns = await db.select().from(whatsappConnections)
       .where(and(eq(whatsappConnections.userId, userId), eq(whatsappConnections.isConnected, true)));
     return conns.length;
   }
 
   async createWhatsappConnection(conn: InsertWhatsappConnection): Promise<WhatsappConnection> {
+    if (!db) throw new Error("Database not initialized");
     const [newConn] = await db.insert(whatsappConnections).values(conn).returning();
     return newConn;
   }
 
   async updateWhatsappConnection(id: string, update: Partial<WhatsappConnection>): Promise<WhatsappConnection | undefined> {
+    if (!db) return undefined;
     const [updated] = await db.update(whatsappConnections)
       .set({ ...update, updatedAt: new Date() })
       .where(eq(whatsappConnections.id, id))
@@ -122,6 +129,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getAllFunnels(userId: string): Promise<Funnel[]> {
+    if (!db) return [];
     return await db.select().from(funnels).where(eq(funnels.userId, userId)).orderBy(desc(funnels.createdAt));
   }
 

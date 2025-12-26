@@ -8,8 +8,11 @@ neonConfig.webSocketConstructor = ws;
 const databaseUrl = process.env.DATABASE_URL;
 
 if (!databaseUrl) {
-  console.warn('DATABASE_URL is not set. Running without database.');
+  console.warn('DATABASE_URL is not set. Running with mock/empty database.');
 }
 
-export const pool = databaseUrl ? new Pool({ connectionString: databaseUrl }) : null;
+// Fallback to avoid null pointer errors if DB is not provisioned correctly yet
+const connectionString = databaseUrl || "";
+
+export const pool = connectionString ? new Pool({ connectionString }) : null;
 export const db = pool ? drizzle({ client: pool, schema }) : null;
