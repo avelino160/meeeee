@@ -1,5 +1,6 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
+import axios from "axios";
 import { storage } from "./storage";
 import { whatsappService } from "./services/whatsappService";
 import { funnelService } from "./services/funnelService";
@@ -174,7 +175,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      const axios = require('axios');
       const qrUrl = `https://api.green-api.com/waInstance${idInstance}/qr/${apiToken}`;
       
       const response = await axios.get(qrUrl);
