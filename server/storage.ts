@@ -393,7 +393,9 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getUserUsage(userId: string): Promise<UsageInfo> {
-    const limits = getPlanLimits("business");
+    const user = await this.getUser(userId);
+    const planType = (user?.planType || "business") as PlanType;
+    const limits = getPlanLimits(planType);
     const funnelCount = (await this.getAllFunnels(userId)).length;
     const contactCount = (await this.getContacts(userId)).length;
     const whatsappCount = await this.getConnectedAccountsCount(userId);
@@ -407,19 +409,36 @@ export class DatabaseStorage implements IStorage {
   }
 
   async checkFunnelLimit(userId: string): Promise<LimitCheckResult> {
-    return { allowed: true };
+    const user = await this.getUser(userId);
+    const planType = (user?.planType || "business") as PlanType;
+    const limits = getPlanLimits(planType);
+    const funnelsList = await this.getAllFunnels(userId);
+    const count = funnelsList.length;
+    return checkLimit("funis", count, limits.maxFunnels);
   }
 
   async checkContactLimit(userId: string): Promise<LimitCheckResult> {
-    return { allowed: true };
+    const user = await this.getUser(userId);
+    const planType = (user?.planType || "business") as PlanType;
+    const limits = getPlanLimits(planType);
+    const count = (await this.getContacts(userId)).length;
+    return checkLimit("contatos", count, limits.maxContacts);
   }
 
   async checkWhatsappLimit(userId: string): Promise<LimitCheckResult> {
-    return { allowed: true };
+    const user = await this.getUser(userId);
+    const planType = (user?.planType || "business") as PlanType;
+    const limits = getPlanLimits(planType);
+    const count = await this.getConnectedAccountsCount(userId);
+    return checkLimit("contas WhatsApp", count, limits.maxWhatsappAccounts);
   }
 
   async checkMessageLimit(userId: string): Promise<LimitCheckResult> {
-    return { allowed: true };
+    const user = await this.getUser(userId);
+    const planType = (user?.planType || "business") as PlanType;
+    const limits = getPlanLimits(planType);
+    const count = await this.getMessagesThisHour(userId);
+    return checkLimit("mensagens por hora", count, limits.maxMessagesPerHour);
   }
 }
 

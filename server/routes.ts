@@ -63,9 +63,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         firstName: updatedUser?.firstName || DEMO_USER.firstName,
         lastName: updatedUser?.lastName || DEMO_USER.lastName,
         email: updatedUser?.email || DEMO_USER.email,
-        planType: 'business',
-        planExpiresAt: null,
-        isBlocked: false
+        planType: updatedUser?.planType || 'business',
+        planExpiresAt: updatedUser?.planExpiresAt || null,
+        isBlocked: updatedUser?.isBlocked || false
       });
     } catch (error) {
       console.error("Error getting user:", error);
