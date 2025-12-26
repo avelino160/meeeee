@@ -412,7 +412,8 @@ export class DatabaseStorage implements IStorage {
     const user = await this.getUser(userId);
     const planType = (user?.planType || "basic") as PlanType;
     const limits = getPlanLimits(planType);
-    const count = (await this.getAllFunnels(userId)).length;
+    const funnelsList = await this.getAllFunnels(userId);
+    const count = funnelsList.length;
     return checkLimit("funis", count, limits.maxFunnels);
   }
 

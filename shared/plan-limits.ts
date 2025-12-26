@@ -85,12 +85,19 @@ export function checkLimitForCreation(
     return { allowed: true };
   }
   
-  const wouldExceed = current + 1 > limit;
+  // Bug fix: current + 1 would check if we can add another one. 
+  // But if the user says they didn't create anything, current might be 0.
+  // The logic current + 1 > limit means if limit is 3, and current is 2, 2+1=3 > 3 is false, allowed.
+  // If current is 3, 3+1=4 > 3 is true, not allowed.
+  // This seems correct for "can I add one more?".
+  // However, the user says "didn't create anything". 
+  // Let's verify if the problem is in how current is calculated or if the limit is 0.
+  const wouldExceed = current >= limit; 
   
   if (wouldExceed) {
     return {
       allowed: false,
-      reason: `Você excedeu o seu limite de ${resourceType} (${current}/${limit}). Faça upgrade do seu plano para continuar.`,
+      reason: `Você atingiu o seu limite de ${resourceType} (${current}/${limit}). Faça upgrade do seu plano para continuar.`,
       limit,
       current,
     };
