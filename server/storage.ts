@@ -1,3 +1,5 @@
+import { db } from "./db";
+import { eq, and, desc } from "drizzle-orm";
 import {
   type User,
   type UpsertUser,
@@ -12,6 +14,13 @@ import {
   type InsertWhatsappConnection,
   type FunnelExecution,
   type InsertFunnelExecution,
+  users,
+  whatsappConnections,
+  funnels,
+  funnelNodes,
+  contacts,
+  messages,
+  funnelExecutions,
 } from "@shared/schema";
 import { nanoid } from "nanoid";
 import { 
@@ -124,37 +133,35 @@ export class MemStorage implements IStorage {
   }
 
   async getWhatsappConnection(userId: string): Promise<WhatsappConnection | undefined> {
-    return Array.from(this.whatsappConnections.values()).find(c => c.userId === userId);
+    const results = await db.select().from(whatsappConnections).where(eq(whatsappConnections.userId, userId));
+    return results[0];
   }
 
   async getAllWhatsappConnections(userId: string): Promise<WhatsappConnection[]> {
-    return Array.from(this.whatsappConnections.values())
-      .filter(c => c.userId === userId)
-      .sort((a, b) => (b.createdAt?.getTime() || 0) - (a.createdAt?.getTime() || 0));
+    return await db.select().from(whatsappConnections)
+      .where(eq(whatsappConnections.userId, userId))
+      .orderBy(desc(whatsappConnections.createdAt));
   }
 
   async getConnectedAccountsCount(userId: string): Promise<number> {
-    return Array.from(this.whatsappConnections.values())
-      .filter(c => c.userId === userId && c.isConnected === true)
-      .length;
+    const conns = await db.select().from(whatsappConnections)
+      .where(and(eq(whatsappConnections.userId, userId), eq(whatsappConnections.isConnected, true)));
+    return conns.length;
   }
 
-  async createWhatsappConnection(connection: InsertWhatsappConnection): Promise<WhatsappConnection> {
-    const newConnection: WhatsappConnection = {
-      id: nanoid(),
-      ...connection,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-    this.whatsappConnections.set(newConnection.id, newConnection);
-    return newConnection;
+  async createWhatsappConnection(conn: InsertWhatsappConnection): Promise<WhatsappConnection> {
+    const [newConn] = await db.insert(whatsappConnections).values(conn).returning();
+    return newConn;
   }
 
-  async updateWhatsappConnection(id: string, updates: Partial<WhatsappConnection>): Promise<WhatsappConnection | undefined> {
-    const connection = this.whatsappConnections.get(id);
-    if (!connection) return undefined;
-    const updated = { ...connection, ...updates, updatedAt: new Date() };
-    this.whatsappConnections.set(id, updated);
+  async updateWhatsappConnection(id: string, update: Partial<WhatsappConnection>): Promise<WhatsappConnection | undefined> {
+    const [updated] = await db.update(whatsappConnections)
+      .set({
+        ...update,
+        updatedAt: new Date()
+      })
+      .where(eq(whatsappConnections.id, id))
+      .returning();
     return updated;
   }
 

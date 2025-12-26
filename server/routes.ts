@@ -116,14 +116,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.patch('/api/whatsapp/connections/:id', async (req, res) => {
     try {
       const { id } = req.params;
-      const { name } = req.body;
+      const { name, idInstance, apiTokenInstance } = req.body;
       
-      // Validar nome
-      if (typeof name !== 'string' || name.trim().length === 0) {
-        return res.status(400).json({ message: "Name is required and cannot be empty" });
-      }
+      const updateData: any = {};
+      if (name) updateData.name = name.trim();
+      if (idInstance) updateData.idInstance = idInstance.trim();
+      if (apiTokenInstance) updateData.apiTokenInstance = apiTokenInstance.trim();
       
-      const updated = await storage.updateWhatsappConnection(id, { name: name.trim() });
+      const updated = await storage.updateWhatsappConnection(id, updateData);
       if (!updated) {
         return res.status(404).json({ message: "Connection not found" });
       }
@@ -131,6 +131,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error updating WhatsApp connection:", error);
       res.status(500).json({ message: "Failed to update WhatsApp connection" });
+    }
+  });
+
+  // Rota para criar nova conexão Green API
+  app.post('/api/whatsapp/connections', async (req, res) => {
+    try {
+      const userId = DEFAULT_USER_ID;
+      const { name, idInstance, apiTokenInstance, phoneNumber } = req.body;
+
+      if (!idInstance || !apiTokenInstance || !phoneNumber) {
+        return res.status(400).json({ message: "Instance ID, Token and Phone are required" });
+      }
+
+      const connection = await (storage as any).createWhatsappConnection({
+        userId,
+        name: name || `Green API ${phoneNumber}`,
+        idInstance,
+        apiTokenInstance,
+        phoneNumber,
+        isConnected: true
+      });
+
+      res.status(201).json(connection);
+    } catch (error) {
+      console.error("Error creating WhatsApp connection:", error);
+      res.status(500).json({ message: "Failed to create WhatsApp connection" });
     }
   });
 

@@ -50,6 +50,8 @@ export const whatsappConnections = pgTable("whatsapp_connections", {
   name: varchar("name"),
   isConnected: boolean("is_connected").default(false),
   qrCode: text("qr_code"),
+  idInstance: varchar("id_instance"),
+  apiTokenInstance: varchar("api_token_instance"),
   lastConnectedAt: timestamp("last_connected_at"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
