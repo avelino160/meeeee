@@ -11,8 +11,5 @@ if (!databaseUrl) {
   console.warn('DATABASE_URL is not set. Running with mock/empty database.');
 }
 
-// Fallback to avoid null pointer errors if DB is not provisioned correctly yet
-const connectionString = databaseUrl || "";
-
-export const pool = connectionString ? new Pool({ connectionString }) : null;
-export const db = pool ? drizzle({ client: pool, schema }) : null;
+export const pool = databaseUrl ? new Pool({ connectionString: databaseUrl }) : null;
+export const db = pool ? drizzle(pool, { schema }) : null;
