@@ -175,7 +175,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      const qrUrl = `https://api.green-api.com/waInstance${idInstance}/qr/${apiToken}`;
+      const qrUrl = `https://qr.green-api.com/waInstance${idInstance}/${apiToken}`;
       
       console.log('🔗 Calling Green API:', qrUrl);
       const response = await axios.get(qrUrl);
