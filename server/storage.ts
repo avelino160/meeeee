@@ -130,20 +130,33 @@ export class DatabaseStorage implements IStorage {
 
   async getAllFunnels(userId: string): Promise<Funnel[]> {
     if (!db) return [];
-    return await db.select().from(funnels).where(eq(funnels.userId, userId)).orderBy(desc(funnels.createdAt));
+    try {
+      return await db.select().from(funnels).where(eq(funnels.userId, userId)).orderBy(desc(funnels.createdAt));
+    } catch (error) {
+      console.error("Error in getAllFunnels:", error);
+      return [];
+    }
   }
 
   async getFunnel(id: string): Promise<Funnel | undefined> {
-    const [funnel] = await db.select().from(funnels).where(eq(funnels.id, id));
-    return funnel;
+    if (!db) return undefined;
+    try {
+      const [funnel] = await db.select().from(funnels).where(eq(funnels.id, id));
+      return funnel;
+    } catch (error) {
+      console.error("Error in getFunnel:", error);
+      return undefined;
+    }
   }
 
   async createFunnel(funnel: InsertFunnel): Promise<Funnel> {
+    if (!db) throw new Error("Database not initialized");
     const [newFunnel] = await db.insert(funnels).values(funnel).returning();
     return newFunnel;
   }
 
   async updateFunnel(id: string, updates: Partial<Funnel>): Promise<Funnel | undefined> {
+    if (!db) return undefined;
     const [updated] = await db.update(funnels)
       .set({ ...updates, updatedAt: new Date() })
       .where(eq(funnels.id, id))
@@ -152,20 +165,29 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteFunnel(id: string): Promise<boolean> {
+    if (!db) return false;
     const [deleted] = await db.delete(funnels).where(eq(funnels.id, id)).returning();
     return !!deleted;
   }
 
   async getFunnelNodes(funnelId: string): Promise<FunnelNode[]> {
-    return await db.select().from(funnelNodes).where(eq(funnelNodes.funnelId, funnelId));
+    if (!db) return [];
+    try {
+      return await db.select().from(funnelNodes).where(eq(funnelNodes.funnelId, funnelId));
+    } catch (error) {
+      console.error("Error in getFunnelNodes:", error);
+      return [];
+    }
   }
 
   async createFunnelNode(node: Omit<FunnelNode, "id" | "createdAt">): Promise<FunnelNode> {
+    if (!db) throw new Error("Database not initialized");
     const [newNode] = await db.insert(funnelNodes).values(node).returning();
     return newNode;
   }
 
   async updateFunnelNode(id: string, updates: Partial<FunnelNode>): Promise<FunnelNode | undefined> {
+    if (!db) return undefined;
     const [updated] = await db.update(funnelNodes)
       .set(updates)
       .where(eq(funnelNodes.id, id))
@@ -174,30 +196,51 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteFunnelNode(id: string): Promise<boolean> {
+    if (!db) return false;
     const [deleted] = await db.delete(funnelNodes).where(eq(funnelNodes.id, id)).returning();
     return !!deleted;
   }
 
   async getContacts(userId: string): Promise<Contact[]> {
-    return await db.select().from(contacts).where(eq(contacts.userId, userId)).orderBy(desc(contacts.createdAt));
+    if (!db) return [];
+    try {
+      return await db.select().from(contacts).where(eq(contacts.userId, userId)).orderBy(desc(contacts.createdAt));
+    } catch (error) {
+      console.error("Error in getContacts:", error);
+      return [];
+    }
   }
 
   async getContact(id: string, userId: string): Promise<Contact | undefined> {
-    const [contact] = await db.select().from(contacts).where(and(eq(contacts.id, id), eq(contacts.userId, userId)));
-    return contact;
+    if (!db) return undefined;
+    try {
+      const [contact] = await db.select().from(contacts).where(and(eq(contacts.id, id), eq(contacts.userId, userId)));
+      return contact;
+    } catch (error) {
+      console.error("Error in getContact:", error);
+      return undefined;
+    }
   }
 
   async getContactByPhone(phoneNumber: string, userId: string): Promise<Contact | undefined> {
-    const [contact] = await db.select().from(contacts).where(and(eq(contacts.phoneNumber, phoneNumber), eq(contacts.userId, userId)));
-    return contact;
+    if (!db) return undefined;
+    try {
+      const [contact] = await db.select().from(contacts).where(and(eq(contacts.phoneNumber, phoneNumber), eq(contacts.userId, userId)));
+      return contact;
+    } catch (error) {
+      console.error("Error in getContactByPhone:", error);
+      return undefined;
+    }
   }
 
   async createContact(contact: InsertContact): Promise<Contact> {
+    if (!db) throw new Error("Database not initialized");
     const [newContact] = await db.insert(contacts).values(contact).returning();
     return newContact;
   }
 
   async updateContact(id: string, updates: Partial<Contact>): Promise<Contact | undefined> {
+    if (!db) return undefined;
     const [updated] = await db.update(contacts)
       .set({ ...updates, updatedAt: new Date() })
       .where(eq(contacts.id, id))
@@ -206,25 +249,40 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteContact(id: string, userId: string): Promise<boolean> {
+    if (!db) return false;
     const [deleted] = await db.delete(contacts).where(and(eq(contacts.id, id), eq(contacts.userId, userId))).returning();
     return !!deleted;
   }
 
   async getMessages(userId: string, limit = 100): Promise<Message[]> {
-    return await db.select().from(messages).where(eq(messages.userId, userId)).orderBy(desc(messages.createdAt)).limit(limit);
+    if (!db) return [];
+    try {
+      return await db.select().from(messages).where(eq(messages.userId, userId)).orderBy(desc(messages.createdAt)).limit(limit);
+    } catch (error) {
+      console.error("Error in getMessages:", error);
+      return [];
+    }
   }
 
   async getMessage(id: string, userId: string): Promise<Message | undefined> {
-    const [message] = await db.select().from(messages).where(and(eq(messages.id, id), eq(messages.userId, userId)));
-    return message;
+    if (!db) return undefined;
+    try {
+      const [message] = await db.select().from(messages).where(and(eq(messages.id, id), eq(messages.userId, userId)));
+      return message;
+    } catch (error) {
+      console.error("Error in getMessage:", error);
+      return undefined;
+    }
   }
 
   async createMessage(message: InsertMessage): Promise<Message> {
+    if (!db) throw new Error("Database not initialized");
     const [newMessage] = await db.insert(messages).values(message).returning();
     return newMessage;
   }
 
   async updateMessage(id: string, updates: Partial<Message>): Promise<Message | undefined> {
+    if (!db) return undefined;
     const [updated] = await db.update(messages)
       .set(updates)
       .where(eq(messages.id, id))
@@ -233,23 +291,43 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getPendingMessages(): Promise<Message[]> {
-    return await db.select().from(messages).where(eq(messages.status, "pending")).orderBy(messages.scheduledAt);
+    if (!db) return [];
+    try {
+      return await db.select().from(messages).where(eq(messages.status, "pending")).orderBy(messages.scheduledAt);
+    } catch (error) {
+      console.error("Error in getPendingMessages:", error);
+      return [];
+    }
   }
 
   async getScheduledMessages(): Promise<Message[]> {
-    return await db.select().from(messages).where(and(eq(messages.status, "pending"), sql`scheduled_at <= now()`));
+    if (!db) return [];
+    try {
+      return await db.select().from(messages).where(and(eq(messages.status, "pending"), sql`scheduled_at <= now()`));
+    } catch (error) {
+      console.error("Error in getScheduledMessages:", error);
+      return [];
+    }
   }
 
   async getFunnelExecutions(funnelId: string): Promise<FunnelExecution[]> {
-    return await db.select().from(funnelExecutions).where(eq(funnelExecutions.funnelId, funnelId)).orderBy(desc(funnelExecutions.startedAt));
+    if (!db) return [];
+    try {
+      return await db.select().from(funnelExecutions).where(eq(funnelExecutions.funnelId, funnelId)).orderBy(desc(funnelExecutions.startedAt));
+    } catch (error) {
+      console.error("Error in getFunnelExecutions:", error);
+      return [];
+    }
   }
 
   async createFunnelExecution(execution: InsertFunnelExecution): Promise<FunnelExecution> {
+    if (!db) throw new Error("Database not initialized");
     const [newExecution] = await db.insert(funnelExecutions).values(execution).returning();
     return newExecution;
   }
 
   async updateFunnelExecution(id: string, updates: Partial<FunnelExecution>): Promise<FunnelExecution | undefined> {
+    if (!db) return undefined;
     const [updated] = await db.update(funnelExecutions)
       .set(updates)
       .where(eq(funnelExecutions.id, id))
@@ -258,10 +336,17 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getActiveFunnelExecutions(): Promise<FunnelExecution[]> {
-    return await db.select().from(funnelExecutions).where(eq(funnelExecutions.status, "active"));
+    if (!db) return [];
+    try {
+      return await db.select().from(funnelExecutions).where(eq(funnelExecutions.status, "active"));
+    } catch (error) {
+      console.error("Error in getActiveFunnelExecutions:", error);
+      return [];
+    }
   }
 
   async updateUserPlan(userId: string, planType: string, expiresAt: Date): Promise<User | undefined> {
+    if (!db) return undefined;
     const [updated] = await db.update(users)
       .set({ planType: planType as any, planExpiresAt: expiresAt, isBlocked: false, updatedAt: new Date() })
       .where(eq(users.id, userId))
@@ -270,6 +355,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async blockUser(userId: string): Promise<User | undefined> {
+    if (!db) return undefined;
     const [updated] = await db.update(users)
       .set({ isBlocked: true, updatedAt: new Date() })
       .where(eq(users.id, userId))
@@ -278,6 +364,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async unblockUser(userId: string): Promise<User | undefined> {
+    if (!db) return undefined;
     const [updated] = await db.update(users)
       .set({ isBlocked: false, updatedAt: new Date() })
       .where(eq(users.id, userId))
@@ -294,9 +381,15 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getMessagesThisHour(userId: string): Promise<number> {
-    const result = await db.select().from(messages)
-      .where(and(eq(messages.userId, userId), sql`status != 'failed'`, sql`coalesce(sent_at, created_at) >= now() - interval '1 hour'`));
-    return result.length;
+    if (!db) return 0;
+    try {
+      const result = await db.select().from(messages)
+        .where(and(eq(messages.userId, userId), sql`status != 'failed'`, sql`coalesce(sent_at, created_at) >= now() - interval '1 hour'`));
+      return result.length;
+    } catch (error) {
+      console.error("Error in getMessagesThisHour:", error);
+      return 0;
+    }
   }
 
   async getUserUsage(userId: string): Promise<UsageInfo> {
