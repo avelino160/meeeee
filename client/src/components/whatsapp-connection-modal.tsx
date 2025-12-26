@@ -13,7 +13,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Key, Plus } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Key, Plus, QrCode } from "lucide-react";
 
 interface WhatsAppConnectionModalProps {
   open: boolean;
@@ -25,6 +26,8 @@ export default function WhatsAppConnectionModal({ open, onOpenChange }: WhatsApp
   const [apiToken, setApiToken] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [connectionName, setConnectionName] = useState("");
+  const [qrCodeImage, setQrCodeImage] = useState<string>("");
+  const [showQR, setShowQR] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -33,7 +36,47 @@ export default function WhatsAppConnectionModal({ open, onOpenChange }: WhatsApp
     enabled: open,
   });
 
-  // 🚀 ADICIONAR CONEXÃO GREEN API
+  // 🎯 GERAR QR CODE DIRETO DA GREEN API
+  const generateQRMutation = useMutation({
+    mutationFn: async () => {
+      // Usando credenciais do environment
+      const id = import.meta.env.VITE_GREEN_API_ID_INSTANCE || "7105442726";
+      const token = import.meta.env.VITE_GREEN_API_TOKEN_INSTANCE || "60800edd5b5841c991ee97cba8e4e8e7f55983bee177449681";
+      
+      try {
+        const response = await fetch(`https://api.green-api.com/waInstance${id}/qr/${token}`);
+        if (!response.ok) {
+          throw new Error("Falha ao gerar QR Code");
+        }
+        const data = await response.json();
+        
+        if (data.qrCode) {
+          setQrCodeImage(data.qrCode);
+          setShowQR(true);
+          setIdInstance(id);
+          setApiToken(token);
+          
+          toast({
+            title: "✅ QR Code Gerado!",
+            description: "Escaneie com seu WhatsApp para conectar",
+            duration: 2000,
+          });
+        }
+      } catch (error) {
+        throw new Error("Não foi possível gerar o QR Code. Verifique suas credenciais.");
+      }
+    },
+    onError: (error: any) => {
+      toast({
+        title: "❌ Erro ao Gerar QR Code",
+        description: error?.message || "Tente novamente ou insira as credenciais manualmente.",
+        variant: "destructive",
+        duration: 3000,
+      });
+    },
+  });
+
+  // 🚀 ADICIONAR CONEXÃO GREEN API COM CREDENCIAIS MANUALAMENTE
   const addConnectionMutation = useMutation({
     mutationFn: async () => {
       if (!idInstance.trim() || !apiToken.trim() || !phoneNumber.trim()) {
@@ -65,6 +108,8 @@ export default function WhatsAppConnectionModal({ open, onOpenChange }: WhatsApp
       setApiToken("");
       setPhoneNumber("");
       setConnectionName("");
+      setQrCodeImage("");
+      setShowQR(false);
       
       // Fechar modal e atualizar lista
       onOpenChange(false);
@@ -110,126 +155,219 @@ export default function WhatsAppConnectionModal({ open, onOpenChange }: WhatsApp
         <DialogHeader>
           <DialogTitle className="flex items-center">
             <Key className="h-5 w-5 mr-2 text-primary" />
-            Adicionar Conta Green API
+            Conectar WhatsApp com Green API
           </DialogTitle>
           <DialogDescription>
-            Insira suas credenciais da Green API para conectar sua conta WhatsApp
+            Escolha entre gerar QR Code ou inserir credenciais manualmente
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-6">
-          {/* Info Box */}
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 dark:bg-blue-950 dark:border-blue-800">
-            <p className="text-sm text-blue-900 dark:text-blue-100">
-              <strong>Como obter suas credenciais?</strong><br />
-              Acesse <a href="https://app.green-api.com" target="_blank" rel="noopener noreferrer" className="underline text-blue-700 dark:text-blue-300">app.green-api.com</a> para gerar seu ID Instance e Token.
-            </p>
-          </div>
+        <Tabs defaultValue="qrcode" className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="qrcode">
+              <QrCode className="h-4 w-4 mr-2" />
+              QR Code
+            </TabsTrigger>
+            <TabsTrigger value="manual">
+              <Key className="h-4 w-4 mr-2" />
+              Credenciais
+            </TabsTrigger>
+          </TabsList>
 
-          {/* Form */}
-          <div className="space-y-4">
-            <div>
-              <Label htmlFor="connection-name" className="text-sm font-medium">
-                Nome da Conexão (opcional)
-              </Label>
-              <Input
-                id="connection-name"
-                placeholder="Ex: WhatsApp Principal"
-                value={connectionName}
-                onChange={(e) => setConnectionName(e.target.value)}
-                data-testid="input-connection-name"
-              />
+          {/* QR CODE TAB */}
+          <TabsContent value="qrcode" className="space-y-6">
+            <div className="space-y-4">
+              {!showQR ? (
+                <div className="space-y-4 p-6 bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl border-2 border-purple-300 dark:from-purple-950 dark:to-purple-900 dark:border-purple-700">
+                  <div>
+                    <h3 className="text-lg font-bold text-purple-700 dark:text-purple-300">Pronto para conectar?</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-300">Clique abaixo para gerar o QR Code</p>
+                  </div>
+                  
+                  {generateQRMutation.isPending ? (
+                    <div className="flex flex-col items-center space-y-3">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                      <p className="font-medium text-blue-700 dark:text-blue-400">Gerando QR Code...</p>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">Aguarde alguns segundos...</p>
+                    </div>
+                  ) : (
+                    <Button
+                      onClick={() => generateQRMutation.mutate()}
+                      className="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3"
+                      data-testid="button-generate-qr"
+                    >
+                      <QrCode className="h-5 w-5 mr-2" />
+                      Gerar QR Code
+                    </Button>
+                  )}
+                </div>
+              ) : qrCodeImage ? (
+                <div className="space-y-4">
+                  <div className="bg-white p-6 rounded-lg border-2 border-blue-200 mx-auto inline-block dark:bg-gray-800">
+                    <img 
+                      src={qrCodeImage} 
+                      alt="QR Code" 
+                      className="w-64 h-64"
+                      data-testid="img-qr-code"
+                    />
+                  </div>
+                  
+                  <div className="space-y-2 text-center">
+                    <h3 className="text-lg font-bold text-blue-700 dark:text-blue-300">📱 Escaneie o QR Code</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Abra o WhatsApp no seu celular e escaneie este código</p>
+                    
+                    <div className="bg-blue-50 dark:bg-blue-950 p-4 rounded-lg text-sm text-gray-700 dark:text-gray-300">
+                      <p className="font-medium mb-2">Como conectar:</p>
+                      <ol className="text-left space-y-1 text-xs">
+                        <li><strong>1.</strong> Abra WhatsApp no seu celular</li>
+                        <li><strong>2.</strong> Toque em <strong>⋮ (Menu) → Aparelhos conectados</strong></li>
+                        <li><strong>3.</strong> Toque em <strong>Conectar um aparelho</strong></li>
+                        <li><strong>4.</strong> Escaneie este QR Code com a câmera</li>
+                      </ol>
+                    </div>
+                    
+                    <Button
+                      onClick={() => {
+                        setShowQR(false);
+                        setQrCodeImage("");
+                      }}
+                      variant="outline"
+                      className="w-full"
+                      data-testid="button-regenerate-qr"
+                    >
+                      🔄 Gerar Novo QR Code
+                    </Button>
+                  </div>
+
+                  {idInstance && apiToken && (
+                    <div>
+                      <Label htmlFor="phone-number" className="text-sm font-medium">
+                        Número de Telefone (após escanear) <span className="text-red-500">*</span>
+                      </Label>
+                      <Input
+                        id="phone-number"
+                        placeholder="Ex: 5511999999999"
+                        value={phoneNumber}
+                        onChange={(e) => setPhoneNumber(e.target.value)}
+                        data-testid="input-phone-number"
+                      />
+                      <Button
+                        onClick={() => addConnectionMutation.mutate()}
+                        disabled={addConnectionMutation.isPending || !phoneNumber}
+                        className="w-full mt-2"
+                        data-testid="button-confirm-connection"
+                      >
+                        {addConnectionMutation.isPending ? "Conectando..." : "✅ Confirmar Conexão"}
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              ) : null}
             </div>
+          </TabsContent>
 
-            <div>
-              <Label htmlFor="phone-number" className="text-sm font-medium">
-                Número de Telefone <span className="text-red-500">*</span>
-              </Label>
-              <Input
-                id="phone-number"
-                placeholder="Ex: 5511999999999 ou +55 11 99999-9999"
-                value={phoneNumber}
-                onChange={(e) => setPhoneNumber(e.target.value)}
-                data-testid="input-phone-number"
-              />
-              <p className="text-xs text-muted-foreground mt-1">
-                Número com código do país (55 para Brasil)
+          {/* MANUAL CREDENTIALS TAB */}
+          <TabsContent value="manual" className="space-y-6">
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 dark:bg-blue-950 dark:border-blue-800">
+              <p className="text-sm text-blue-900 dark:text-blue-100">
+                <strong>Como obter suas credenciais?</strong><br />
+                Acesse <a href="https://app.green-api.com" target="_blank" rel="noopener noreferrer" className="underline text-blue-700 dark:text-blue-300">app.green-api.com</a> para gerar seu ID Instance e Token.
               </p>
             </div>
 
-            <div>
-              <Label htmlFor="id-instance" className="text-sm font-medium">
-                ID Instance <span className="text-red-500">*</span>
-              </Label>
-              <Input
-                id="id-instance"
-                placeholder="Ex: 1234567890123456"
-                value={idInstance}
-                onChange={(e) => setIdInstance(e.target.value)}
-                type="password"
-                data-testid="input-id-instance"
-              />
-              <p className="text-xs text-muted-foreground mt-1">
-                Encontrado no painel Green API
-              </p>
-            </div>
-
-            <div>
-              <Label htmlFor="api-token" className="text-sm font-medium">
-                API Token <span className="text-red-500">*</span>
-              </Label>
-              <Input
-                id="api-token"
-                placeholder="Ex: abcdef1234567890"
-                value={apiToken}
-                onChange={(e) => setApiToken(e.target.value)}
-                type="password"
-                data-testid="input-api-token"
-              />
-              <p className="text-xs text-muted-foreground mt-1">
-                Token da sua instância Green API
-              </p>
-            </div>
-          </div>
-
-          {/* Actions */}
-          <div className="flex gap-3">
-            <Button
-              onClick={() => onOpenChange(false)}
-              variant="outline"
-              className="flex-1"
-              data-testid="button-cancel"
-            >
-              Cancelar
-            </Button>
-            <Button
-              onClick={() => addConnectionMutation.mutate()}
-              disabled={addConnectionMutation.isPending}
-              className="flex-1"
-              data-testid="button-add-connection"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              {addConnectionMutation.isPending ? "Adicionando..." : "Adicionar Conexão"}
-            </Button>
-          </div>
-
-          {/* Help Text */}
-          <div className="border-t pt-4">
-            <details className="cursor-pointer">
-              <summary className="font-medium text-sm hover:text-primary">
-                📖 Como criar uma instância na Green API?
-              </summary>
-              <div className="mt-3 text-xs space-y-2 text-muted-foreground">
-                <p>1. Acesse <a href="https://app.green-api.com" target="_blank" rel="noopener noreferrer" className="underline text-blue-600 dark:text-blue-400">app.green-api.com</a></p>
-                <p>2. Crie uma conta ou faça login</p>
-                <p>3. Acesse "Minhas Instâncias" e clique em "Nova Instância"</p>
-                <p>4. Siga as instruções de escanear o QR Code</p>
-                <p>5. Copie o ID Instance e API Token</p>
-                <p>6. Cole aqui e clique em "Adicionar Conexão"</p>
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="connection-name" className="text-sm font-medium">
+                  Nome da Conexão (opcional)
+                </Label>
+                <Input
+                  id="connection-name"
+                  placeholder="Ex: WhatsApp Principal"
+                  value={connectionName}
+                  onChange={(e) => setConnectionName(e.target.value)}
+                  data-testid="input-connection-name"
+                />
               </div>
-            </details>
-          </div>
-        </div>
+
+              <div>
+                <Label htmlFor="phone-number-manual" className="text-sm font-medium">
+                  Número de Telefone <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="phone-number-manual"
+                  placeholder="Ex: 5511999999999"
+                  value={phoneNumber}
+                  onChange={(e) => setPhoneNumber(e.target.value)}
+                  data-testid="input-phone-number-manual"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="id-instance" className="text-sm font-medium">
+                  ID Instance <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="id-instance"
+                  placeholder="Ex: 1234567890123456"
+                  value={idInstance}
+                  onChange={(e) => setIdInstance(e.target.value)}
+                  type="password"
+                  data-testid="input-id-instance"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="api-token" className="text-sm font-medium">
+                  API Token <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="api-token"
+                  placeholder="Ex: abcdef1234567890"
+                  value={apiToken}
+                  onChange={(e) => setApiToken(e.target.value)}
+                  type="password"
+                  data-testid="input-api-token"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-3">
+              <Button
+                onClick={() => onOpenChange(false)}
+                variant="outline"
+                className="flex-1"
+                data-testid="button-cancel"
+              >
+                Cancelar
+              </Button>
+              <Button
+                onClick={() => addConnectionMutation.mutate()}
+                disabled={addConnectionMutation.isPending}
+                className="flex-1"
+                data-testid="button-add-connection"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                {addConnectionMutation.isPending ? "Adicionando..." : "Adicionar Conexão"}
+              </Button>
+            </div>
+
+            <div className="border-t pt-4">
+              <details className="cursor-pointer">
+                <summary className="font-medium text-sm hover:text-primary">
+                  📖 Como criar uma instância na Green API?
+                </summary>
+                <div className="mt-3 text-xs space-y-2 text-muted-foreground">
+                  <p>1. Acesse <a href="https://app.green-api.com" target="_blank" rel="noopener noreferrer" className="underline text-blue-600 dark:text-blue-400">app.green-api.com</a></p>
+                  <p>2. Crie uma conta ou faça login</p>
+                  <p>3. Acesse "Minhas Instâncias" e clique em "Nova Instância"</p>
+                  <p>4. Siga as instruções de escanear o QR Code</p>
+                  <p>5. Copie o ID Instance e API Token</p>
+                  <p>6. Cole aqui e clique em "Adicionar Conexão"</p>
+                </div>
+              </details>
+            </div>
+          </TabsContent>
+        </Tabs>
       </DialogContent>
     </Dialog>
   );
