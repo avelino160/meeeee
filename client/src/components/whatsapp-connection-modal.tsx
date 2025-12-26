@@ -11,7 +11,9 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { MessageSquare, QrCode } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Key, Plus } from "lucide-react";
 
 interface WhatsAppConnectionModalProps {
   open: boolean;
@@ -19,9 +21,10 @@ interface WhatsAppConnectionModalProps {
 }
 
 export default function WhatsAppConnectionModal({ open, onOpenChange }: WhatsAppConnectionModalProps) {
-  const [showQR, setShowQR] = useState(false);
-  const [qrCodeData, setQrCodeData] = useState<string>("");
-  const [qrImageUrl, setQrImageUrl] = useState<string>("");
+  const [idInstance, setIdInstance] = useState("");
+  const [apiToken, setApiToken] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [connectionName, setConnectionName] = useState("");
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -30,70 +33,53 @@ export default function WhatsAppConnectionModal({ open, onOpenChange }: WhatsApp
     enabled: open,
   });
 
-  // 🚀 GERAR QR CODE 
-  const generateQRMutation = useMutation({
+  // 🚀 ADICIONAR CONEXÃO GREEN API
+  const addConnectionMutation = useMutation({
     mutationFn: async () => {
-      const response = await apiRequest("POST", "/api/whatsapp/qr");
+      if (!idInstance.trim() || !apiToken.trim() || !phoneNumber.trim()) {
+        throw new Error("Preencha todos os campos obrigatórios");
+      }
+      
+      const response = await apiRequest("POST", "/api/whatsapp/connections", {
+        name: connectionName.trim() || `Green API ${phoneNumber}`,
+        idInstance: idInstance.trim(),
+        apiTokenInstance: apiToken.trim(),
+        phoneNumber: phoneNumber.trim(),
+      });
+      
       if (!response.ok) {
         const data = await response.json();
-        const error: any = new Error(data.message || "Falha ao gerar QR Code");
-        error.status = response.status;
-        error.details = data.details;
-        error.error = data.error;
-        console.log('❌ QR Generation Failed:', { status: response.status, message: data.message, error: data.error });
-        throw error;
+        throw new Error(data.message || "Falha ao adicionar conexão");
       }
       return response.json();
     },
-    onSuccess: (data) => {
-      const qrCode = data.qrCode || '';
-      const qrImage = data.qrImage || ''; 
-      
-      setQrCodeData(qrCode);
-      setQrImageUrl(qrImage);
-      setShowQR(true);
-      
+    onSuccess: () => {
       toast({
-        title: "🔥 QR Code Gerado!",
-        description: "📱 Escaneie com seu WhatsApp para conectar!",
+        title: "✅ Conexão Adicionada!",
+        description: "Sua conta Green API foi conectada com sucesso!",
         duration: 2000,
       });
+      
+      // Limpar formulário
+      setIdInstance("");
+      setApiToken("");
+      setPhoneNumber("");
+      setConnectionName("");
+      
+      // Fechar modal e atualizar lista
+      onOpenChange(false);
+      queryClient.invalidateQueries({ queryKey: ["/api/whatsapp/connections"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/whatsapp/status"] });
     },
     onError: (error: any) => {
-      console.log('🔍 Error object:', { status: error?.status, message: error?.message, error: error?.error });
-      
       toast({
-        title: "❌ Erro ao Gerar QR Code",
-        description: error?.message || "Falha ao gerar QR Code. Tente novamente.",
+        title: "❌ Erro ao Adicionar Conexão",
+        description: error?.message || "Verifique suas credenciais e tente novamente.",
         variant: "destructive",
-        duration: 2000,
+        duration: 3000,
       });
     },
   });
-
-  // ⏸️ POLLING DESATIVADO - Só funciona quando clicar em "Conectar"
-  // useEffect(() => {
-  //   if (!open) return;
-  //   
-  //   // 🎉 FECHAR MODAL AUTOMATICAMENTE QUANDO CONECTAR
-  //   if (whatsappStatus?.connected) {
-  //     toast({
-  //       title: "🎉 WhatsApp Conectado com Sucesso!",
-  //       description: "🚀 RanZap está ativo! Seu funil de vendas automatizado já está funcionando!",
-  //     });
-  //     setTimeout(() => {
-  //       onOpenChange(false);
-  //       setShowQR(false);
-  //     }, 2000); // Fechar após 2 segundos para mostrar a mensagem
-  //     return;
-  //   }
-  //   
-  //   const interval = setInterval(() => {
-  //     queryClient.invalidateQueries({ queryKey: ["/api/whatsapp/status"] });
-  //   }, 3000);
-  //
-  //   return () => clearInterval(interval);
-  // }, [open, whatsappStatus?.connected, queryClient, onOpenChange, toast]);
 
   const disconnectMutation = useMutation({
     mutationFn: async () => {
@@ -107,7 +93,6 @@ export default function WhatsAppConnectionModal({ open, onOpenChange }: WhatsApp
         description: "WhatsApp desconectado com sucesso!",
         duration: 2000,
       });
-      setShowQR(false);
     },
     onError: (error) => {
       toast({
@@ -119,155 +104,131 @@ export default function WhatsAppConnectionModal({ open, onOpenChange }: WhatsApp
     },
   });
 
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[95vw] max-w-md" data-testid="modal-whatsapp-connection">
+      <DialogContent className="w-[95vw] max-w-lg" data-testid="modal-whatsapp-connection">
         <DialogHeader>
           <DialogTitle className="flex items-center">
-            <QrCode className="h-5 w-5 mr-2 text-primary" />
-            Conectar WhatsApp com QR Code
+            <Key className="h-5 w-5 mr-2 text-primary" />
+            Adicionar Conta Green API
           </DialogTitle>
           <DialogDescription>
-            Escaneie o código QR com seu WhatsApp para conectar
+            Insira suas credenciais da Green API para conectar sua conta WhatsApp
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-6">
-          {/* Connection Status */}
-          <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
-            <div className="flex items-center space-x-3">
-              <div 
-                className={`w-3 h-3 rounded-full ${
-                  whatsappStatus?.connected ? 'bg-green-500' : 'bg-red-500'
-                }`}
-                data-testid="indicator-connection-status"
+          {/* Info Box */}
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 dark:bg-blue-950 dark:border-blue-800">
+            <p className="text-sm text-blue-900 dark:text-blue-100">
+              <strong>Como obter suas credenciais?</strong><br />
+              Acesse <a href="https://app.green-api.com" target="_blank" rel="noopener noreferrer" className="underline text-blue-700 dark:text-blue-300">app.green-api.com</a> para gerar seu ID Instance e Token.
+            </p>
+          </div>
+
+          {/* Form */}
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="connection-name" className="text-sm font-medium">
+                Nome da Conexão (opcional)
+              </Label>
+              <Input
+                id="connection-name"
+                placeholder="Ex: WhatsApp Principal"
+                value={connectionName}
+                onChange={(e) => setConnectionName(e.target.value)}
+                data-testid="input-connection-name"
               />
-              <div>
-                <p className="font-medium" data-testid="text-connection-status">
-                  {whatsappStatus?.connected ? 'Conectado' : 'Desconectado'}
-                </p>
-                {whatsappStatus?.phoneNumber && (
-                  <p className="text-sm text-muted-foreground" data-testid="text-phone-number">
-                    {whatsappStatus.phoneNumber}
-                  </p>
-                )}
-              </div>
+            </div>
+
+            <div>
+              <Label htmlFor="phone-number" className="text-sm font-medium">
+                Número de Telefone <span className="text-red-500">*</span>
+              </Label>
+              <Input
+                id="phone-number"
+                placeholder="Ex: 5511999999999 ou +55 11 99999-9999"
+                value={phoneNumber}
+                onChange={(e) => setPhoneNumber(e.target.value)}
+                data-testid="input-phone-number"
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                Número com código do país (55 para Brasil)
+              </p>
+            </div>
+
+            <div>
+              <Label htmlFor="id-instance" className="text-sm font-medium">
+                ID Instance <span className="text-red-500">*</span>
+              </Label>
+              <Input
+                id="id-instance"
+                placeholder="Ex: 1234567890123456"
+                value={idInstance}
+                onChange={(e) => setIdInstance(e.target.value)}
+                type="password"
+                data-testid="input-id-instance"
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                Encontrado no painel Green API
+              </p>
+            </div>
+
+            <div>
+              <Label htmlFor="api-token" className="text-sm font-medium">
+                API Token <span className="text-red-500">*</span>
+              </Label>
+              <Input
+                id="api-token"
+                placeholder="Ex: abcdef1234567890"
+                value={apiToken}
+                onChange={(e) => setApiToken(e.target.value)}
+                type="password"
+                data-testid="input-api-token"
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                Token da sua instância Green API
+              </p>
             </div>
           </div>
 
-          {!whatsappStatus?.connected ? (
-            <>
-              {/* QR Code Generation */}
-              <div className="text-center space-y-4">
-                {showQR && qrImageUrl ? (
-                  <div className="space-y-4">
-                    <div className="bg-white p-6 rounded-lg border-2 border-blue-200 mx-auto inline-block">
-                      <img 
-                        src={qrImageUrl} 
-                        alt="QR Code" 
-                        className="w-64 h-64"
-                        data-testid="img-qr-code"
-                      />
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <h3 className="text-lg font-bold text-blue-700">📱 Escaneie o QR Code</h3>
-                      <p className="text-sm text-gray-600">Abra o WhatsApp no seu celular e escaneie este código</p>
-                      
-                      <div className="bg-blue-50 p-4 rounded-lg text-sm text-gray-700">
-                        <p className="font-medium mb-2">Como conectar:</p>
-                        <ol className="text-left space-y-1 text-xs">
-                          <li><strong>1.</strong> Abra WhatsApp no seu celular</li>
-                          <li><strong>2.</strong> Toque em <strong>⋮ (Menu) → Aparelhos conectados</strong></li>
-                          <li><strong>3.</strong> Toque em <strong>Conectar um aparelho</strong></li>
-                          <li><strong>4.</strong> Escaneie este QR Code com a câmera</li>
-                        </ol>
-                      </div>
-                      
-                      <Button
-                        onClick={() => generateQRMutation.mutate()}
-                        variant="outline"
-                        className="w-full"
-                        data-testid="button-regenerate-qr"
-                      >
-                        🔄 Gerar Novo QR Code
-                      </Button>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="space-y-4 p-6 bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl border-2 border-purple-300">
-                    <div>
-                      <h3 className="text-lg font-bold text-purple-700">Pronto para conectar?</h3>
-                      <p className="text-sm text-gray-600">Clique abaixo para gerar o QR Code</p>
-                    </div>
-                    
-                    {generateQRMutation.isPending ? (
-                      <div className="flex flex-col items-center space-y-3">
-                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                        <p className="font-medium text-blue-700">Gerando QR Code...</p>
-                        <p className="text-sm text-gray-600">Aguarde alguns segundos...</p>
-                      </div>
-                    ) : (
-                      <Button
-                        onClick={() => generateQRMutation.mutate()}
-                        className="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3"
-                        data-testid="button-generate-qr"
-                      >
-                        <QrCode className="h-5 w-5 mr-2" />
-                        Gerar QR Code
-                      </Button>
-                    )}
-                  </div>
-                )}
+          {/* Actions */}
+          <div className="flex gap-3">
+            <Button
+              onClick={() => onOpenChange(false)}
+              variant="outline"
+              className="flex-1"
+              data-testid="button-cancel"
+            >
+              Cancelar
+            </Button>
+            <Button
+              onClick={() => addConnectionMutation.mutate()}
+              disabled={addConnectionMutation.isPending}
+              className="flex-1"
+              data-testid="button-add-connection"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              {addConnectionMutation.isPending ? "Adicionando..." : "Adicionar Conexão"}
+            </Button>
+          </div>
 
-                <Button
-                  variant="outline"
-                  onClick={() => onOpenChange(false)}
-                  className="w-full"
-                  data-testid="button-close-modal"
-                >
-                  Fechar
-                </Button>
+          {/* Help Text */}
+          <div className="border-t pt-4">
+            <details className="cursor-pointer">
+              <summary className="font-medium text-sm hover:text-primary">
+                📖 Como criar uma instância na Green API?
+              </summary>
+              <div className="mt-3 text-xs space-y-2 text-muted-foreground">
+                <p>1. Acesse <a href="https://app.green-api.com" target="_blank" rel="noopener noreferrer" className="underline text-blue-600 dark:text-blue-400">app.green-api.com</a></p>
+                <p>2. Crie uma conta ou faça login</p>
+                <p>3. Acesse "Minhas Instâncias" e clique em "Nova Instância"</p>
+                <p>4. Siga as instruções de escanear o QR Code</p>
+                <p>5. Copie o ID Instance e API Token</p>
+                <p>6. Cole aqui e clique em "Adicionar Conexão"</p>
               </div>
-            </>
-          ) : (
-            /* ✅ WhatsApp Conectado */
-            (<div className="space-y-4 text-center p-6 bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl border-2 border-green-300">
-              <div className="flex items-center justify-center space-x-3 mb-4">
-                <div className="w-4 h-4 bg-green-500 rounded-full animate-pulse"></div>
-                <h3 className="text-lg font-bold text-green-700">✅ WhatsApp Conectado!</h3>
-              </div>
-              <div className="space-y-2">
-                <p className="font-medium text-green-800">🎉 Pilot Zap está funcionando!</p>
-                <p className="text-sm text-green-700">
-                  Seu funil de vendas automático está ativo e pronto para receber clientes.
-                </p>
-                <div className="text-xs text-green-600 bg-green-100 p-2 rounded mt-3">
-                  💡 <strong>Dica:</strong> Agora envie "Oi" para seu WhatsApp e teste o funil automático!
-                </div>
-              </div>
-              <div className="flex space-x-2">
-                <Button
-                  variant="outline"
-                  onClick={() => onOpenChange(false)}
-                  className="flex-1"
-                  data-testid="button-close"
-                >
-                  Fechar
-                </Button>
-                <Button
-                  variant="destructive"
-                  onClick={() => disconnectMutation.mutate()}
-                  disabled={disconnectMutation.isPending}
-                  className="flex-1"
-                  data-testid="button-disconnect"
-                >
-                  {disconnectMutation.isPending ? "Desconectando..." : "🔴 Desconectar"}
-                </Button>
-              </div>
-            </div>)
-          )}
+            </details>
+          </div>
         </div>
       </DialogContent>
     </Dialog>

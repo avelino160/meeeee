@@ -90,7 +90,9 @@ Preferred communication style: Simple, everyday language.
 ## External Dependencies
 
 ### Third-Party Services
-- **OneMsg.io**: WhatsApp Business API integration for sending messages and media
+- **Green API**: WhatsApp Business API integration for sending messages (switched from OneMsg.io)
+  - Credentials: ID Instance and API Token stored per WhatsApp connection
+  - Multiple connections supported with rate limits based on subscription plan
 - **Neon Database**: Serverless PostgreSQL hosting for data persistence
 - **Replit Authentication**: OIDC provider for user authentication and authorization
 
