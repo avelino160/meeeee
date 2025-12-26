@@ -177,17 +177,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const qrUrl = `https://api.green-api.com/waInstance${idInstance}/qr/${apiToken}`;
       
+      console.log('🔗 Calling Green API:', qrUrl);
       const response = await axios.get(qrUrl);
       
-      if (response.data && response.data.qrCode) {
+      console.log('📦 Response data:', JSON.stringify(response.data));
+      
+      // A resposta pode ser base64 ou ter estrutura diferente
+      const qrCode = response.data?.qrCode || response.data;
+      
+      if (qrCode) {
         console.log('✅ QR Code generated successfully');
         res.json({ 
-          qrCode: response.data.qrCode,
+          qrCode: qrCode,
           idInstance,
           apiToken 
         });
       } else {
-        throw new Error("No QR code in response");
+        console.log('❌ No QR code found in response:', response.data);
+        throw new Error(`No QR code in response. Got: ${JSON.stringify(response.data)}`);
       }
     } catch (error: any) {
       console.error("❌ Error generating QR code:", error?.message || error);
