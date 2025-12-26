@@ -45,7 +45,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const user = await storage.getUser(DEFAULT_USER_ID);
       
       if (!user) {
-        res.json(DEMO_USER);
+        // Create demo user if doesn't exist
+        await storage.upsertUser({
+          ...DEMO_USER,
+          planType: 'enterprise',
+          isBlocked: false
+        });
+        res.json({ ...DEMO_USER, planType: 'enterprise', isBlocked: false });
         return;
       }
 
@@ -57,7 +63,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         firstName: updatedUser?.firstName || DEMO_USER.firstName,
         lastName: updatedUser?.lastName || DEMO_USER.lastName,
         email: updatedUser?.email || DEMO_USER.email,
-        planType: updatedUser?.planType || 'basic',
+        planType: updatedUser?.planType || 'enterprise',
         planExpiresAt: updatedUser?.planExpiresAt || null,
         isBlocked: updatedUser?.isBlocked || false
       });
