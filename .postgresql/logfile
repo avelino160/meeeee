@@ -43,3 +43,43 @@
 2026-05-24 09:52:21.706 UTC [2710] STATEMENT:  select "id", "user_id", "phone_number", "name", "is_connected", "qr_code", "id_instance", "api_token_instance", "last_connected_at", "created_at", "updated_at" from "whatsapp_connections" where "whatsapp_connections"."user_id" = $1 order by "whatsapp_connections"."created_at" desc
 2026-05-24 09:52:27.601 UTC [2721] ERROR:  column "name" does not exist at character 41
 2026-05-24 09:52:27.601 UTC [2721] STATEMENT:  select "id", "user_id", "phone_number", "name", "is_connected", "qr_code", "id_instance", "api_token_instance", "last_connected_at", "created_at", "updated_at" from "whatsapp_connections" where "whatsapp_connections"."user_id" = $1 order by "whatsapp_connections"."created_at" desc
+2026-05-24 11:21:41.872 UTC [4914] LOG:  starting PostgreSQL 16.10 on x86_64-pc-linux-gnu, compiled by clang version 19.1.7, 64-bit
+2026-05-24 11:21:41.874 UTC [4914] LOG:  listening on Unix socket "/home/runner/workspace/.postgresql/run/.s.PGSQL.5432"
+2026-05-24 11:21:41.882 UTC [4917] LOG:  database system was interrupted; last known up at 2026-05-24 09:52:17 UTC
+2026-05-24 11:21:41.892 UTC [4917] LOG:  database system was not properly shut down; automatic recovery in progress
+2026-05-24 11:21:42.000 UTC [4917] LOG:  redo starts at 0/19614E0
+2026-05-24 11:21:42.000 UTC [4917] LOG:  invalid record length at 0/1961518: expected at least 24, got 0
+2026-05-24 11:21:42.000 UTC [4917] LOG:  redo done at 0/19614E0 system usage: CPU: user: 0.00 s, system: 0.00 s, elapsed: 0.00 s
+2026-05-24 11:21:42.009 UTC [4915] LOG:  checkpoint starting: end-of-recovery immediate wait
+2026-05-24 11:21:42.024 UTC [4915] LOG:  checkpoint complete: wrote 3 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.001 s, sync=0.004 s, total=0.017 s; sync files=2, longest=0.003 s, average=0.002 s; distance=0 kB, estimate=0 kB; lsn=0/1961518, redo lsn=0/1961518
+2026-05-24 11:21:42.029 UTC [4914] LOG:  database system is ready to accept connections
+2026-05-24 11:21:47.301 UTC [5139] ERROR:  column "name" does not exist at character 41
+2026-05-24 11:21:47.301 UTC [5139] STATEMENT:  select "id", "user_id", "phone_number", "name", "is_connected", "qr_code", "id_instance", "api_token_instance", "last_connected_at", "created_at", "updated_at" from "whatsapp_connections" where "whatsapp_connections"."user_id" = $1 order by "whatsapp_connections"."created_at" desc
+2026-05-24 11:22:06.677 UTC [5195] ERROR:  column "name" does not exist at character 41
+2026-05-24 11:22:06.677 UTC [5195] STATEMENT:  select "id", "user_id", "phone_number", "name", "is_connected", "qr_code", "id_instance", "api_token_instance", "last_connected_at", "created_at", "updated_at" from "whatsapp_connections" where "whatsapp_connections"."user_id" = $1 order by "whatsapp_connections"."created_at" desc
+2026-05-24 11:23:19.381 UTC [5270] LOG:  starting PostgreSQL 16.10 on x86_64-pc-linux-gnu, compiled by clang version 19.1.7, 64-bit
+2026-05-24 11:23:19.383 UTC [5270] LOG:  listening on Unix socket "/home/runner/workspace/.postgresql/run/.s.PGSQL.5432"
+2026-05-24 11:23:19.390 UTC [5273] LOG:  database system was interrupted; last known up at 2026-05-24 11:21:42 UTC
+2026-05-24 11:23:19.403 UTC [5273] LOG:  database system was not properly shut down; automatic recovery in progress
+2026-05-24 11:23:19.414 UTC [5273] LOG:  redo starts at 0/1961590
+2026-05-24 11:23:19.414 UTC [5273] LOG:  invalid record length at 0/19615C8: expected at least 24, got 0
+2026-05-24 11:23:19.414 UTC [5273] LOG:  redo done at 0/1961590 system usage: CPU: user: 0.00 s, system: 0.00 s, elapsed: 0.00 s
+2026-05-24 11:23:19.421 UTC [5271] LOG:  checkpoint starting: end-of-recovery immediate wait
+2026-05-24 11:23:19.435 UTC [5271] LOG:  checkpoint complete: wrote 3 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.001 s, sync=0.005 s, total=0.017 s; sync files=2, longest=0.003 s, average=0.003 s; distance=0 kB, estimate=0 kB; lsn=0/19615C8, redo lsn=0/19615C8
+2026-05-24 11:23:19.439 UTC [5270] LOG:  database system is ready to accept connections
+2026-05-24 11:23:36.354 UTC [5393] ERROR:  column "name" does not exist at character 41
+2026-05-24 11:23:36.354 UTC [5393] STATEMENT:  select "id", "user_id", "phone_number", "name", "is_connected", "qr_code", "id_instance", "api_token_instance", "last_connected_at", "created_at", "updated_at" from "whatsapp_connections" where "whatsapp_connections"."user_id" = $1 order by "whatsapp_connections"."created_at" desc
+2026-05-24 11:23:36.358 UTC [5394] ERROR:  column "name" does not exist at character 41
+2026-05-24 11:23:36.358 UTC [5394] STATEMENT:  select "id", "user_id", "phone_number", "name", "is_connected", "qr_code", "id_instance", "api_token_instance", "last_connected_at", "created_at", "updated_at" from "whatsapp_connections" where ("whatsapp_connections"."user_id" = $1 and "whatsapp_connections"."is_connected" = $2)
+2026-05-24 11:23:36.358 UTC [5395] ERROR:  column "name" does not exist at character 41
+2026-05-24 11:23:36.358 UTC [5395] STATEMENT:  select "id", "user_id", "phone_number", "name", "is_connected", "qr_code", "id_instance", "api_token_instance", "last_connected_at", "created_at", "updated_at" from "whatsapp_connections" where "whatsapp_connections"."user_id" = $1 order by "whatsapp_connections"."created_at" desc
+2026-05-24 11:24:11.023 UTC [5507] LOG:  starting PostgreSQL 16.10 on x86_64-pc-linux-gnu, compiled by clang version 19.1.7, 64-bit
+2026-05-24 11:24:11.025 UTC [5507] LOG:  listening on Unix socket "/home/runner/workspace/.postgresql/run/.s.PGSQL.5432"
+2026-05-24 11:24:11.032 UTC [5510] LOG:  database system was interrupted; last known up at 2026-05-24 11:23:19 UTC
+2026-05-24 11:24:11.042 UTC [5510] LOG:  database system was not properly shut down; automatic recovery in progress
+2026-05-24 11:24:11.047 UTC [5510] LOG:  redo starts at 0/1961640
+2026-05-24 11:24:11.047 UTC [5510] LOG:  invalid record length at 0/1961678: expected at least 24, got 0
+2026-05-24 11:24:11.047 UTC [5510] LOG:  redo done at 0/1961640 system usage: CPU: user: 0.00 s, system: 0.00 s, elapsed: 0.00 s
+2026-05-24 11:24:11.053 UTC [5508] LOG:  checkpoint starting: end-of-recovery immediate wait
+2026-05-24 11:24:11.069 UTC [5508] LOG:  checkpoint complete: wrote 3 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.001 s, sync=0.005 s, total=0.019 s; sync files=2, longest=0.003 s, average=0.003 s; distance=0 kB, estimate=0 kB; lsn=0/1961678, redo lsn=0/1961678
+2026-05-24 11:24:11.073 UTC [5507] LOG:  database system is ready to accept connections

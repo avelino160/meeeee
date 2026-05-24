@@ -1,8 +1,10 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
+import { randomUUID } from "crypto";
 import axios from "axios";
 import { storage } from "./storage";
 import { whatsappService } from "./services/whatsappService";
+import { baileyService } from "./services/baileyService";
 import { funnelService } from "./services/funnelService";
 import { schedulerService } from "./services/schedulerService";
 import { 
@@ -167,48 +169,70 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // 🐝 Baileys: start a new WhatsApp session (returns sessionId)
+  app.post('/api/whatsapp/start-session', async (req, res) => {
+    try {
+      const userId = DEFAULT_USER_ID;
+
+      const limitCheck = await storage.checkWhatsappLimit(userId);
+      if (!limitCheck.allowed) {
+        return res.status(403).json({
+          message: limitCheck.reason,
+          error: "limit_exceeded",
+          limit: limitCheck.limit,
+          current: limitCheck.current
+        });
+      }
+
+      const sessionId = randomUUID();
+      // Start async — do not await so the client gets the sessionId immediately
+      baileyService.startSession(sessionId, userId);
+
+      res.json({ sessionId });
+    } catch (error: any) {
+      console.error("Error starting Baileys session:", error);
+      res.status(500).json({ message: "Failed to start WhatsApp session" });
+    }
+  });
+
+  // 🐝 Baileys: poll session status / QR code
+  app.get('/api/whatsapp/session-status/:sessionId', async (req, res) => {
+    const { sessionId } = req.params;
+    const session = baileyService.getSession(sessionId);
+    if (!session) {
+      return res.status(404).json({ status: "not_found" });
+    }
+    res.json({
+      status: session.status,
+      qrCode: session.qrCodeBase64,
+      phoneNumber: session.phoneNumber,
+      connectionId: session.connectionId,
+      error: session.error,
+    });
+  });
+
+  // 🐝 Baileys: terminate / cancel a session
+  app.delete('/api/whatsapp/session/:sessionId', async (req, res) => {
+    const { sessionId } = req.params;
+    await baileyService.terminateSession(sessionId);
+    res.json({ success: true });
+  });
+
+  // Legacy QR endpoint — kept for compatibility, now delegates to Baileys start-session
   app.post('/api/whatsapp/qr', async (req, res) => {
     try {
-      console.log('📱 Starting QR code generation from Green API...');
-      
-      const idInstance = process.env.GREEN_API_ID_INSTANCE || "7105442726";
-      const apiToken = process.env.GREEN_API_TOKEN_INSTANCE || "60800edd5b5841c991ee97cba8e4e8e7f55983bee177449681";
-      
-      if (!idInstance || !apiToken) {
-        return res.status(400).json({ 
-          message: "Green API credentials not configured",
-          error: "missing_credentials"
-        });
+      const userId = DEFAULT_USER_ID;
+      const sessionId = randomUUID();
+      baileyService.startSession(sessionId, userId);
+      // Wait a moment for the QR to generate
+      await new Promise(r => setTimeout(r, 8000));
+      const session = baileyService.getSession(sessionId);
+      if (session?.qrCodeBase64) {
+        return res.json({ qrCode: session.qrCodeBase64, sessionId });
       }
-      
-      const qrUrl = `https://qr.green-api.com/waInstance${idInstance}/${apiToken}`;
-      
-      console.log('🔗 Calling Green API:', qrUrl);
-      const response = await axios.get(qrUrl);
-      
-      console.log('📦 Response data:', JSON.stringify(response.data));
-      
-      // A resposta pode ser base64 ou ter estrutura diferente
-      const qrCode = response.data?.qrCode || response.data;
-      
-      if (qrCode) {
-        console.log('✅ QR Code generated successfully');
-        res.json({ 
-          qrCode: qrCode,
-          idInstance,
-          apiToken 
-        });
-      } else {
-        console.log('❌ No QR code found in response:', response.data);
-        throw new Error(`No QR code in response. Got: ${JSON.stringify(response.data)}`);
-      }
+      res.status(503).json({ message: "QR Code ainda não disponível. Use /api/whatsapp/start-session e poll /api/whatsapp/session-status/:sessionId" });
     } catch (error: any) {
-      console.error("❌ Error generating QR code:", error?.message || error);
-      
-      res.status(500).json({ 
-        message: error?.message || "Failed to generate QR code from Green API",
-        error: error?.error || "qr_generation_failed"
-      });
+      res.status(500).json({ message: error?.message || "Falha ao gerar QR Code" });
     }
   });
 

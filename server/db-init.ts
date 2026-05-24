@@ -64,12 +64,21 @@ export async function initializeDatabase() {
         id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid()::text,
         user_id VARCHAR NOT NULL REFERENCES users(id) ON DELETE CASCADE,
         phone_number VARCHAR NOT NULL,
+        name VARCHAR,
         is_connected BOOLEAN DEFAULT false,
         qr_code TEXT,
+        id_instance VARCHAR,
+        api_token_instance VARCHAR,
         last_connected_at TIMESTAMP,
         created_at TIMESTAMP DEFAULT NOW(),
         updated_at TIMESTAMP DEFAULT NOW()
       );
+    `);
+
+    await pool.query(`
+      ALTER TABLE whatsapp_connections ADD COLUMN IF NOT EXISTS name VARCHAR;
+      ALTER TABLE whatsapp_connections ADD COLUMN IF NOT EXISTS id_instance VARCHAR;
+      ALTER TABLE whatsapp_connections ADD COLUMN IF NOT EXISTS api_token_instance VARCHAR;
     `);
 
     await pool.query(`
