@@ -1,0 +1,105 @@
+const { 
+  default: makeWASocket, 
+  useMultiFileAuthState, 
+  DisconnectReason, 
+  Browsers 
+} = require("@whiskeysockets/baileys");
+const qrcode = require("qrcode-terminal");
+const pino = require("pino");
+
+class WhatsAppEngine {
+  constructor(sessionName = "automacao_session") {
+    this.sessionName = sessionName;
+    this.socket = null;
+  }
+
+  async start() {
+    // 1. Configura a persistência da sessão em uma pasta local (. /auth_info)
+    const { state, saveCreds } = await useMultiFileAuthState(`./auth_${this.sessionName}`);
+
+    // 2. Inicializa o Socket do WhatsApp
+    this.socket = makeWASocket({
+      auth: state,
+      logger: pino({ level: "silent" }), // Silencia logs verbosos no terminal
+      printQRInTerminal: false, // Vamos gerar nós mesmos de forma estilizada
+      browser: Browsers.appropriate("Desktop"), // Identifica seu app como desktop
+    });
+
+    // 3. Monitora atualizações na conexão (QR Code e Status)
+    this.socket.ev.on("connection.update", async (update) => {
+      const { connection, lastDisconnect, qr } = update;
+
+      // Se houver um QR Code gerado, renderiza no terminal
+      if (qr) {
+        console.clear();
+        console.log("====================================================");
+        console.log("👉 ESCANEIE O QR CODE ABAIXO PARA CONECTAR:");
+        console.log("====================================================\n");
+        qrcode.generate(qr, { small: true });
+        console.log("\n====================================================");
+      }
+
+      // Se a conexão foi fechada
+      if (connection === "close") {
+        const shouldReconnect = lastDisconnect?.error?.output?.statusCode !== DisconnectReason.loggedOut;
+        console.log(`⚠️ Conexão fechada devido a: ${lastDisconnect?.error?.message}. Reconectando: ${shouldReconnect}`);
+        
+        if (shouldReconnect) {
+          this.start(); // Reconecta automaticamente
+        } else {
+          console.log("❌ Você foi desconectado pelo celular. Escaneie novamente para conectar.");
+        }
+      }
+
+      // Conectado com sucesso!
+      if (connection === "open") {
+        console.log("\n✅ WhatsApp Conectado com Sucesso e Pronto para Automar!");
+      }
+    });
+
+    // 4. Salva as credenciais atualizadas de autenticação
+    this.socket.ev.on("creds.update", saveCreds);
+
+    // 5. Escuta novas mensagens recebidas
+    this.socket.ev.on("messages.upsert", async (m) => {
+      if (m.type === "notify") {
+        for (const msg of m.messages) {
+          if (!msg.key.fromMe) { // Ignora mensagens enviadas por você mesmo
+            const sender = msg.key.remoteJid;
+            const text = msg.message?.conversation || msg.message?.extendedTextMessage?.text;
+
+            if (text) {
+              console.log(`📩 Nova mensagem de [${sender}]: ${text}`);
+              
+              // Aqui você conecta com a sua automação!
+              await this.onMessageReceived(sender, text, msg);
+            }
+          }
+        }
+      }
+    });
+  }
+
+  // Regra de automação quando recebe mensagens
+  async onMessageReceived(from, text, rawMessage) {
+    // Exemplo Simples de Automação (Resposta Automática):
+    if (text.toLowerCase() === "olá" || text.toLowerCase() === "oi") {
+      await this.sendMessage(from, "Olá! Sou um robô de automação inteligente. Como posso te ajudar?");
+    }
+  }
+
+  // Função para enviar mensagem de texto
+  async sendMessage(to, text) {
+    if (!this.socket) {
+      console.error("❌ Erro: WhatsApp não foi inicializado.");
+      return;
+    }
+    // Formata o número para o padrão correto do WhatsApp (ex: 5511999999999@s.whatsapp.net)
+    const formattedJid = to.includes("@") ? to : `${to.replace(/\D/g, "")}@s.whatsapp.net`;
+    
+    await this.socket.sendMessage(formattedJid, { text: text });
+    console.log(`🚀 Mensagem enviada para [${formattedJid}]: ${text}`);
+  }
+}
+
+module.exports = WhatsAppEngine;

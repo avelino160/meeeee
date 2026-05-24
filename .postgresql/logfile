@@ -1,0 +1,45 @@
+2026-05-24 09:49:11.886 UTC [1834] LOG:  starting PostgreSQL 16.10 on x86_64-pc-linux-gnu, compiled by clang version 19.1.7, 64-bit
+2026-05-24 09:49:11.890 UTC [1834] LOG:  listening on IPv4 address "127.0.0.1", port 5432
+2026-05-24 09:49:11.898 UTC [1834] FATAL:  could not create lock file "/run/postgresql/.s.PGSQL.5432.lock": No such file or directory
+2026-05-24 09:49:11.900 UTC [1834] LOG:  database system is shut down
+2026-05-24 09:49:20.917 UTC [1879] LOG:  starting PostgreSQL 16.10 on x86_64-pc-linux-gnu, compiled by clang version 19.1.7, 64-bit
+2026-05-24 09:49:20.920 UTC [1879] LOG:  listening on IPv4 address "127.0.0.1", port 5432
+2026-05-24 09:49:20.923 UTC [1879] LOG:  listening on Unix socket "/run/postgresql/.s.PGSQL.5432"
+2026-05-24 09:49:20.940 UTC [1882] LOG:  database system was shut down at 2026-05-24 09:49:04 UTC
+2026-05-24 09:49:20.955 UTC [1879] LOG:  database system is ready to accept connections
+2026-05-24 09:50:34.165 UTC [2161] LOG:  starting PostgreSQL 16.10 on x86_64-pc-linux-gnu, compiled by clang version 19.1.7, 64-bit
+2026-05-24 09:50:34.169 UTC [2161] LOG:  listening on Unix socket "/home/runner/workspace/.postgresql/run/.s.PGSQL.5432"
+2026-05-24 09:50:34.184 UTC [2164] LOG:  database system was interrupted; last known up at 2026-05-24 09:49:20 UTC
+2026-05-24 09:50:34.715 UTC [2164] LOG:  database system was not properly shut down; automatic recovery in progress
+2026-05-24 09:50:34.722 UTC [2164] LOG:  invalid record length at 0/14F1FE0: expected at least 24, got 0
+2026-05-24 09:50:34.722 UTC [2164] LOG:  redo is not required
+2026-05-24 09:50:34.729 UTC [2162] LOG:  checkpoint starting: end-of-recovery immediate wait
+2026-05-24 09:50:34.751 UTC [2162] LOG:  checkpoint complete: wrote 3 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.003 s, sync=0.006 s, total=0.025 s; sync files=2, longest=0.003 s, average=0.003 s; distance=0 kB, estimate=0 kB; lsn=0/14F1FE0, redo lsn=0/14F1FE0
+2026-05-24 09:50:34.762 UTC [2161] LOG:  database system is ready to accept connections
+2026-05-24 09:51:12.748 UTC [2291] LOG:  starting PostgreSQL 16.10 on x86_64-pc-linux-gnu, compiled by clang version 19.1.7, 64-bit
+2026-05-24 09:51:12.750 UTC [2291] LOG:  listening on Unix socket "/home/runner/workspace/.postgresql/run/.s.PGSQL.5432"
+2026-05-24 09:51:12.758 UTC [2294] LOG:  database system was interrupted; last known up at 2026-05-24 09:50:34 UTC
+2026-05-24 09:51:12.766 UTC [2294] LOG:  database system was not properly shut down; automatic recovery in progress
+2026-05-24 09:51:12.778 UTC [2294] LOG:  invalid record length at 0/14F2070: expected at least 24, got 0
+2026-05-24 09:51:12.778 UTC [2294] LOG:  redo is not required
+2026-05-24 09:51:12.781 UTC [2292] LOG:  checkpoint starting: end-of-recovery immediate wait
+2026-05-24 09:51:12.884 UTC [2292] LOG:  checkpoint complete: wrote 3 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.001 s, sync=0.005 s, total=0.106 s; sync files=2, longest=0.003 s, average=0.003 s; distance=0 kB, estimate=0 kB; lsn=0/14F2070, redo lsn=0/14F2070
+2026-05-24 09:51:12.888 UTC [2291] LOG:  database system is ready to accept connections
+2026-05-24 09:51:22.836 UTC [2339] ERROR:  column "name" does not exist at character 41
+2026-05-24 09:51:22.836 UTC [2339] STATEMENT:  select "id", "user_id", "phone_number", "name", "is_connected", "qr_code", "id_instance", "api_token_instance", "last_connected_at", "created_at", "updated_at" from "whatsapp_connections" where "whatsapp_connections"."user_id" = $1 order by "whatsapp_connections"."created_at" desc
+2026-05-24 09:52:08.282 UTC [2596] ERROR:  column "name" does not exist at character 41
+2026-05-24 09:52:08.282 UTC [2596] STATEMENT:  select "id", "user_id", "phone_number", "name", "is_connected", "qr_code", "id_instance", "api_token_instance", "last_connected_at", "created_at", "updated_at" from "whatsapp_connections" where "whatsapp_connections"."user_id" = $1 order by "whatsapp_connections"."created_at" desc
+2026-05-24 09:52:16.161 UTC [2636] LOG:  starting PostgreSQL 16.10 on x86_64-pc-linux-gnu, compiled by clang version 19.1.7, 64-bit
+2026-05-24 09:52:16.163 UTC [2636] LOG:  listening on Unix socket "/home/runner/workspace/.postgresql/run/.s.PGSQL.5432"
+2026-05-24 09:52:16.170 UTC [2639] LOG:  database system was interrupted; last known up at 2026-05-24 09:51:12 UTC
+2026-05-24 09:52:16.186 UTC [2639] LOG:  database system was not properly shut down; automatic recovery in progress
+2026-05-24 09:52:16.189 UTC [2639] LOG:  redo starts at 0/14F20E8
+2026-05-24 09:52:16.207 UTC [2639] LOG:  invalid record length at 0/1961468: expected at least 24, got 0
+2026-05-24 09:52:16.207 UTC [2639] LOG:  redo done at 0/1961430 system usage: CPU: user: 0.00 s, system: 0.00 s, elapsed: 0.01 s
+2026-05-24 09:52:16.214 UTC [2637] LOG:  checkpoint starting: end-of-recovery immediate wait
+2026-05-24 09:52:17.230 UTC [2637] LOG:  checkpoint complete: wrote 980 buffers (6.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.275 s, sync=0.730 s, total=1.019 s; sync files=345, longest=0.111 s, average=0.003 s; distance=4540 kB, estimate=4540 kB; lsn=0/1961468, redo lsn=0/1961468
+2026-05-24 09:52:17.235 UTC [2636] LOG:  database system is ready to accept connections
+2026-05-24 09:52:21.706 UTC [2710] ERROR:  column "name" does not exist at character 41
+2026-05-24 09:52:21.706 UTC [2710] STATEMENT:  select "id", "user_id", "phone_number", "name", "is_connected", "qr_code", "id_instance", "api_token_instance", "last_connected_at", "created_at", "updated_at" from "whatsapp_connections" where "whatsapp_connections"."user_id" = $1 order by "whatsapp_connections"."created_at" desc
+2026-05-24 09:52:27.601 UTC [2721] ERROR:  column "name" does not exist at character 41
+2026-05-24 09:52:27.601 UTC [2721] STATEMENT:  select "id", "user_id", "phone_number", "name", "is_connected", "qr_code", "id_instance", "api_token_instance", "last_connected_at", "created_at", "updated_at" from "whatsapp_connections" where "whatsapp_connections"."user_id" = $1 order by "whatsapp_connections"."created_at" desc

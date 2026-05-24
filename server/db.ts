@@ -1,15 +1,16 @@
-import { Pool, neonConfig } from '@neondatabase/serverless';
-import { drizzle } from 'drizzle-orm/neon-serverless';
-import ws from "ws";
+import { drizzle } from "drizzle-orm/node-postgres";
+import pg from "pg";
 import * as schema from "@shared/schema";
 
-neonConfig.webSocketConstructor = ws;
+const { Pool } = pg;
 
 const databaseUrl = process.env.DATABASE_URL;
 
 if (!databaseUrl) {
-  console.warn('DATABASE_URL is not set. Running with mock/empty database.');
+  console.warn('DATABASE_URL is not set. Database features will not work.');
+} else {
+  console.log('DATABASE_URL is set, connecting to PostgreSQL...');
 }
 
 export const pool = databaseUrl ? new Pool({ connectionString: databaseUrl }) : null;
-export const db = pool ? drizzle(pool, { schema }) : null;
+export const db = pool ? drizzle(pool, { schema }) : null as any;
