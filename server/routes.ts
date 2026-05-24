@@ -125,13 +125,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.patch('/api/whatsapp/connections/:id', async (req, res) => {
     try {
       const { id } = req.params;
-      const { name, idInstance, apiTokenInstance } = req.body;
-      
+      const { name } = req.body;
       const updateData: any = {};
       if (name) updateData.name = name.trim();
-      if (idInstance) updateData.idInstance = idInstance.trim();
-      if (apiTokenInstance) updateData.apiTokenInstance = apiTokenInstance.trim();
-      
       const updated = await storage.updateWhatsappConnection(id, updateData);
       if (!updated) {
         return res.status(404).json({ message: "Connection not found" });
@@ -143,29 +139,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Rota para criar nova conexão Green API
-  app.post('/api/whatsapp/connections', async (req, res) => {
+  // 🗑️ Deletar conexão WhatsApp
+  app.delete('/api/whatsapp/connections/:id', async (req, res) => {
     try {
-      const userId = DEFAULT_USER_ID;
-      const { name, idInstance, apiTokenInstance, phoneNumber } = req.body;
-
-      if (!idInstance || !apiTokenInstance || !phoneNumber) {
-        return res.status(400).json({ message: "Instance ID, Token and Phone are required" });
-      }
-
-      const connection = await (storage as any).createWhatsappConnection({
-        userId,
-        name: name || `Green API ${phoneNumber}`,
-        idInstance,
-        apiTokenInstance,
-        phoneNumber,
-        isConnected: true
-      });
-
-      res.status(201).json(connection);
+      const { id } = req.params;
+      await storage.deleteWhatsappConnection(id);
+      res.json({ success: true });
     } catch (error) {
-      console.error("Error creating WhatsApp connection:", error);
-      res.status(500).json({ message: "Failed to create WhatsApp connection" });
+      console.error("Error deleting WhatsApp connection:", error);
+      res.status(500).json({ message: "Failed to delete WhatsApp connection" });
     }
   });
 
@@ -236,24 +218,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/whatsapp/pairing-code', async (req, res) => {
-    try {
-      const userId = DEFAULT_USER_ID;
-      const { phoneNumber } = req.body;
-
-      if (!phoneNumber) {
-        return res.status(400).json({ message: "Phone number is required" });
-      }
-
-      // Remover caracteres não numéricos do telefone
-      const cleanPhone = phoneNumber.replace(/\D/g, '');
-      
-      const pairingCode = await whatsappService.getPairingCode(userId, cleanPhone);
-      res.json({ pairingCode });
-    } catch (error: any) {
-      console.error("Error generating pairing code:", error);
-      res.status(500).json({ message: "Failed to generate pairing code" });
-    }
+  // pairing-code não suportado com Baileys direto — retorna mensagem informativa
+  app.post('/api/whatsapp/pairing-code', async (_req, res) => {
+    res.status(400).json({ message: "Use o QR Code para conectar. Pairing code não suportado." });
   });
 
   app.post('/api/whatsapp/connect', async (req, res) => {

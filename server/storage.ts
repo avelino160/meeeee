@@ -44,6 +44,7 @@ export interface IStorage {
   getConnectedAccountsCount(userId: string): Promise<number>;
   createWhatsappConnection(connection: InsertWhatsappConnection): Promise<WhatsappConnection>;
   updateWhatsappConnection(id: string, updates: Partial<WhatsappConnection>): Promise<WhatsappConnection | undefined>;
+  deleteWhatsappConnection(id: string): Promise<boolean>;
   getAllFunnels(userId: string): Promise<Funnel[]>;
   getFunnel(id: string): Promise<Funnel | undefined>;
   createFunnel(funnel: InsertFunnel): Promise<Funnel>;
@@ -119,6 +120,11 @@ export class DatabaseStorage implements IStorage {
       .where(eq(whatsappConnections.id, id))
       .returning();
     return updated;
+  }
+
+  async deleteWhatsappConnection(id: string): Promise<boolean> {
+    const result = await db.delete(whatsappConnections).where(eq(whatsappConnections.id, id));
+    return true;
   }
 
   async getAllFunnels(userId: string): Promise<Funnel[]> {
