@@ -9,13 +9,12 @@ export class WhatsAppService {
   async getConnectionStatus(userId: string): Promise<{ connected: boolean; status: string; phoneNumber?: string }> {
     try {
       const connections = await storage.getAllWhatsappConnections(userId);
-      const connected = connections.find(c => c.isConnected);
-      if (connected) {
-        const active = baileyService.isConnectionActive(connected.id);
+      const conn = connections.find(c => c.isConnected);
+      if (conn) {
         return {
-          connected: active,
-          status: active ? 'connected' : 'disconnected',
-          phoneNumber: connected.phoneNumber,
+          connected: true,
+          status: 'connected',
+          phoneNumber: conn.phoneNumber,
         };
       }
       return { connected: false, status: 'disconnected' };

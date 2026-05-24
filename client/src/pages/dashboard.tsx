@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
 import type { DashboardAnalytics } from "@shared/api-types";
 
 type WhatsAppStatus = {
@@ -22,6 +23,16 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsi
 
 export default function Dashboard() {
   const [showWhatsAppModal, setShowWhatsAppModal] = useState(false);
+  const queryClient = useQueryClient();
+
+  const disconnectMutation = useMutation({
+    mutationFn: () => apiRequest("POST", "/api/whatsapp/disconnect"),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/whatsapp/status"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/whatsapp/connections"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/whatsapp/connected-count"] });
+    },
+  });
 
   const { data: analytics, isLoading: analyticsLoading } = useQuery<DashboardAnalytics>({
     queryKey: ["/api/analytics/dashboard"],
@@ -96,40 +107,38 @@ export default function Dashboard() {
             </div>
             
             <div className="flex items-center gap-2 flex-wrap">
-              <div className="flex items-center space-x-2 px-3 sm:px-4 py-2 rounded-full sm:text-sm font-medium bg-red-100 text-red-700 border border-red-300 text-justify text-[12px] pl-[8px] pr-[8px] pt-[4px] pb-[4px]">
-                {whatsappStatus?.connected ? (
-                  <>
+              {whatsappStatus?.connected ? (
+                <>
+                  <div className="flex items-center space-x-2 rounded-full text-[12px] font-medium bg-green-100 text-green-700 border border-green-300 pl-[8px] pr-[8px] pt-[4px] pb-[4px]">
                     <Wifi className="h-4 w-4" />
-                    <span>WhatsApp Conectado</span>
-                  </>
-                ) : (
-                  <>
-                    <WifiOff className="h-4 w-4" />
-                    <span>Desconectado</span>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="ml-2 h-7 text-xs px-3"
-                      onClick={() => setShowWhatsAppModal(true)}
-                      data-testid="button-connect-whatsapp"
-                    >
-                      Conectar
-                    </Button>
-                  </>
-                )}
-              </div>
-              
-              {whatsappStatus?.connected && (
-                <Button 
-                  variant="outline"
-                  size="sm"
-                  className="h-8 text-sm"
-                  onClick={() => setShowWhatsAppModal(true)}
-                  data-testid="button-whatsapp-settings"
-                >
-                  <MessageSquare className="h-4 w-4 mr-2" />
-                  WhatsApp
-                </Button>
+                    <span>Conectado{whatsappStatus.phoneNumber ? ` · +${whatsappStatus.phoneNumber}` : ""}</span>
+                  </div>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="h-7 text-xs px-3 border-red-300 text-red-600 hover:bg-red-50"
+                    onClick={() => disconnectMutation.mutate()}
+                    disabled={disconnectMutation.isPending}
+                    data-testid="button-disconnect-whatsapp"
+                  >
+                    <WifiOff className="h-3 w-3 mr-1" />
+                    {disconnectMutation.isPending ? "..." : "Desconectar"}
+                  </Button>
+                </>
+              ) : (
+                <div className="flex items-center space-x-2 rounded-full text-[12px] font-medium bg-red-100 text-red-700 border border-red-300 pl-[8px] pr-[8px] pt-[4px] pb-[4px]">
+                  <WifiOff className="h-4 w-4" />
+                  <span>Desconectado</span>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="ml-1 h-7 text-xs px-3"
+                    onClick={() => setShowWhatsAppModal(true)}
+                    data-testid="button-connect-whatsapp"
+                  >
+                    Conectar
+                  </Button>
+                </div>
               )}
             </div>
           </div>

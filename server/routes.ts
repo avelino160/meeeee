@@ -252,7 +252,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/whatsapp/disconnect', async (req, res) => {
     try {
-      await whatsappService.disconnect();
+      const userId = DEFAULT_USER_ID;
+      const connections = await storage.getAllWhatsappConnections(userId);
+      for (const conn of connections) {
+        await storage.updateWhatsappConnection(conn.id, { isConnected: false });
+        await baileyService.terminateSession(conn.id);
+      }
       res.json({ success: true });
     } catch (error) {
       console.error("Error disconnecting WhatsApp:", error);
