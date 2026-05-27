@@ -270,3 +270,5 @@
 2026-05-27 16:41:50.449 UTC [2942] LOG:  checkpoint starting: end-of-recovery immediate wait
 2026-05-27 16:41:50.473 UTC [2942] LOG:  checkpoint complete: wrote 4 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.001 s, sync=0.006 s, total=0.027 s; sync files=3, longest=0.002 s, average=0.002 s; distance=2 kB, estimate=2 kB; lsn=0/1977F78, redo lsn=0/1977F78
 2026-05-27 16:41:50.477 UTC [2941] LOG:  database system is ready to accept connections
+2026-05-27 16:46:50.493 UTC [2942] LOG:  checkpoint starting: time
+2026-05-27 16:46:51.300 UTC [2942] LOG:  checkpoint complete: wrote 7 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.602 s, sync=0.166 s, total=0.808 s; sync files=6, longest=0.158 s, average=0.028 s; distance=2 kB, estimate=2 kB; lsn=0/1978B60, redo lsn=0/1978B28
