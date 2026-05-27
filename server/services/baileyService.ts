@@ -42,6 +42,32 @@ class BaileyService {
     console.log("🐝 BaileyService inicializado");
   }
 
+  /** Called once at startup — reconnects all accounts that were connected before restart */
+  async restoreConnectedSessions(): Promise<void> {
+    try {
+      const connections = await storage.getAllWhatsappConnections("default-user");
+      const connected = connections.filter((c) => c.isConnected);
+      if (connected.length === 0) return;
+      console.log(`🔄 Reconectando ${connected.length} conta(s) WhatsApp salva(s)...`);
+      for (const conn of connected) {
+        const authDir = this.sessionDir(conn.id);
+        if (fs.existsSync(authDir) && fs.readdirSync(authDir).length > 0) {
+          console.log(`♻️  Restaurando sessão para ${conn.phoneNumber} (${conn.id})`);
+          // Use the connectionId as the sessionId so activeSockets maps correctly
+          this.startSession(conn.id, conn.userId).catch((err) =>
+            console.error(`Erro ao restaurar sessão ${conn.id}:`, err)
+          );
+        } else {
+          // No saved auth state — mark as disconnected in DB
+          await storage.updateWhatsappConnection(conn.id, { isConnected: false });
+          console.log(`⚠️  Sem credenciais salvas para ${conn.phoneNumber}, marcado como desconectado`);
+        }
+      }
+    } catch (err) {
+      console.error("Erro ao restaurar sessões:", err);
+    }
+  }
+
   private sessionDir(sessionId: string) {
     return path.join(SESSIONS_DIR, sessionId);
   }
@@ -115,17 +141,48 @@ class BaileyService {
           console.log(`✅ WhatsApp conectado! Número: ${phone}`);
 
           try {
-            const conn = await storage.createWhatsappConnection({
-              userId,
-              phoneNumber: phone,
-              name: `WhatsApp ${phone}`,
-              isConnected: true,
-              lastConnectedAt: new Date(),
-            });
+            // Check if this sessionId is already a DB connection ID (restore flow)
+            const existingConns = await storage.getAllWhatsappConnections(userId);
+            const isRestore = existingConns.some((c) => c.id === sessionId);
+
+            let connectionId: string;
+            if (isRestore) {
+              // Just update the existing record
+              await storage.updateWhatsappConnection(sessionId, {
+                isConnected: true,
+                phoneNumber: phone,
+                lastConnectedAt: new Date(),
+              });
+              connectionId = sessionId;
+              console.log(`♻️  Sessão restaurada para ${phone}`);
+            } else {
+              // New connection — create DB record then rename auth folder
+              const conn = await storage.createWhatsappConnection({
+                userId,
+                phoneNumber: phone,
+                name: `WhatsApp ${phone}`,
+                isConnected: true,
+                lastConnectedAt: new Date(),
+              });
+              connectionId = conn.id;
+
+              // Rename .sessions/{sessionId}/ → .sessions/{connectionId}/
+              // so future restarts can find the auth files using the DB ID
+              const oldDir = this.sessionDir(sessionId);
+              const newDir = this.sessionDir(connectionId);
+              if (fs.existsSync(oldDir) && oldDir !== newDir) {
+                try {
+                  fs.renameSync(oldDir, newDir);
+                } catch (renameErr) {
+                  console.error("Erro ao mover pasta de sessão:", renameErr);
+                }
+              }
+            }
+
             const cur = this.sessions.get(sessionId);
             if (cur) {
-              cur.connectionId = conn.id;
-              this.activeSockets.set(conn.id, sock);
+              cur.connectionId = connectionId;
+              this.activeSockets.set(connectionId, sock);
             }
           } catch (err) {
             console.error("Erro ao salvar conexão no DB:", err);
@@ -171,6 +228,29 @@ class BaileyService {
       });
 
       sock.ev.on("creds.update", saveCreds);
+
+      // 📨 Listener de mensagens recebidas — dispara os funis
+      sock.ev.on("messages.upsert", async ({ messages: msgs, type }) => {
+        if (type !== "notify") return;
+
+        for (const msg of msgs) {
+          if (msg.key.fromMe) continue;
+          const jid = msg.key.remoteJid ?? "";
+          if (!jid || jid.endsWith("@g.us") || jid.endsWith("@broadcast")) continue;
+
+          const phone = jid.replace("@s.whatsapp.net", "").replace(/\D/g, "");
+          const text = (
+            msg.message?.conversation ||
+            msg.message?.extendedTextMessage?.text ||
+            msg.message?.imageMessage?.caption ||
+            msg.message?.videoMessage?.caption ||
+            ""
+          ).trim();
+
+          console.log(`📨 Mensagem recebida de ${phone}: "${text}"`);
+          await this.handleIncomingMessage(userId, phone, text);
+        }
+      });
     } catch (err: any) {
       const current = this.sessions.get(sessionId);
       if (current) {
@@ -188,12 +268,7 @@ class BaileyService {
   async terminateSession(sessionId: string): Promise<void> {
     const session = this.sessions.get(sessionId);
     if (session?.socket) {
-      try {
-        await session.socket.logout();
-      } catch (_) {}
-      try {
-        session.socket.end(undefined);
-      } catch (_) {}
+      try { session.socket.end(undefined); } catch (_) {}
     }
     if (session?.connectionId) {
       this.activeSockets.delete(session.connectionId);
@@ -205,6 +280,45 @@ class BaileyService {
       const dir = this.sessionDir(sessionId);
       if (fs.existsSync(dir)) fs.rmSync(dir, { recursive: true, force: true });
     } catch (_) {}
+  }
+
+  private async handleIncomingMessage(userId: string, phone: string, text: string): Promise<void> {
+    try {
+      // Find or create contact
+      let contact = await storage.getContactByPhone(phone, userId);
+      if (!contact) {
+        contact = await storage.createContact({
+          userId,
+          phoneNumber: phone,
+          name: phone,
+          isActive: true,
+        });
+        console.log(`👤 Novo contato criado: ${phone}`);
+      }
+
+      // Load active funnels and find matching ones
+      const allFunnels = await storage.getAllFunnels(userId);
+      const activeFunnels = allFunnels.filter((f) => f.status === "active");
+
+      for (const funnel of activeFunnels) {
+        const phrases = (funnel.triggerPhrases as string[] | null) ?? [];
+
+        // Empty phrases = catch-all; otherwise check if text contains any phrase
+        const matches =
+          phrases.length === 0 ||
+          phrases.some((p) => text.toLowerCase().includes(p.toLowerCase()));
+
+        if (matches) {
+          console.log(`🔀 Funil "${funnel.name}" disparado para ${phone}`);
+          // Dynamic import avoids circular dependency
+          const { funnelService } = await import("./funnelService");
+          await funnelService.executeFunnel(funnel.id, contact!.id, text);
+          break; // Only first matching funnel runs
+        }
+      }
+    } catch (err) {
+      console.error("Erro ao processar mensagem recebida:", err);
+    }
   }
 
   async sendMessage(

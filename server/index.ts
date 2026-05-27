@@ -3,6 +3,14 @@ import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { initializeDatabase } from "./db-init";
 
+// Prevent Baileys (and other libs) from crashing the server on unhandled errors
+process.on("uncaughtException", (err: any) => {
+  console.error("⚠️ Uncaught exception (handled):", err?.message || err);
+});
+process.on("unhandledRejection", (reason: any) => {
+  console.error("⚠️ Unhandled rejection (handled):", reason?.message || reason);
+});
+
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -39,6 +47,11 @@ app.use((req, res, next) => {
 
 (async () => {
   await initializeDatabase();
+
+  // Reconnect WhatsApp sessions saved before restart
+  const { baileyService } = await import("./services/baileyService");
+  setTimeout(() => baileyService.restoreConnectedSessions(), 2000);
+
   const server = await registerRoutes(app);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
