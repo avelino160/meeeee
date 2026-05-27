@@ -53,7 +53,8 @@ export class FunnelService {
 
   async processNextNode(executionId: string): Promise<void> {
     try {
-      const execution = await storage.updateFunnelExecution(executionId, {});
+      // Use getFunnelExecution (not update with empty object) to read current state
+      const execution = await storage.getFunnelExecution(executionId);
       if (!execution || execution.status !== 'active') {
         return;
       }
@@ -64,49 +65,53 @@ export class FunnelService {
       }
 
       const flowData = funnel.flowData as { nodes: FunnelNodeData[], edges: any[] };
-      
-      // Helper to check if a node is a trigger node (check both type and data.nodeType)
-      const isTriggerNode = (node: FunnelNodeData) => 
+
+      // Helper to check if a node is a trigger node
+      const isTriggerNode = (node: FunnelNodeData) =>
         node.type === 'trigger' || (node.data as any)?.nodeType === 'trigger';
-      
-      // If no current node, start with the first node (trigger)
+
       let currentNode: FunnelNodeData | undefined;
-      
+
       if (!execution.currentNodeId) {
-        // Find the start/trigger node
+        // First call: start with the trigger node
         currentNode = flowData.nodes.find(node => isTriggerNode(node));
       } else {
-        // Find the current node
-        currentNode = flowData.nodes.find(node => node.id === execution.currentNodeId);
-        
-        // Find the next node based on edges
+        // Subsequent calls: advance to the NEXT node based on edges
         const nextEdge = flowData.edges.find(edge => edge.source === execution.currentNodeId);
         if (nextEdge) {
           currentNode = flowData.nodes.find(node => node.id === nextEdge.target);
         }
+        // If no next edge, currentNode stays undefined → end of funnel
       }
 
       if (!currentNode) {
-        // End of funnel
+        // End of funnel — no more nodes to process
         await storage.updateFunnelExecution(executionId, {
           status: 'completed',
           completedAt: new Date(),
         });
+        console.log(`✅ Funil ${execution.funnelId} concluído para execução ${executionId}`);
         return;
       }
 
-      // Get the current node type
+      // Get the canonical node type
       const currentNodeType = (currentNode.data as any)?.nodeType || currentNode.type;
-      
+
       // Process the current node
       await this.processNode(execution, currentNode);
-      
-      // Update execution with current node
+
+      // Record which node we just processed
       await storage.updateFunnelExecution(executionId, {
         currentNodeId: currentNode.id,
       });
 
-      // If current node is a delay node, wait before continuing to next node
+      // Trigger node: skip delay logic, advance immediately
+      if (isTriggerNode(currentNode)) {
+        setTimeout(() => this.processNextNode(executionId), 500);
+        return;
+      }
+
+      // Delay node: schedule the next step
       if (currentNodeType === 'delay') {
         const delayMinutes = currentNode.data.delayMinutes || 0;
         if (delayMinutes > 0) {
@@ -117,16 +122,14 @@ export class FunnelService {
             executeAt: new Date(Date.now() + delayMinutes * 60 * 1000),
           });
           console.log(`⏰ Aguardando ${delayMinutes} minuto(s) antes da próxima mensagem`);
-          return; // Stop here, scheduler will call processNextNode later
+          return;
         }
       }
-      
-      // For all other nodes, process next node immediately
+
+      // All other nodes: advance to next immediately (1 s gap to avoid flooding)
       setTimeout(() => this.processNextNode(executionId), 1000);
     } catch (error) {
       console.error('Process next node error:', error);
-      
-      // Mark execution as failed
       await storage.updateFunnelExecution(executionId, {
         status: 'stopped',
         completedAt: new Date(),

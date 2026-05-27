@@ -66,6 +66,7 @@ export interface IStorage {
   updateMessage(id: string, updates: Partial<Message>): Promise<Message | undefined>;
   getPendingMessages(): Promise<Message[]>;
   getScheduledMessages(): Promise<Message[]>;
+  getFunnelExecution(id: string): Promise<FunnelExecution | undefined>;
   getFunnelExecutions(funnelId: string): Promise<FunnelExecution[]>;
   createFunnelExecution(execution: InsertFunnelExecution): Promise<FunnelExecution>;
   updateFunnelExecution(id: string, updates: Partial<FunnelExecution>): Promise<FunnelExecution | undefined>;
@@ -286,6 +287,11 @@ export class DatabaseStorage implements IStorage {
       console.error("Error in getScheduledMessages:", error);
       return [];
     }
+  }
+
+  async getFunnelExecution(id: string): Promise<FunnelExecution | undefined> {
+    const [exec] = await db.select().from(funnelExecutions).where(eq(funnelExecutions.id, id));
+    return exec;
   }
 
   async getFunnelExecutions(funnelId: string): Promise<FunnelExecution[]> {

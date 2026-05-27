@@ -198,7 +198,14 @@ class BaileyService {
             `⚠️ Conexão fechada (sessão ${sessionId}) statusCode=${statusCode} loggedOut=${loggedOut}`
           );
 
-          if (current && current.status !== "connected") {
+          if (current) {
+            // Remove socket from activeSockets since it's closed
+            if (current.connectionId) {
+              this.activeSockets.delete(current.connectionId);
+              // Mark DB as disconnected
+              storage.updateWhatsappConnection(current.connectionId, { isConnected: false }).catch(() => {});
+            }
+
             if (loggedOut) {
               current.status = "error";
               current.error = "Desconectado pelo celular";
@@ -207,15 +214,13 @@ class BaileyService {
               statusCode === 428 ||
               statusCode === undefined
             ) {
-              // Transient failure — retry: keep session in map as "starting" so frontend keeps polling
+              // Transient failure — retry regardless of previous status
               console.log(`🔄 Tentando reconectar sessão ${sessionId}...`);
               current.status = "starting";
               current.qrCodeBase64 = undefined;
               current.error = undefined;
               current.socket = undefined;
-              // Re-run session setup after short delay
               setTimeout(async () => {
-                // Remove old socket ref then reinitialise
                 this.sessions.delete(sessionId);
                 await this.startSession(sessionId, userId);
               }, 3_000);
@@ -231,11 +236,17 @@ class BaileyService {
 
       // 📨 Listener de mensagens recebidas — dispara os funis
       sock.ev.on("messages.upsert", async ({ messages: msgs, type }) => {
-        if (type !== "notify") return;
+        console.log(`📬 messages.upsert disparado — tipo: ${type}, total msgs: ${msgs.length}`);
+
+        // Accept both "notify" (real-time) and "append" (post-reconnect delivery)
+        if (type !== "notify" && type !== "append") return;
 
         for (const msg of msgs) {
-          if (msg.key.fromMe) continue;
           const jid = msg.key.remoteJid ?? "";
+          const fromMe = msg.key.fromMe ?? false;
+          console.log(`  msg JID=${jid} fromMe=${fromMe} type=${type}`);
+
+          if (fromMe) continue;
           if (!jid || jid.endsWith("@g.us") || jid.endsWith("@broadcast")) continue;
 
           const phone = jid.replace("@s.whatsapp.net", "").replace(/\D/g, "");
@@ -270,16 +281,19 @@ class BaileyService {
     if (session?.socket) {
       try { session.socket.end(undefined); } catch (_) {}
     }
-    if (session?.connectionId) {
-      this.activeSockets.delete(session.connectionId);
+    const connectionId = session?.connectionId;
+    if (connectionId) {
+      this.activeSockets.delete(connectionId);
     }
     this.sessions.delete(sessionId);
 
-    // Remove auth files for this session
-    try {
-      const dir = this.sessionDir(sessionId);
-      if (fs.existsSync(dir)) fs.rmSync(dir, { recursive: true, force: true });
-    } catch (_) {}
+    // Remove auth files — check both the original sessionId folder AND the renamed connectionId folder
+    for (const dirId of [sessionId, connectionId].filter(Boolean) as string[]) {
+      try {
+        const dir = this.sessionDir(dirId);
+        if (fs.existsSync(dir)) fs.rmSync(dir, { recursive: true, force: true });
+      } catch (_) {}
+    }
   }
 
   private async handleIncomingMessage(userId: string, phone: string, text: string): Promise<void> {

@@ -196,6 +196,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // 🐝 Baileys: terminate / cancel a session
   app.delete('/api/whatsapp/session/:sessionId', async (req, res) => {
     const { sessionId } = req.params;
+    const session = baileyService.getSession(sessionId);
+    // If session has a DB connectionId, mark it disconnected
+    if (session?.connectionId) {
+      await storage.updateWhatsappConnection(session.connectionId, { isConnected: false }).catch(() => {});
+    }
     await baileyService.terminateSession(sessionId);
     res.json({ success: true });
   });

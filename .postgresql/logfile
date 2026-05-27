@@ -233,3 +233,40 @@
 2026-05-27 16:24:24.260 UTC [1785] LOG:  checkpoint starting: end-of-recovery immediate wait
 2026-05-27 16:24:24.292 UTC [1785] LOG:  checkpoint complete: wrote 4 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.001 s, sync=0.014 s, total=0.035 s; sync files=3, longest=0.010 s, average=0.005 s; distance=1 kB, estimate=1 kB; lsn=0/1972BF8, redo lsn=0/1972BF8
 2026-05-27 16:24:24.296 UTC [1784] LOG:  database system is ready to accept connections
+2026-05-27 16:29:24.357 UTC [1785] LOG:  checkpoint starting: time
+2026-05-27 16:29:24.996 UTC [1785] LOG:  checkpoint complete: wrote 6 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.502 s, sync=0.106 s, total=0.640 s; sync files=6, longest=0.097 s, average=0.018 s; distance=6 kB, estimate=6 kB; lsn=0/19747A8, redo lsn=0/1974770
+2026-05-27 16:34:25.065 UTC [1785] LOG:  checkpoint starting: time
+2026-05-27 16:34:25.416 UTC [1785] LOG:  checkpoint complete: wrote 4 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.302 s, sync=0.023 s, total=0.351 s; sync files=4, longest=0.017 s, average=0.006 s; distance=9 kB, estimate=9 kB; lsn=0/1976EC8, redo lsn=0/1976E90
+2026-05-27 16:37:35.997 UTC [2358] LOG:  starting PostgreSQL 16.10 on x86_64-pc-linux-gnu, compiled by clang version 19.1.7, 64-bit
+2026-05-27 16:37:36.002 UTC [2358] LOG:  listening on Unix socket "/home/runner/workspace/.postgresql/run/.s.PGSQL.5432"
+2026-05-27 16:37:36.010 UTC [2361] LOG:  database system was interrupted; last known up at 2026-05-27 16:34:25 UTC
+2026-05-27 16:37:36.023 UTC [2361] LOG:  database system was not properly shut down; automatic recovery in progress
+2026-05-27 16:37:36.125 UTC [2361] LOG:  redo starts at 0/1976E90
+2026-05-27 16:37:36.125 UTC [2361] LOG:  invalid record length at 0/1976F78: expected at least 24, got 0
+2026-05-27 16:37:36.125 UTC [2361] LOG:  redo done at 0/1976F40 system usage: CPU: user: 0.00 s, system: 0.00 s, elapsed: 0.00 s
+2026-05-27 16:37:36.281 UTC [2359] LOG:  checkpoint starting: end-of-recovery immediate wait
+2026-05-27 16:37:36.357 UTC [2359] LOG:  checkpoint complete: wrote 3 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.001 s, sync=0.007 s, total=0.229 s; sync files=2, longest=0.004 s, average=0.004 s; distance=0 kB, estimate=0 kB; lsn=0/1976F78, redo lsn=0/1976F78
+2026-05-27 16:37:36.362 UTC [2358] LOG:  database system is ready to accept connections
+2026-05-27 16:39:10.649 UTC [2612] LOG:  starting PostgreSQL 16.10 on x86_64-pc-linux-gnu, compiled by clang version 19.1.7, 64-bit
+2026-05-27 16:39:10.652 UTC [2612] LOG:  listening on Unix socket "/home/runner/workspace/.postgresql/run/.s.PGSQL.5432"
+2026-05-27 16:39:10.660 UTC [2615] LOG:  database system was interrupted; last known up at 2026-05-27 16:37:36 UTC
+2026-05-27 16:39:10.671 UTC [2615] LOG:  database system was not properly shut down; automatic recovery in progress
+2026-05-27 16:39:10.674 UTC [2615] LOG:  redo starts at 0/1976FF0
+2026-05-27 16:39:10.674 UTC [2615] LOG:  invalid record length at 0/1977638: expected at least 24, got 0
+2026-05-27 16:39:10.674 UTC [2615] LOG:  redo done at 0/1977600 system usage: CPU: user: 0.00 s, system: 0.00 s, elapsed: 0.00 s
+2026-05-27 16:39:10.679 UTC [2613] LOG:  checkpoint starting: end-of-recovery immediate wait
+2026-05-27 16:39:10.772 UTC [2613] LOG:  checkpoint complete: wrote 4 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.001 s, sync=0.082 s, total=0.095 s; sync files=3, longest=0.078 s, average=0.028 s; distance=1 kB, estimate=1 kB; lsn=0/1977638, redo lsn=0/1977638
+2026-05-27 16:39:10.775 UTC [2612] LOG:  database system is ready to accept connections
+2026-05-27 16:40:16.748 UTC [2821] ERROR:  column "triggerPhrases" does not exist at character 26
+2026-05-27 16:40:16.748 UTC [2821] HINT:  Perhaps you meant to reference the column "funnels.trigger_phrases".
+2026-05-27 16:40:16.748 UTC [2821] STATEMENT:  SELECT id, name, status, "triggerPhrases" FROM funnels WHERE "userId" = 'default-user';
+2026-05-27 16:41:50.411 UTC [2941] LOG:  starting PostgreSQL 16.10 on x86_64-pc-linux-gnu, compiled by clang version 19.1.7, 64-bit
+2026-05-27 16:41:50.414 UTC [2941] LOG:  listening on Unix socket "/home/runner/workspace/.postgresql/run/.s.PGSQL.5432"
+2026-05-27 16:41:50.421 UTC [2944] LOG:  database system was interrupted; last known up at 2026-05-27 16:39:10 UTC
+2026-05-27 16:41:50.431 UTC [2944] LOG:  database system was not properly shut down; automatic recovery in progress
+2026-05-27 16:41:50.442 UTC [2944] LOG:  redo starts at 0/19776B0
+2026-05-27 16:41:50.442 UTC [2944] LOG:  invalid record length at 0/1977F78: expected at least 24, got 0
+2026-05-27 16:41:50.442 UTC [2944] LOG:  redo done at 0/1977F40 system usage: CPU: user: 0.00 s, system: 0.00 s, elapsed: 0.00 s
+2026-05-27 16:41:50.449 UTC [2942] LOG:  checkpoint starting: end-of-recovery immediate wait
+2026-05-27 16:41:50.473 UTC [2942] LOG:  checkpoint complete: wrote 4 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.001 s, sync=0.006 s, total=0.027 s; sync files=3, longest=0.002 s, average=0.002 s; distance=2 kB, estimate=2 kB; lsn=0/1977F78, redo lsn=0/1977F78
+2026-05-27 16:41:50.477 UTC [2941] LOG:  database system is ready to accept connections
