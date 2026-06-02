@@ -19,6 +19,7 @@ import Campaigns from "@/pages/campaigns";
 import Templates from "@/pages/templates";
 import Login from "@/pages/login";
 import Register from "@/pages/register";
+import ForgotPassword from "@/pages/forgot-password";
 import { useEffect } from "react";
 
 type User = {
@@ -41,7 +42,7 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (isLoading) return;
-    const isAuthPage = location === "/login" || location === "/register";
+    const isAuthPage = location === "/login" || location === "/register" || location === "/forgot-password";
     if (!user && !isAuthPage) {
       setLocation("/login");
     }
@@ -70,6 +71,7 @@ function Router() {
       <Switch>
         <Route path="/login" component={Login} />
         <Route path="/register" component={Register} />
+        <Route path="/forgot-password" component={ForgotPassword} />
         <Route path="/" component={Dashboard} />
         <Route path="/dashboard" component={Dashboard} />
         <Route path="/whatsapp-connection" component={WhatsAppConnection} />

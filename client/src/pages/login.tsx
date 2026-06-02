@@ -78,6 +78,7 @@ export default function Login() {
                           type="email"
                           placeholder="seu@email.com"
                           className="pl-10"
+                          autoComplete="email"
                           data-testid="input-email"
                         />
                       </div>
@@ -101,6 +102,7 @@ export default function Login() {
                           type={showPassword ? "text" : "password"}
                           placeholder="••••••••"
                           className="pl-10 pr-10"
+                          autoComplete="current-password"
                           data-testid="input-password"
                         />
                         <button
@@ -129,16 +131,25 @@ export default function Login() {
             </form>
           </Form>
 
-          <p className="text-center text-sm text-muted-foreground">
-            Não tem conta?{" "}
+          <div className="space-y-3 text-center">
             <button
-              onClick={() => setLocation("/register")}
-              className="text-purple-400 hover:text-purple-300 font-medium"
-              data-testid="link-register"
+              onClick={() => setLocation("/forgot-password")}
+              className="text-sm text-muted-foreground hover:text-purple-400 transition-colors"
+              data-testid="link-forgot-password"
             >
-              Criar conta
+              Esqueci minha senha
             </button>
-          </p>
+            <p className="text-sm text-muted-foreground">
+              Não tem conta?{" "}
+              <button
+                onClick={() => setLocation("/register")}
+                className="text-purple-400 hover:text-purple-300 font-medium"
+                data-testid="link-register"
+              >
+                Criar conta
+              </button>
+            </p>
+          </div>
         </div>
       </div>
     </div>

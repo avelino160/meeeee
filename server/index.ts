@@ -20,7 +20,7 @@ app.use(express.urlencoded({ extended: false }));
 
 const PgSession = connectPg(session);
 app.use(session({
-  store: pool ? new PgSession({ pool, createTableIfMissing: true }) : undefined,
+  store: pool ? new PgSession({ pool, tableName: 'sessions' }) : undefined,
   secret: process.env.SESSION_SECRET || "pilotzap-secret-2024",
   resave: false,
   saveUninitialized: false,

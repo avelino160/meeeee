@@ -68,13 +68,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         lastName: data.lastName,
       });
       (req.session as any).userId = user.id;
-      res.status(201).json({
-        id: user.id,
-        email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        planType: user.planType,
-        isBlocked: user.isBlocked,
+      req.session.save((err) => {
+        if (err) {
+          console.error("Session save error:", err);
+          return res.status(500).json({ message: "Erro ao criar sessão" });
+        }
+        res.status(201).json({
+          id: user.id,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          planType: user.planType,
+          isBlocked: user.isBlocked,
+        });
       });
     } catch (error: any) {
       if (error?.name === "ZodError") {
@@ -97,13 +103,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "E-mail ou senha incorretos" });
       }
       (req.session as any).userId = user.id;
-      res.json({
-        id: user.id,
-        email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        planType: user.planType,
-        isBlocked: user.isBlocked,
+      req.session.save((err) => {
+        if (err) {
+          console.error("Session save error:", err);
+          return res.status(500).json({ message: "Erro ao criar sessão" });
+        }
+        res.json({
+          id: user.id,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          planType: user.planType,
+          isBlocked: user.isBlocked,
+        });
       });
     } catch (error: any) {
       if (error?.name === "ZodError") {
@@ -111,6 +123,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       console.error("Error logging in:", error);
       res.status(500).json({ message: "Erro ao fazer login" });
+    }
+  });
+
+  app.post('/api/auth/forgot-password', async (req, res) => {
+    try {
+      const { email, newPassword } = req.body;
+      if (!email || !newPassword) {
+        return res.status(400).json({ message: "E-mail e nova senha são obrigatórios" });
+      }
+      if (newPassword.length < 6) {
+        return res.status(400).json({ message: "Senha deve ter pelo menos 6 caracteres" });
+      }
+      const user = await storage.getUserByEmail(email);
+      if (!user) {
+        return res.status(404).json({ message: "E-mail não encontrado" });
+      }
+      const hashed = await bcrypt.hash(newPassword, 10);
+      await storage.upsertUser({ ...user, password: hashed });
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error resetting password:", error);
+      res.status(500).json({ message: "Erro ao redefinir senha" });
     }
   });
 
