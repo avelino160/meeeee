@@ -1,7 +1,8 @@
-import type { Express } from "express";
+import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { randomUUID } from "crypto";
 import axios from "axios";
+import bcrypt from "bcryptjs";
 import { storage } from "./storage";
 import { whatsappService } from "./services/whatsappService";
 import { baileyService } from "./services/baileyService";
@@ -11,6 +12,8 @@ import {
   insertFunnelSchema,
   insertContactSchema,
   insertMessageSchema,
+  loginSchema,
+  registerSchema,
 } from "@shared/schema";
 import { z } from "zod";
 import { readFileSync } from "fs";
@@ -18,16 +21,24 @@ import { join } from "path";
 import { validateFunnelJSON, funnelJSONSchema } from "@shared/funnel-json-types";
 import { convertFunnelJSONToFlowData } from "./services/funnelJsonConverter";
 
-const DEFAULT_USER_ID = "default-user";
-const DEMO_USER = {
-  id: DEFAULT_USER_ID,
-  firstName: "Usuário",
-  lastName: "Demo",
-  email: "demo@pilotzap.com",
-};
+function requireAuth(req: Request, res: Response, next: NextFunction) {
+  if (!(req.session as any).userId) {
+    return res.status(401).json({ message: "Não autenticado" });
+  }
+  next();
+}
 
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Global auth guard — all /api/* routes require a session except /api/auth/*
+  app.use('/api', (req: Request, res: Response, next: NextFunction) => {
+    if (req.path.startsWith('/auth/')) return next();
+    if (!(req.session as any).userId) {
+      return res.status(401).json({ message: "Não autenticado" });
+    }
+    next();
+  });
+
   // Funnel JSON route
   app.get('/api/funnel-json', async (req, res) => {
     try {
@@ -41,33 +52,91 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // User routes
-  app.get('/api/user/me', async (req, res) => {
+  // ─── Auth routes ──────────────────────────────────────────────────────────
+  app.post('/api/auth/register', async (req, res) => {
     try {
-      const user = await storage.getUser(DEFAULT_USER_ID);
-      
-      if (!user) {
-        // Create demo user if doesn't exist
-        await storage.upsertUser({
-          ...DEMO_USER,
-          planType: 'enterprise',
-          isBlocked: false
-        });
-        res.json({ ...DEMO_USER, planType: 'enterprise', isBlocked: false });
-        return;
+      const data = registerSchema.parse(req.body);
+      const existing = await storage.getUserByEmail(data.email);
+      if (existing) {
+        return res.status(409).json({ message: "E-mail já cadastrado" });
       }
+      const hashed = await bcrypt.hash(data.password, 10);
+      const user = await storage.createUser({
+        email: data.email,
+        password: hashed,
+        firstName: data.firstName,
+        lastName: data.lastName,
+      });
+      (req.session as any).userId = user.id;
+      res.status(201).json({
+        id: user.id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        planType: user.planType,
+        isBlocked: user.isBlocked,
+      });
+    } catch (error: any) {
+      if (error?.name === "ZodError") {
+        return res.status(400).json({ message: error.errors[0]?.message || "Dados inválidos" });
+      }
+      console.error("Error registering user:", error);
+      res.status(500).json({ message: "Erro ao criar conta" });
+    }
+  });
 
-      await storage.checkPlanExpiration(DEFAULT_USER_ID);
-      const updatedUser = await storage.getUser(DEFAULT_USER_ID);
-
+  app.post('/api/auth/login', async (req, res) => {
+    try {
+      const data = loginSchema.parse(req.body);
+      const user = await storage.getUserByEmail(data.email);
+      if (!user || !user.password) {
+        return res.status(401).json({ message: "E-mail ou senha incorretos" });
+      }
+      const valid = await bcrypt.compare(data.password, user.password);
+      if (!valid) {
+        return res.status(401).json({ message: "E-mail ou senha incorretos" });
+      }
+      (req.session as any).userId = user.id;
       res.json({
-        id: updatedUser?.id || DEMO_USER.id,
-        firstName: updatedUser?.firstName || DEMO_USER.firstName,
-        lastName: updatedUser?.lastName || DEMO_USER.lastName,
-        email: updatedUser?.email || DEMO_USER.email,
-        planType: updatedUser?.planType || 'enterprise',
-        planExpiresAt: updatedUser?.planExpiresAt || null,
-        isBlocked: updatedUser?.isBlocked || false
+        id: user.id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        planType: user.planType,
+        isBlocked: user.isBlocked,
+      });
+    } catch (error: any) {
+      if (error?.name === "ZodError") {
+        return res.status(400).json({ message: error.errors[0]?.message || "Dados inválidos" });
+      }
+      console.error("Error logging in:", error);
+      res.status(500).json({ message: "Erro ao fazer login" });
+    }
+  });
+
+  app.post('/api/auth/logout', (req, res) => {
+    req.session.destroy(() => {
+      res.json({ success: true });
+    });
+  });
+
+  // User routes
+  app.get('/api/user/me', requireAuth, async (req, res) => {
+    try {
+      const userId = (req.session as any).userId;
+      await storage.checkPlanExpiration(userId);
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "Usuário não encontrado" });
+      }
+      res.json({
+        id: user.id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        planType: user.planType,
+        planExpiresAt: user.planExpiresAt || null,
+        isBlocked: user.isBlocked,
       });
     } catch (error) {
       console.error("Error getting user:", error);
@@ -78,7 +147,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // WhatsApp connection routes
   app.get('/api/whatsapp/status', async (req, res) => {
     try {
-      const userId = DEFAULT_USER_ID;
+      const userId = (req.session as any).userId;
       const status = await whatsappService.getConnectionStatus(userId);
       res.json(status);
     } catch (error) {
@@ -89,7 +158,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/whatsapp/connected-count', async (req, res) => {
     try {
-      const userId = DEFAULT_USER_ID;
+      const userId = (req.session as any).userId;
       const count = await storage.getConnectedAccountsCount(userId);
       res.json({ count });
     } catch (error) {
@@ -112,7 +181,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // 📱 Listar todas as conexões WhatsApp do usuário
   app.get('/api/whatsapp/connections', async (req, res) => {
     try {
-      const userId = DEFAULT_USER_ID;
+      const userId = (req.session as any).userId;
       const connections = await storage.getAllWhatsappConnections(userId);
       res.json(connections);
     } catch (error) {
@@ -154,7 +223,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // 🐝 Baileys: start a new WhatsApp session (returns sessionId)
   app.post('/api/whatsapp/start-session', async (req, res) => {
     try {
-      const userId = DEFAULT_USER_ID;
+      const userId = (req.session as any).userId;
 
       const limitCheck = await storage.checkWhatsappLimit(userId);
       if (!limitCheck.allowed) {
@@ -208,7 +277,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Legacy QR endpoint — kept for compatibility, now delegates to Baileys start-session
   app.post('/api/whatsapp/qr', async (req, res) => {
     try {
-      const userId = DEFAULT_USER_ID;
+      const userId = (req.session as any).userId;
       const sessionId = randomUUID();
       baileyService.startSession(sessionId, userId);
       // Wait a moment for the QR to generate
@@ -230,7 +299,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/whatsapp/connect', async (req, res) => {
     try {
-      const userId = DEFAULT_USER_ID;
+      const userId = (req.session as any).userId;
       const { phoneNumber } = req.body;
 
       if (!phoneNumber) {
@@ -257,7 +326,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/whatsapp/disconnect', async (req, res) => {
     try {
-      const userId = DEFAULT_USER_ID;
+      const userId = (req.session as any).userId;
       const connections = await storage.getAllWhatsappConnections(userId);
       for (const conn of connections) {
         await storage.updateWhatsappConnection(conn.id, { isConnected: false });
@@ -273,7 +342,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Funnel routes
   app.get('/api/funnels', async (req, res) => {
     try {
-      const userId = DEFAULT_USER_ID;
+      const userId = (req.session as any).userId;
       const funnels = await storage.getAllFunnels(userId);
       res.json(funnels);
     } catch (error) {
@@ -298,7 +367,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/funnels', async (req, res) => {
     try {
-      const userId = DEFAULT_USER_ID;
+      const userId = (req.session as any).userId;
       
       const limitCheck = await storage.checkFunnelLimit(userId);
       if (!limitCheck.allowed) {
@@ -321,7 +390,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/funnels/import', async (req, res) => {
     try {
-      const userId = DEFAULT_USER_ID;
+      const userId = (req.session as any).userId;
       const { funnels } = req.body;
 
       if (!Array.isArray(funnels)) {
@@ -465,7 +534,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Contact routes
   app.get('/api/contacts', async (req, res) => {
     try {
-      const userId = DEFAULT_USER_ID;
+      const userId = (req.session as any).userId;
       const contacts = await storage.getContacts(userId);
       res.json(contacts);
     } catch (error) {
@@ -476,7 +545,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/contacts', async (req, res) => {
     try {
-      const userId = DEFAULT_USER_ID;
+      const userId = (req.session as any).userId;
       
       const limitCheck = await storage.checkContactLimit(userId);
       if (!limitCheck.allowed) {
@@ -499,7 +568,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put('/api/contacts/:id', async (req, res) => {
     try {
-      const userId = DEFAULT_USER_ID;
+      const userId = (req.session as any).userId;
       const { id } = req.params;
       
       // Verify ownership
@@ -518,7 +587,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete('/api/contacts/:id', async (req, res) => {
     try {
-      const userId = DEFAULT_USER_ID;
+      const userId = (req.session as any).userId;
       const { id } = req.params;
       
       const success = await storage.deleteContact(id, userId);
@@ -535,7 +604,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/contacts/import', async (req, res) => {
     try {
-      const userId = DEFAULT_USER_ID;
+      const userId = (req.session as any).userId;
       const { contacts } = req.body;
 
       if (!contacts || !Array.isArray(contacts)) {
@@ -574,7 +643,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Message routes
   app.get('/api/messages', async (req, res) => {
     try {
-      const userId = DEFAULT_USER_ID;
+      const userId = (req.session as any).userId;
       const { limit } = req.query;
       const messages = await storage.getMessages(userId, limit ? parseInt(limit as string) : undefined);
       res.json(messages);
@@ -586,7 +655,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/messages/send', async (req, res) => {
     try {
-      const userId = DEFAULT_USER_ID;
+      const userId = (req.session as any).userId;
       const { contactId, content, type, mediaUrl, scheduledAt } = req.body;
 
       const limitCheck = await storage.checkMessageLimit(userId);
@@ -643,7 +712,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // User usage/limits endpoint
   app.get('/api/user/usage', async (req, res) => {
     try {
-      const userId = DEFAULT_USER_ID;
+      const userId = (req.session as any).userId;
       const usage = await storage.getUserUsage(userId);
       const user = await storage.getUser(userId);
       
@@ -660,7 +729,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Plan management routes
   app.get('/api/user/plan-status', async (req, res) => {
     try {
-      const userId = DEFAULT_USER_ID;
+      const userId = (req.session as any).userId;
       
       const isExpired = await storage.checkPlanExpiration(userId);
       const user = await storage.getUser(userId);
@@ -780,7 +849,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Analytics routes
   app.get('/api/analytics/dashboard', async (req, res) => {
     try {
-      const userId = DEFAULT_USER_ID;
+      const userId = (req.session as any).userId;
       
       // Get basic stats
       const funnels = await storage.getAllFunnels(userId);

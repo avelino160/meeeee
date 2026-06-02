@@ -32,6 +32,7 @@ export const planTypeEnum = pgEnum("plan_type", ["free", "basic", "pro", "enterp
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   email: varchar("email").unique(),
+  password: varchar("password"),
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),
   profileImageUrl: varchar("profile_image_url"),
@@ -41,6 +42,21 @@ export const users = pgTable("users", {
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
+
+export const loginSchema = z.object({
+  email: z.string().email("E-mail inválido"),
+  password: z.string().min(6, "Senha deve ter pelo menos 6 caracteres"),
+});
+
+export const registerSchema = z.object({
+  email: z.string().email("E-mail inválido"),
+  password: z.string().min(6, "Senha deve ter pelo menos 6 caracteres"),
+  firstName: z.string().min(1, "Nome é obrigatório"),
+  lastName: z.string().optional(),
+});
+
+export type LoginInput = z.infer<typeof loginSchema>;
+export type RegisterInput = z.infer<typeof registerSchema>;
 
 // WhatsApp connections
 export const whatsappConnections = pgTable("whatsapp_connections", {

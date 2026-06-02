@@ -17,6 +17,8 @@ import BlockedPage from "@/pages/blocked";
 import NotFound from "@/pages/not-found";
 import Campaigns from "@/pages/campaigns";
 import Templates from "@/pages/templates";
+import Login from "@/pages/login";
+import Register from "@/pages/register";
 import { useEffect } from "react";
 
 type User = {
@@ -29,27 +31,45 @@ type User = {
   isBlocked: boolean;
 };
 
-function BlockedUserCheck({ children }: { children: React.ReactNode }) {
+function AuthGuard({ children }: { children: React.ReactNode }) {
   const [location, setLocation] = useLocation();
-  
-  const { data: user } = useQuery<User>({
+
+  const { data: user, isLoading } = useQuery<User>({
     queryKey: ["/api/user/me"],
     retry: false,
   });
 
   useEffect(() => {
-    if (user?.isBlocked && location !== '/blocked' && location !== '/plans') {
-      setLocation('/blocked');
+    if (isLoading) return;
+    const isAuthPage = location === "/login" || location === "/register";
+    if (!user && !isAuthPage) {
+      setLocation("/login");
     }
-  }, [user, location, setLocation]);
+    if (user && isAuthPage) {
+      setLocation("/");
+    }
+    if (user?.isBlocked && location !== "/blocked" && location !== "/plans") {
+      setLocation("/blocked");
+    }
+  }, [user, isLoading, location, setLocation]);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-muted-foreground text-sm animate-pulse">Carregando...</div>
+      </div>
+    );
+  }
 
   return <>{children}</>;
 }
 
 function Router() {
   return (
-    <BlockedUserCheck>
+    <AuthGuard>
       <Switch>
+        <Route path="/login" component={Login} />
+        <Route path="/register" component={Register} />
         <Route path="/" component={Dashboard} />
         <Route path="/dashboard" component={Dashboard} />
         <Route path="/whatsapp-connection" component={WhatsAppConnection} />
@@ -64,7 +84,7 @@ function Router() {
         <Route path="/blocked" component={BlockedPage} />
         <Route component={NotFound} />
       </Switch>
-    </BlockedUserCheck>
+    </AuthGuard>
   );
 }
 

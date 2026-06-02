@@ -34,6 +34,8 @@ import {
 
 export interface IStorage {
   getUser(id: string): Promise<User | undefined>;
+  getUserByEmail(email: string): Promise<User | undefined>;
+  createUser(data: { email: string; password: string; firstName: string; lastName?: string }): Promise<User>;
   upsertUser(user: UpsertUser): Promise<User>;
   updateUserPlan(userId: string, planType: string, expiresAt: Date): Promise<User | undefined>;
   blockUser(userId: string): Promise<User | undefined>;
@@ -82,6 +84,23 @@ export interface IStorage {
 export class DatabaseStorage implements IStorage {
   async getUser(id: string): Promise<User | undefined> {
     const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user;
+  }
+
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.email, email));
+    return user;
+  }
+
+  async createUser(data: { email: string; password: string; firstName: string; lastName?: string }): Promise<User> {
+    const [user] = await db.insert(users).values({
+      email: data.email,
+      password: data.password,
+      firstName: data.firstName,
+      lastName: data.lastName || null,
+      planType: "free",
+      isBlocked: false,
+    }).returning();
     return user;
   }
 

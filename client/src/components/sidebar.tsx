@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { useSettings } from "@/contexts/SettingsContext";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import {
   MessageSquare,
@@ -18,15 +19,40 @@ import {
   Plane,
   Megaphone,
   FileText,
+  LogOut,
+  User,
 } from "lucide-react";
+import { apiRequest } from "@/lib/queryClient";
+
+type UserData = {
+  id: string;
+  firstName: string;
+  lastName?: string;
+  email: string;
+  planType: string;
+};
 
 export default function Sidebar() {
-  const [location] = useLocation();
+  const [location, setLocation] = useLocation();
   const [isMinimized, setIsMinimized] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { t } = useSettings();
+  const queryClient = useQueryClient();
 
-  if (location.startsWith("/funnel-editor/")) {
+  const { data: user } = useQuery<UserData>({
+    queryKey: ["/api/user/me"],
+    retry: false,
+  });
+
+  const logoutMutation = useMutation({
+    mutationFn: () => apiRequest("POST", "/api/auth/logout"),
+    onSuccess: () => {
+      queryClient.clear();
+      setLocation("/login");
+    },
+  });
+
+  if (location.startsWith("/funnel-editor/") || location === "/login" || location === "/register") {
     return null;
   }
 
@@ -44,7 +70,7 @@ export default function Sidebar() {
 
   const SidebarContent = ({ isMobile = false }: { isMobile?: boolean }) => {
     const showMinimized = !isMobile && isMinimized;
-    
+
     return (
       <>
         <div className="p-4 sm:p-6 border-b border-border flex items-center justify-between">
@@ -67,18 +93,17 @@ export default function Sidebar() {
             {showMinimized ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
           </Button>
         </div>
-        
-        
+
         <nav className="flex-1 p-4 space-y-1">
           {menuItems.map((item) => {
-            const isActive = location === item.href;
+            const isActive = location === item.href || (item.href === "/" && location === "/dashboard");
             return (
               <Link key={item.href} href={item.href}>
                 <Button
                   onClick={() => setIsMobileMenuOpen(false)}
                   variant={isActive ? "secondary" : "ghost"}
                   className={`w-full ${showMinimized ? 'justify-center px-2' : 'justify-start'} ${isActive ? 'bg-secondary text-secondary-foreground' : ''}`}
-                  data-testid={`button-nav-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
+                  data-testid={`button-nav-${item.key}`}
                   title={showMinimized ? item.label : undefined}
                 >
                   <item.icon className={`h-4 w-4 ${showMinimized ? '' : 'mr-3'}`} />
@@ -88,7 +113,47 @@ export default function Sidebar() {
             );
           })}
         </nav>
-        
+
+        {/* User info + logout */}
+        <div className={`p-4 border-t border-border ${showMinimized ? 'flex justify-center' : ''}`}>
+          {showMinimized ? (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => logoutMutation.mutate()}
+              disabled={logoutMutation.isPending}
+              title="Sair"
+              data-testid="button-logout"
+            >
+              <LogOut className="h-4 w-4" />
+            </Button>
+          ) : (
+            <div className="flex items-center gap-2">
+              <div className="h-8 w-8 rounded-full bg-purple-600 flex items-center justify-center flex-shrink-0">
+                <User className="h-4 w-4 text-white" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium truncate" data-testid="text-user-name">
+                  {user?.firstName || "Usuário"}
+                </p>
+                <p className="text-xs text-muted-foreground truncate" data-testid="text-user-email">
+                  {user?.email || ""}
+                </p>
+              </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => logoutMutation.mutate()}
+                disabled={logoutMutation.isPending}
+                title="Sair"
+                data-testid="button-logout"
+                className="flex-shrink-0 h-8 w-8"
+              >
+                <LogOut className="h-4 w-4" />
+              </Button>
+            </div>
+          )}
+        </div>
       </>
     );
   };

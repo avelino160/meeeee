@@ -1,7 +1,10 @@
 import express, { type Request, Response, NextFunction } from "express";
+import session from "express-session";
+import connectPg from "connect-pg-simple";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { initializeDatabase } from "./db-init";
+import { pool } from "./db";
 
 // Prevent Baileys (and other libs) from crashing the server on unhandled errors
 process.on("uncaughtException", (err: any) => {
@@ -14,6 +17,19 @@ process.on("unhandledRejection", (reason: any) => {
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+
+const PgSession = connectPg(session);
+app.use(session({
+  store: pool ? new PgSession({ pool, createTableIfMissing: true }) : undefined,
+  secret: process.env.SESSION_SECRET || "pilotzap-secret-2024",
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    secure: false,
+    httpOnly: true,
+    maxAge: 30 * 24 * 60 * 60 * 1000,
+  },
+}));
 
 app.use((req, res, next) => {
   const start = Date.now();
