@@ -79,6 +79,9 @@ export interface IStorage {
   checkWhatsappLimit(userId: string): Promise<LimitCheckResult>;
   checkMessageLimit(userId: string): Promise<LimitCheckResult>;
   getMessagesThisHour(userId: string): Promise<number>;
+  createPasswordResetToken(userId: string, token: string, expiresAt: Date): Promise<void>;
+  verifyPasswordResetToken(userId: string, token: string): Promise<boolean>;
+  markPasswordResetTokenUsed(userId: string, token: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -434,6 +437,29 @@ export class DatabaseStorage implements IStorage {
     const limits = getPlanLimits(planType);
     const count = await this.getMessagesThisHour(userId);
     return checkLimit("mensagens por hora", count, limits.maxMessagesPerHour);
+  }
+
+  async createPasswordResetToken(userId: string, token: string, expiresAt: Date): Promise<void> {
+    // Invalidate any existing tokens for this user first
+    await db.execute(
+      sql`UPDATE password_reset_tokens SET used_at = NOW() WHERE user_id = ${userId} AND used_at IS NULL`
+    );
+    await db.execute(
+      sql`INSERT INTO password_reset_tokens (user_id, token, expires_at) VALUES (${userId}, ${token}, ${expiresAt})`
+    );
+  }
+
+  async verifyPasswordResetToken(userId: string, token: string): Promise<boolean> {
+    const result = await db.execute(
+      sql`SELECT id FROM password_reset_tokens WHERE user_id = ${userId} AND token = ${token} AND expires_at > NOW() AND used_at IS NULL LIMIT 1`
+    );
+    return (result.rows?.length ?? 0) > 0;
+  }
+
+  async markPasswordResetTokenUsed(userId: string, token: string): Promise<void> {
+    await db.execute(
+      sql`UPDATE password_reset_tokens SET used_at = NOW() WHERE user_id = ${userId} AND token = ${token}`
+    );
   }
 }
 

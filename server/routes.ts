@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import { randomUUID } from "crypto";
 import axios from "axios";
 import bcrypt from "bcryptjs";
+import { sendPasswordResetCode } from "./services/emailService";
 import { storage } from "./storage";
 import { whatsappService } from "./services/whatsappService";
 import { baileyService } from "./services/baileyService";
@@ -126,21 +127,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Step 1: request code
   app.post('/api/auth/forgot-password', async (req, res) => {
     try {
-      const { email, newPassword } = req.body;
-      if (!email || !newPassword) {
-        return res.status(400).json({ message: "E-mail e nova senha são obrigatórios" });
+      const { email } = req.body;
+      if (!email) return res.status(400).json({ message: "E-mail é obrigatório" });
+      const user = await storage.getUserByEmail(email);
+      if (!user) {
+        // Don't reveal whether the email exists
+        return res.json({ success: true });
+      }
+      // Generate 6-digit code, expire in 15 min
+      const code = String(Math.floor(100000 + Math.random() * 900000));
+      const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
+      await storage.createPasswordResetToken(user.id, code, expiresAt);
+      const sent = await sendPasswordResetCode(email, code);
+      if (!sent) {
+        // SMTP not configured — return code in dev mode so the flow can still be tested
+        const isDev = process.env.NODE_ENV === "development";
+        return res.json({ success: true, ...(isDev ? { devCode: code } : {}) });
+      }
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error in forgot-password:", error);
+      res.status(500).json({ message: "Erro ao enviar código" });
+    }
+  });
+
+  // Step 2: verify code + reset password
+  app.post('/api/auth/reset-password', async (req, res) => {
+    try {
+      const { email, code, newPassword } = req.body;
+      if (!email || !code || !newPassword) {
+        return res.status(400).json({ message: "Dados incompletos" });
       }
       if (newPassword.length < 6) {
         return res.status(400).json({ message: "Senha deve ter pelo menos 6 caracteres" });
       }
       const user = await storage.getUserByEmail(email);
-      if (!user) {
-        return res.status(404).json({ message: "E-mail não encontrado" });
-      }
+      if (!user) return res.status(400).json({ message: "Código inválido ou expirado" });
+      const valid = await storage.verifyPasswordResetToken(user.id, code);
+      if (!valid) return res.status(400).json({ message: "Código inválido ou expirado" });
       const hashed = await bcrypt.hash(newPassword, 10);
       await storage.upsertUser({ ...user, password: hashed });
+      await storage.markPasswordResetTokenUsed(user.id, code);
       res.json({ success: true });
     } catch (error) {
       console.error("Error resetting password:", error);
