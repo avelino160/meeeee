@@ -33,6 +33,8 @@ const translations: Record<string, Record<string, string>> = {
     'reports': 'Relatórios',
     'plans': 'Planos',
     'settings': 'Configurações',
+    'campaigns': 'Campanhas',
+    'templates': 'Templates',
     'whatsapp_connection': 'Conexão WhatsApp',
     'whatsapp_automation': 'Automação para WhatsApp',
     
@@ -95,7 +97,7 @@ const translations: Record<string, Record<string, string>> = {
     'sales_funnels_limit': 'funil de venda',
     'contacts_limit': 'contatos',
     'whats_included': 'O que está incluso:',
-    'save': 'economize',
+    'save_percent': 'economize',
     'per_month': '/mês',
     
     // WhatsApp Connection
@@ -142,6 +144,8 @@ const translations: Record<string, Record<string, string>> = {
     'reports': 'Reports',
     'plans': 'Plans',
     'settings': 'Settings',
+    'campaigns': 'Campaigns',
+    'templates': 'Templates',
     'whatsapp_connection': 'WhatsApp Connection',
     'whatsapp_automation': 'WhatsApp Automation',
     
@@ -204,7 +208,7 @@ const translations: Record<string, Record<string, string>> = {
     'sales_funnels_limit': 'sales funnels',
     'contacts_limit': 'contacts',
     'whats_included': 'What\'s included:',
-    'save': 'save',
+    'save_percent': 'save',
     'per_month': '/month',
     
     // WhatsApp Connection
@@ -251,6 +255,8 @@ const translations: Record<string, Record<string, string>> = {
     'reports': 'Informes',
     'plans': 'Planes',
     'settings': 'Configuración',
+    'campaigns': 'Campañas',
+    'templates': 'Plantillas',
     'whatsapp_connection': 'Conexión WhatsApp',
     'whatsapp_automation': 'Automatización WhatsApp',
     
@@ -313,7 +319,7 @@ const translations: Record<string, Record<string, string>> = {
     'sales_funnels_limit': 'embudos de venta',
     'contacts_limit': 'contactos',
     'whats_included': 'Qué está incluido:',
-    'save': 'ahorra',
+    'save_percent': 'ahorra',
     'per_month': '/mes',
     
     // WhatsApp Connection

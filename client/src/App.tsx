@@ -15,6 +15,8 @@ import Plans from "@/pages/plans";
 import Settings from "@/pages/settings";
 import BlockedPage from "@/pages/blocked";
 import NotFound from "@/pages/not-found";
+import Campaigns from "@/pages/campaigns";
+import Templates from "@/pages/templates";
 import { useEffect } from "react";
 
 type User = {
@@ -55,6 +57,8 @@ function Router() {
         <Route path="/funnel-editor/:id" component={FunnelEditor} />
         <Route path="/contacts" component={Contacts} />
         <Route path="/analytics" component={Analytics} />
+        <Route path="/campaigns" component={Campaigns} />
+        <Route path="/templates" component={Templates} />
         <Route path="/plans" component={Plans} />
         <Route path="/settings" component={Settings} />
         <Route path="/blocked" component={BlockedPage} />

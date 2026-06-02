@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { Image, Video, Mic, FileText, MapPin, Navigation } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
@@ -358,10 +359,12 @@ export default function WhatsAppPreview({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent 
         className="w-[280px] h-[500px] max-h-[85vh] p-0 bg-black border-none overflow-hidden rounded-[30px] flex flex-col"
+        aria-describedby={undefined}
         style={{ 
           boxShadow: '0 0 0 6px #1a1a1a, 0 15px 30px -8px rgba(0, 0, 0, 0.5)' 
         }}
       >
+        <VisuallyHidden><DialogTitle>Pré-visualização do Funil WhatsApp</DialogTitle></VisuallyHidden>
         {/* Top bezel - iPhone frame */}
         <div className="h-6 bg-black flex-shrink-0 relative">
           {/* Dynamic Island / Notch */}
@@ -403,9 +406,9 @@ export default function WhatsAppPreview({
               </AvatarFallback>
             </Avatar>
             <div className="flex-1 min-w-0">
-              <DialogTitle className="text-white text-sm font-medium truncate">
+              <span className="text-white text-sm font-medium truncate block">
                 PilotZap
-              </DialogTitle>
+              </span>
               <p className="text-[10px] text-[#8696a0]">online</p>
             </div>
           </div>

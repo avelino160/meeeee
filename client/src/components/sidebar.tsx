@@ -1,6 +1,7 @@
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { useSettings } from "@/contexts/SettingsContext";
 import { useState } from "react";
 import {
@@ -15,6 +16,8 @@ import {
   Menu,
   CreditCard,
   Plane,
+  Megaphone,
+  FileText,
 } from "lucide-react";
 
 export default function Sidebar() {
@@ -32,6 +35,8 @@ export default function Sidebar() {
     { href: "/whatsapp-connection", icon: MessageSquare, label: t('whatsapp_connection'), key: 'whatsapp_connection' },
     { href: "/funnel-builder", icon: BarChart3, label: t('sales_funnels'), key: 'sales_funnels' },
     { href: "/contacts", icon: Users, label: t('contacts'), key: 'contacts' },
+    { href: "/campaigns", icon: Megaphone, label: t('campaigns'), key: 'campaigns' },
+    { href: "/templates", icon: FileText, label: t('templates'), key: 'templates' },
     { href: "/analytics", icon: TrendingUp, label: t('reports'), key: 'reports' },
     { href: "/plans", icon: CreditCard, label: t('plans'), key: 'plans' },
     { href: "/settings", icon: Settings, label: t('settings'), key: 'settings' },
@@ -103,6 +108,7 @@ export default function Sidebar() {
           </Button>
         </SheetTrigger>
         <SheetContent side="left" className="w-64 p-0">
+          <VisuallyHidden><SheetTitle>Menu de Navegação</SheetTitle></VisuallyHidden>
           <div className="bg-card flex flex-col h-full">
             <SidebarContent isMobile={true} />
           </div>
